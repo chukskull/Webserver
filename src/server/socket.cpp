@@ -1,8 +1,11 @@
 
-#include "server.hpp"
+// #include "server.hpp"
+// #include "ConfigParser.hpp"
+#include "everything.hpp"
 
-int main(void)
+int main(int ac, char *av[])
 {
+	(void)ac , (void)av;
 	std::ofstream file;
 	int									server_fd = -1;
 	int									rcv;
@@ -22,11 +25,12 @@ int main(void)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	if ((rcv = getaddrinfo(NULL, "8080", &hints, &ai)) != 0){
+	if ((rcv = getaddrinfo("0.0.0.0" , "9090", &hints, &ai)) != 0){
 		std::cerr << gai_strerror(rcv) << std::endl;
 	}
 	for(point = ai; point != NULL; point = point->ai_next)
 	{
+		std::cerr << point->ai_addr << std::endl;
 		server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
 		if (server_fd < 0)
 			continue;
@@ -37,6 +41,12 @@ int main(void)
 			close(server_fd);
 			exit(-1);
 		}
+		// struct sockaddr_in addr = {};
+		// addr.sin_family = AF_INET;
+		// addr.sin_addr.s_addr = "129.1. 1. 2";
+		// addr.sin_port = htons(vserver.getPort());
+		
+		
 		if(bind(server_fd, point->ai_addr, point->ai_addrlen) < 0)
 			{
 				close(server_fd);
@@ -46,7 +56,10 @@ int main(void)
 	}
 	freeaddrinfo(ai);
 	if (point == NULL)
+	{
+		std::cerr << "there's no ip available in this host" << std::endl;
 		return -1;
+	}
 	if(listen(server_fd, 10) == -1)
 	{
 		perror("listen() failed");
@@ -76,8 +89,6 @@ int main(void)
 		current_size = nfds;
 		for(size_t i = 0; i < fd_s.size(); i++)
 		{
-			// if (fd_s[i].revents == 0)
-			// 	continue;
 			if (fd_s[i].revents & POLLIN)
 			{
 				if (fd_s[i].fd == server_fd)
@@ -99,7 +110,7 @@ int main(void)
 			{
 				int bytes = recv(fd_s[i].fd, buf, BUFFER_SIZE, 0);
 				buf[bytes] = '\0';
-				std::string message(buf);
+				_string message(buf);
 				int sender_fd = fd_s[i].fd;
 				if(bytes <= 0)
 				{

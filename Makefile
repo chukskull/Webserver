@@ -5,7 +5,7 @@ FLAGS= -std=c++98 -Wall -Wextra -Werror
 MAIN= main.cpp
 B_DIR = build
 SERVER=$(addprefix server/, socket.cpp)
-HEADER = $(addprefix inc/, server.hpp)
+HEADER = $(addprefix inc/, everything.hpp)
 FILES= $(addprefix src/, $(SERVER))
 OBJ= $(addprefix build/, $(FILES:.cpp=.o))
 NAME= webserv

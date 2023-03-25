@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-# define SERVER_HPP
+#ifndef EVERYTHING_HPP
+# define EVERYTHING_HPP
 
 
 
@@ -28,8 +28,12 @@
 #include <fstream>
 #include <unistd.h>
 #include <fcntl.h>
+#include "Location.hpp"
 
 typedef	std::vector<struct pollfd > _vector_fd;
+typedef std::vector<std::string> _methods;
+typedef std::vector<Location> _locations;
+typedef std::string            _string ;
 
 #define	MAX_FD 200
 #define PORT 8080
