@@ -26,18 +26,27 @@
 #include <string>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <unistd.h>
 #include <fcntl.h>
 #include "Location.hpp"
+#include "ServerCongif.hpp"
 
 typedef	std::vector<struct pollfd > _vector_fd;
 typedef std::vector<std::string> _methods;
 typedef std::vector<Location> _locations;
 typedef std::string            _string ;
+typedef std::vector<ServerCongif> _server_config;
 
 #define	MAX_FD 200
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
+enum
+{
+    con_GET = 0,
+    con_POST,
+    con_DELET,
+};
 
 #endif
