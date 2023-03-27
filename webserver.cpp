@@ -1,5 +1,21 @@
 #include "headers.hpp"
 
+bool isWhitespace(char c) 
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+size_t	escape_white_space(_string my_string)
+{
+	size_t k = 0;
+	for(; k < my_string.size(); k++)
+	{
+		if(!isWhitespace(my_string[k]))
+			break ;
+	}
+	return k;
+}
+
+
 _string		erase_some_charc(_string my_string)
 {
 	std::vector<char> sure;
@@ -26,6 +42,7 @@ int parsing_config_file(_string file, _server_config &servers)
 	// _server_config  servers;
 	while (std::getline(input_file, line))
 	{
+		size_t j = 0;
 		if(line.find("server {") != _string::npos)
 		{
 			_string listen, host, body_size, name;
@@ -34,16 +51,27 @@ int parsing_config_file(_string file, _server_config &servers)
 			{
 				if(line.find("}") != std::string::npos)
 					break ;
-				if (line.find("listen") != _string::npos)
+				if ((j = line.find("listen")) != _string::npos)
 				{
-					listen = line.substr(line.find("listen") + 7);
-					listen = erase_some_charc(listen);
+					size_t i = escape_white_space(line);
+					if (i == j)
+					{
+						listen = line.substr(line.find("listen") + 7);
+						listen = erase_some_charc(listen);
+					}
 					// listen.erase(remove(listen.begin(), listen.end(), 'p'), listen.end());
 				}
-				else if(line.find("host") != _string::npos)
+				else if((j = line.find("host")) != _string::npos)
 				{
-					host = line.substr(line.find("host") + 5);
-					host = erase_some_charc(host);
+					print_error << line.size() << std::endl;
+					size_t i = escape_white_space(line);
+					print_error << i << " " << j << std::endl;
+					if(i == j)
+					{
+						host = line.substr(line.find("host") + 5);
+					}
+					// print_error << host << std::endl;
+					// host = erase_some_charc(host);
 				}
 				else if (line.find("body_size") != _string::npos)
 				{
@@ -132,6 +160,7 @@ int main(int ac, char *av[])
 	for(_server_config::iterator it = vec.begin(); it != vec.end(); ++it)
 	{
 		print_error <<"server - port: " << it->get_port()  << std::endl;
+		print_error << "server - host " << it->get_host() << std::endl;
 	}
 	return 0;
 }
