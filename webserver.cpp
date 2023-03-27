@@ -1,17 +1,29 @@
-#include "everything.hpp"
+#include "headers.hpp"
 
+_string		erase_some_charc(_string my_string)
+{
+	std::vector<char> sure;
+	sure.push_back(' ');
+	sure.push_back('\t');
+	sure.push_back('\n');
+	sure.push_back('\r');
+	sure.push_back(';');
+	for (size_t i = 0; i < sure.size(); i++)
+	{
+		my_string.erase(remove(my_string.begin(), my_string.end(), sure[i]), my_string.end());
+	}
+	return my_string;
+}
 
-int parsing_config_file(_string file, int __flag)
+int parsing_config_file(_string file, _server_config &servers)
 {
 	std::ifstream	input_file;
-	if (__flag == 1)
-	{
-		input_file(file);
-	}
-	else
-		input_file("server.conf");
 	_string         line;
-	_server_config  servers;
+	
+	input_file.open(file);
+	if(!input_file.is_open())
+		return -1;
+	// _server_config  servers;
 	while (std::getline(input_file, line))
 	{
 		if(line.find("server {") != _string::npos)
@@ -22,19 +34,33 @@ int parsing_config_file(_string file, int __flag)
 			{
 				if(line.find("}") != std::string::npos)
 					break ;
+				if (line.find("listen") != _string::npos)
+				{
+					listen = line.substr(line.find("listen") + 7);
+					listen = erase_some_charc(listen);
+					// listen.erase(remove(listen.begin(), listen.end(), 'p'), listen.end());
+				}
+				else if(line.find("host") != _string::npos)
+				{
+					host = line.substr(line.find("host") + 5);
+					host = erase_some_charc(host);
+				}
+				else if (line.find("body_size") != _string::npos)
+				{
+					body_size = line.substr(line.find("body_size") + 10);
+					body_size = erase_some_charc(body_size);
+				}
+				else if (line.find("name") != _string::npos)
+				{
+					name = line.substr(line.find("name") + 5);
+					name = erase_some_charc(name);
+				}
 			}
-			if (line.find("listen") != _string::npos)
-				listen = line.substr(line.find("listen") + 7);
-			else if(line.find("host") != _string::npos)
-				host = line.substr(line.find("host") + 5);
-			else if (line.find("body_size") != _string::npos)
-				body_size = line.substr(line.find("body_size") + 10);
-			else if (line.find("name") != _string::npos)
-				name = line.substr(line.find("name") + 5);
 			if (line.find("location") != _string::npos)
 			{
 				_string	path, autoindex, root, index;
 				path = line.substr(line.find("location") + 9);
+				path = erase_some_charc(path);
 				std::vector<_string> 		methods;
 				std::pair<bool, _string>	redirec;
 				while (std::getline(input_file, line))
@@ -45,25 +71,41 @@ int parsing_config_file(_string file, int __flag)
 				if (line.find("path") != std::string::npos)
                     path = line.substr(line.find("path") + 5);
 				else if (line.find("autoindex") != std::string::npos)
+				{
                     autoindex = line.substr(line.find("autoindex") + 9);
+					autoindex = erase_some_charc(autoindex);
+
+				}
                 else if (line.find("root") != std::string::npos)
+				{
                     root = line.substr(line.find("root") + 5);
+					root = erase_some_charc(root);
+				}
                 else if (line.find("index") != std::string::npos)
+				{
                     index = line.substr(line.find("index") + 6);
+					root = erase_some_charc(root);
+
+				}
                 else if (line.find("method") != std::string::npos)
-                    methods.push_back(line.substr(line.find("method") + 7));
+				{
+                    methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
+
+				}
 				if (line.find("redirect") != _string::npos)
-					redirec = std::make_pair(true, line.substr(line.find("redirect") + 9));
+					redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
 				else
-					redirec = std::make_pair(false, NULL);
+				{
+					_string	nothing;
+					redirec = std::make_pair(false, nothing);
+				}
 				}
 				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
 				
 			}
-			servers.push_back(ServerCongif(listen,body_size, host, name,locations));
+			servers.push_back(ServerCongif(listen, body_size, host, name, locations));
 		}
 	}
-	
 	return 0;
 }
 
@@ -71,19 +113,25 @@ int parsing_config_file(_string file, int __flag)
 
 int main(int ac, char *av[])
 {
+	_server_config	vec;
 	int pars = 0;
 	if(ac > 2)
 	{
-		std::cerr << "too many arguments" << std::endl;
+		print_error << "too many arguments" << std::endl;
 	}
 	if (av[1] != NULL)
 	{
 		_string file(av[1]);
-		pars = parsing_config_file(file, 1);
+		pars = parsing_config_file(file, vec);
 	}
 	else
+		pars = parsing_config_file("server.conf", vec);
+	if (pars < 0)
+		exit(0);
+	print_error << "here" << std::endl;
+	for(_server_config::iterator it = vec.begin(); it != vec.end(); ++it)
 	{
-		pars = parsing_config_file(NULL, 0);
+		print_error <<"server - port: " << it->get_port()  << std::endl;
 	}
 	return 0;
 }

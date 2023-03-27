@@ -1,7 +1,7 @@
 
 // #include "server.hpp"
 // #include "ConfigParser.hpp"
-#include "everything.hpp"
+#include "headers.hpp"
 
 int main(int ac, char *av[])
 {
