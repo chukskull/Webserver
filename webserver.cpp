@@ -4,6 +4,7 @@ bool isWhitespace(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
+
 size_t	escape_white_space(_string my_string)
 {
 	size_t k = 0;
@@ -14,7 +15,6 @@ size_t	escape_white_space(_string my_string)
 	}
 	return k;
 }
-
 
 _string		erase_some_charc(_string my_string)
 {
@@ -55,78 +55,77 @@ int parsing_config_file(_string file, _server_config &servers)
 				{
 					size_t i = escape_white_space(line);
 					if (i == j)
-					{
-						listen = line.substr(line.find("listen") + 7);
-						listen = erase_some_charc(listen);
-					}
-					// listen.erase(remove(listen.begin(), listen.end(), 'p'), listen.end());
+						listen = erase_some_charc(line.substr(line.find("listen") + 7));
 				}
 				else if((j = line.find("host")) != _string::npos)
 				{
-					print_error << line.size() << std::endl;
 					size_t i = escape_white_space(line);
-					print_error << i << " " << j << std::endl;
+					// print_error << i << " " << j << std::endl;
 					if(i == j)
-					{
-						host = line.substr(line.find("host") + 5);
-					}
-					// print_error << host << std::endl;
-					// host = erase_some_charc(host);
+						host = erase_some_charc(line.substr(line.find("host") + 5));
 				}
 				else if (line.find("body_size") != _string::npos)
 				{
-					body_size = line.substr(line.find("body_size") + 10);
-					body_size = erase_some_charc(body_size);
+					size_t	i = escape_white_space(line);
+					if (i == j)
+						body_size = erase_some_charc(line.substr(line.find("body_size") + 10));
 				}
 				else if (line.find("name") != _string::npos)
 				{
-					name = line.substr(line.find("name") + 5);
-					name = erase_some_charc(name);
+					size_t	i = escape_white_space(line);
+					if (i == j)
+						name = erase_some_charc(line.substr(line.find("name") + 5));
 				}
 			}
-			if (line.find("location") != _string::npos)
+			if ((j = line.find("location")) != _string::npos)
 			{
 				_string	path, autoindex, root, index;
-				path = line.substr(line.find("location") + 9);
-				path = erase_some_charc(path);
+				size_t	i = escape_white_space(line);
+				if(i == j)
+					path = erase_some_charc(line.substr(line.find("location") + 9));
+				// path = erase_some_charc(path);
 				std::vector<_string> 		methods;
 				std::pair<bool, _string>	redirec;
 				while (std::getline(input_file, line))
 				{
 					if (line.find("]") != _string::npos)
 						break;
-				
-				if (line.find("path") != std::string::npos)
-                    path = line.substr(line.find("path") + 5);
-				else if (line.find("autoindex") != std::string::npos)
-				{
-                    autoindex = line.substr(line.find("autoindex") + 9);
-					autoindex = erase_some_charc(autoindex);
+					if ( (j = line.find("autoindex")) != std::string::npos)
+					{
+						size_t	i = escape_white_space(line);
+						if (i == j)
+                	    	autoindex = erase_some_charc(line.substr(line.find("autoindex") + 9));
+					}
+                	else if ((j = line.find("root")) != std::string::npos)
+					{
+						size_t	i = escape_white_space(line);
+						if(i == j)
+                	    	root = erase_some_charc(line.substr(line.find("root") + 5));
+					}
+                	else if ((j = line.find("index")) != std::string::npos)
+					{
+						size_t	i = escape_white_space(line);
+						if (i == j)
+                	    	index = erase_some_charc(line.substr(line.find("index") + 6));
 
-				}
-                else if (line.find("root") != std::string::npos)
-				{
-                    root = line.substr(line.find("root") + 5);
-					root = erase_some_charc(root);
-				}
-                else if (line.find("index") != std::string::npos)
-				{
-                    index = line.substr(line.find("index") + 6);
-					root = erase_some_charc(root);
-
-				}
-                else if (line.find("method") != std::string::npos)
-				{
-                    methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
-
-				}
-				if (line.find("redirect") != _string::npos)
-					redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
-				else
-				{
-					_string	nothing;
-					redirec = std::make_pair(false, nothing);
-				}
+					}
+                	else if ((j = line.find("method")) != std::string::npos)
+					{
+						size_t	i = escape_white_space(line);
+						if (i == j)
+                	    	methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
+					}
+					if ((j = line.find("redirect")) != _string::npos)
+					{
+						size_t	i = escape_white_space(line);
+						if (i == j)
+							redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
+					}
+					else
+					{
+						_string	nothing;
+						redirec = std::make_pair(false, nothing);
+					}
 				}
 				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
 				
@@ -161,6 +160,10 @@ int main(int ac, char *av[])
 	{
 		print_error <<"server - port: " << it->get_port()  << std::endl;
 		print_error << "server - host " << it->get_host() << std::endl;
+		for(int i = 0; i < it->get_locations().size(); i++)
+		{
+
+		}
 	}
 	return 0;
 }

@@ -29,6 +29,9 @@ public:
 	{
 		return __body_size;
 	}
+	const _locations	&get_locations()const{
+		return __location;
+	}
 	~ServerCongif(){};
 };
 

@@ -1,7 +1,7 @@
 
 // #include "server.hpp"
 // #include "ConfigParser.hpp"
-#include "headers.hpp"
+#include "../../inc/headers.hpp"
 
 int main(int ac, char *av[])
 {
@@ -25,7 +25,7 @@ int main(int ac, char *av[])
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	if ((rcv = getaddrinfo("0.0.0.0" , "9090", &hints, &ai)) != 0){
+	if ((rcv = getaddrinfo(NULL , "9090", &hints, &ai)) != 0){
 		std::cerr << gai_strerror(rcv) << std::endl;
 	}
 	for(point = ai; point != NULL; point = point->ai_next)
