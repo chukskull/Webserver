@@ -76,9 +76,10 @@ int parsing_config_file(_string file, _server_config &servers)
 					if (i == j)
 						name = erase_some_charc(line.substr(line.find("name") + 5));
 				}
-			}
+			
 			if ((j = line.find("location")) != _string::npos)
 			{
+				// print_error << "jojojo" << std::endl;
 				_string	path, autoindex, root, index;
 				size_t	i = escape_white_space(line);
 				if(i == j)
@@ -88,6 +89,7 @@ int parsing_config_file(_string file, _server_config &servers)
 				std::pair<bool, _string>	redirec;
 				while (std::getline(input_file, line))
 				{
+
 					if (line.find("]") != _string::npos)
 						break;
 					if ( (j = line.find("autoindex")) != std::string::npos)
@@ -128,7 +130,7 @@ int parsing_config_file(_string file, _server_config &servers)
 					}
 				}
 				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
-				
+				}
 			}
 			servers.push_back(ServerCongif(listen, body_size, host, name, locations));
 		}
@@ -160,9 +162,15 @@ int main(int ac, char *av[])
 	{
 		print_error <<"server - port: " << it->get_port()  << std::endl;
 		print_error << "server - host " << it->get_host() << std::endl;
-		for(int i = 0; i < it->get_locations().size(); i++)
+		print_error << it->get_locations().size() << std::endl;
+		for(size_t i = 0; i < it->get_locations().size(); i++)
 		{
-
+			print_error << "size of methods : "<< it->get_locations()[i].get_methods().size() << std::endl;
+			for(size_t j = 0; j < it->get_locations()[i].get_methods().size(); j++)
+			{
+				print_error << i << " " << j << std::endl;
+				print_error << it->get_locations()[i].get_methods()[j] << std::endl; 
+			}
 		}
 	}
 	return 0;
