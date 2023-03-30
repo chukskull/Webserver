@@ -22,7 +22,7 @@ struct ReqLoc
 
 struct DataConf
 {
-    _string             __body_size;
+    size_t             __body_size;
     _string             __host;
     _string             __name;
     std::vector<ReqLoc> __locations;

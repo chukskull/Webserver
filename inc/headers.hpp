@@ -29,6 +29,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <fcntl.h>
+
 class Location;
 class ServerCongif;
 typedef	std::vector<struct pollfd > _vector_fd;
@@ -37,6 +38,7 @@ typedef std::vector<Location> _locations;
 typedef std::string            _string ;
 typedef std::vector<ServerCongif> _server_config;
 #define print_error std::cerr
+#include "RequestConfig.hpp"
 
 #include "Location.hpp"
 #include "ServerCongif.hpp"
@@ -50,7 +52,7 @@ enum
 {
     con_GET = 0,
     con_POST,
-    con_DELET,
+    con_DELETE,
 };
 
 #endif

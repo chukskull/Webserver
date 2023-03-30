@@ -1,4 +1,67 @@
 #include "headers.hpp"
+#include <algorithm>
+
+
+int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
+{
+	std::vector<_string>	allow_methods;
+
+	allow_methods.push_back("GET");
+	allow_methods.push_back("POST");
+	allow_methods.push_back("DELETE");
+	_server_config::iterator it = vec.begin();
+	std::vector<bool>	methods;
+	for(; it != vec.end(); it++)
+	{
+		DataConf _data;
+		std::stringstream	lol(it->get_body_size());
+		lol >> _data.__body_size;
+		if(lol.fail())
+			return -1;
+		_data.__host = it->get_host();
+		_data.__name = it->get_name();
+		// _data.__body_size = it->get_body_size().a;
+		_locations	loc = it->get_locations();
+		_locations::iterator	it_2 = loc.begin();
+		for (; it_2 != it->get_locations().end(); it_2++)
+		{
+			ReqLoc req_loc;
+			if(it_2->get_auto_index().compare("false"))
+			{
+				req_loc._autoindex = false;
+			}
+			else if (it_2->get_auto_index().compare("true"))
+			{
+				req_loc._autoindex = true;
+			}
+			else
+				return -1;
+			req_loc.__path = it_2->get_path();
+			req_loc.__file = it_2->get_place();
+			req_loc.__root = it_2->get_root();
+			req_loc.__redirect = it_2->get_redirect();
+			_methods	meth = it_2->get_methods();
+			_methods::iterator it_3 = meth.begin();
+			MethAllow	_allows(3, false);
+			for(;it_3 != it_2->get_methods().end(); it_3++)
+			{
+				std::vector<_string>::iterator t_1;
+				print_error << *it_3 << std::endl;
+				if ((t_1 = std::find(allow_methods.begin(), allow_methods.end(), *it_3)) == allow_methods.end())
+				{
+					return -1;
+				}
+				else{
+					size_t index = t_1 - allow_methods.begin();
+					_allows[index] = true;
+				}
+			}
+			req_loc._AllowMeth = _allows;
+		}
+		_vec_data.push_back(_data);
+	}
+	return 0;
+}
 
 bool isWhitespace(char c) 
 {
@@ -87,6 +150,8 @@ int parsing_config_file(_string file, _server_config &servers)
 				// path = erase_some_charc(path);
 				std::vector<_string> 		methods;
 				std::pair<bool, _string>	redirec;
+				_string	nothing;
+				redirec = std::make_pair(false, nothing);
 				while (std::getline(input_file, line))
 				{
 
@@ -117,7 +182,7 @@ int parsing_config_file(_string file, _server_config &servers)
 						if (i == j)
                 	    	methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
 					}
-					if ((j = line.find("redirect")) != _string::npos)
+					else if ((j = line.find("redirect")) != _string::npos)
 					{
 						size_t	i = escape_white_space(line);
 						if (i == j)
@@ -125,9 +190,15 @@ int parsing_config_file(_string file, _server_config &servers)
 					}
 					else
 					{
-						_string	nothing;
-						redirec = std::make_pair(false, nothing);
-					}
+						line = erase_some_charc(line);
+						// print_error << line << std::endl;
+						if (line.compare("[") != 0)
+						{
+							print_error << "error configfile" << std::endl;
+							return -1;
+						}
+					}	
+
 				}
 				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
 				}
@@ -142,8 +213,10 @@ int parsing_config_file(_string file, _server_config &servers)
 
 int main(int ac, char *av[])
 {
-	_server_config	vec;
+	_server_config			vec;
+	std::vector<DataConf> 	_vec_data;
 	int pars = 0;
+	int pars_2 = 0;
 	if(ac > 2)
 	{
 		print_error << "too many arguments" << std::endl;
@@ -173,5 +246,8 @@ int main(int ac, char *av[])
 			}
 		}
 	}
+	pars_2 = phase_to_req_res(vec, _vec_data);
+	if(pars_2 < 0)
+		exit(0);
 	return 0;
 }

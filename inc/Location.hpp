@@ -33,7 +33,7 @@ class Location
 		_string	get_root()const{
 			return __root;
 		}
-		const _methods	&get_methods()const{
+		_methods	get_methods()const{
 			return __methods;
 		}
 		const std::pair<bool, _string> &get_redirect()const
