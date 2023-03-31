@@ -25,6 +25,7 @@ struct DataConf
     size_t             __body_size;
     _string             __host;
     _string             __name;
+    _string             __port;
     std::vector<ReqLoc> __locations;
 };
 

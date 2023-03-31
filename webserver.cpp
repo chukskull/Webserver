@@ -20,6 +20,7 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			return -1;
 		_data.__host = it->get_host();
 		_data.__name = it->get_name();
+		_data.__port = it->get_port();
 		// _data.__body_size = it->get_body_size().a;
 		_locations	loc = it->get_locations();
 		_locations::iterator	it_2 = loc.begin();
@@ -249,5 +250,9 @@ int main(int ac, char *av[])
 	pars_2 = phase_to_req_res(vec, _vec_data);
 	if(pars_2 < 0)
 		exit(0);
+	for(size_t i = 0; i < _vec_data.size(); i++)
+	{
+		Server::run(_vec_data[i]);
+	}
 	return 0;
 }
