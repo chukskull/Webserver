@@ -5,7 +5,7 @@
 int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 {
 	std::vector<_string>	allow_methods;
-
+	// std::vector<DataConf> _vec_data2;
 	allow_methods.push_back("GET");
 	allow_methods.push_back("POST");
 	allow_methods.push_back("DELETE");
@@ -16,15 +16,20 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 		DataConf _data;
 		std::stringstream	lol(it->get_body_size());
 		lol >> _data.__body_size;
+					puts("myaw");
+					// print_error << it->get_body_size() << std::endl;
 		if(lol.fail())
 			return -1;
-		_data.__host = it->get_host();
-		_data.__name = it->get_name();
-		_data.__port = it->get_port();
+		if(it->get_host().size())
+			_data.__host = it->get_host();
+		if (it->get_name().size())
+			_data.__name = it->get_name();
+		if(it->get_port().size())
+			_data.__port = it->get_port();
 		// _data.__body_size = it->get_body_size().a;
 		_locations	loc = it->get_locations();
 		_locations::iterator	it_2 = loc.begin();
-		for (; it_2 != it->get_locations().end(); it_2++)
+		for (; it_2 != loc.end(); it_2++)
 		{
 			ReqLoc req_loc;
 			if(it_2->get_auto_index().compare("false"))
@@ -44,12 +49,15 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			_methods	meth = it_2->get_methods();
 			_methods::iterator it_3 = meth.begin();
 			MethAllow	_allows(3, false);
-			for(;it_3 != it_2->get_methods().end(); it_3++)
+			print_error << meth.size() << std::endl;
+			for(;it_3 != meth.end(); it_3++)
 			{
+				puts("hh");
 				std::vector<_string>::iterator t_1;
-				print_error << *it_3 << std::endl;
+				// print_error << *it_3 << std::endl;
 				if ((t_1 = std::find(allow_methods.begin(), allow_methods.end(), *it_3)) == allow_methods.end())
 				{
+					puts("am i here");
 					return -1;
 				}
 				else{
@@ -57,8 +65,11 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 					_allows[index] = true;
 				}
 			}
+			puts("SS");
 			req_loc._AllowMeth = _allows;
+			puts("SS 2");
 		}
+		puts("pop _ sure");
 		_vec_data.push_back(_data);
 	}
 	return 0;
@@ -128,13 +139,18 @@ int parsing_config_file(_string file, _server_config &servers)
 					if(i == j)
 						host = erase_some_charc(line.substr(line.find("host") + 5));
 				}
-				else if (line.find("body_size") != _string::npos)
+				else if ((j = line.find("body_size")) != _string::npos)
 				{
 					size_t	i = escape_white_space(line);
+					print_error << i <<'\t' <<j << std::endl;
 					if (i == j)
+					{
+					puts("entering to body_size");
 						body_size = erase_some_charc(line.substr(line.find("body_size") + 10));
+
+					}
 				}
-				else if (line.find("name") != _string::npos)
+				else if ((j = line.find("name")) != _string::npos)
 				{
 					size_t	i = escape_white_space(line);
 					if (i == j)
@@ -147,7 +163,10 @@ int parsing_config_file(_string file, _server_config &servers)
 				_string	path, autoindex, root, index;
 				size_t	i = escape_white_space(line);
 				if(i == j)
+				{
 					path = erase_some_charc(line.substr(line.find("location") + 9));
+
+				}
 				// path = erase_some_charc(path);
 				std::vector<_string> 		methods;
 				std::pair<bool, _string>	redirec;
@@ -236,6 +255,8 @@ int main(int ac, char *av[])
 	{
 		print_error <<"server - port: " << it->get_port()  << std::endl;
 		print_error << "server - host " << it->get_host() << std::endl;
+
+		print_error <<"ss " <<it->get_body_size() << std::endl;
 		print_error << it->get_locations().size() << std::endl;
 		for(size_t i = 0; i < it->get_locations().size(); i++)
 		{
@@ -249,10 +270,15 @@ int main(int ac, char *av[])
 	}
 	pars_2 = phase_to_req_res(vec, _vec_data);
 	if(pars_2 < 0)
+	{
+
+	puts("love like you do");
 		exit(0);
+	}
+	print_error << "thats msn" << std::endl;
 	for(size_t i = 0; i < _vec_data.size(); i++)
 	{
-		Server::run(_vec_data[i]);
+		Server::run(&_vec_data[i]);
 	}
 	return 0;
 }

@@ -13,10 +13,10 @@ class Location
 		_methods                      __methods;
 		std::pair<bool, std::string>  __redirect;
 	public:
-		Location(_string path, _string autoindex, _string place_index, _string root, _methods const &meth, std::pair<bool, std::string> redre): __methods(meth)
+		Location(_string path, _string autoindex, _string place_index, _string root, _methods const &meth, std::pair<bool, std::string> redre): __autoindex(autoindex),__methods(meth)
 		{
 			this->__path = path;
-			this->__autoindex = autoindex;
+			// this->__autoindex = autoindex;
 			this->__place = place_index;
 			this->__root = root;
 			this->__redirect = redre;
@@ -33,7 +33,7 @@ class Location
 		_string	get_root()const{
 			return __root;
 		}
-		_methods	get_methods()const{
+		const _methods	get_methods()const{
 			return __methods;
 		}
 		const std::pair<bool, _string> &get_redirect()const
