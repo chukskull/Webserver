@@ -8,65 +8,70 @@
 
 class Server {
 public:
-    Server(DataConf &data):contain(data) {
+    Server(std::vector<DataConf> &data):_containers(data) {
     }
-	void	initial_server(DataConf *data)
+	void	initial_server(std::vector<DataConf> &data)
 	{
-        print_error << "am here" << std::endl;
-        fd_s.resize(1);
+            // fd_s.resize(1);
         bzero(&hints, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_flags = AI_PASSIVE;
-        this->current_size = 1;
-        print_error << "bouadel "<<data->__host.c_str() << std::endl;
-        if ((rcv = getaddrinfo(data->__host.c_str() , data->__port.c_str(), &hints, &ai)) != 0) {
-            throw std::string("error in getaddrinfo");
-        }
-        print_error << " cringe " << std::endl;
-        for (point = ai; point != NULL; point = point->ai_next) {
-            std::cerr << point->ai_addr << std::endl;
-            server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
-            if (server_fd < 0)
-                continue;
-            this->on = 1;
-            rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
-            if (rc < 0) {
-                // perror("setsocketopt failed");
-                throw std::string("error with setsocketopt");
-                // exit(-1);
-            };
-            if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
-                close(server_fd);
-                continue;
+        fd_s.resize(data.size());
+        for(size_t  i = 0; i < data.size(); i++)
+        {
+            int server_fd;
+            // this->current_size = 1;
+            if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port.c_str(), &hints, &ai)) != 0) {
+                throw std::string("error in getaddrinfo");
             }
-            break ;
+            print_error << " cringe " << std::endl;
+            for (point = ai; point != NULL; point = point->ai_next) {
+                std::cerr << point->ai_addr << std::endl;
+                server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
+                if (server_fd < 0)
+                    continue;
+                else
+                    this->server_fds.push_back(server_fd);
+                this->on = 1;
+                rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
+                if (rc < 0) {
+                    // perror("setsocketopt failed");
+                    throw std::string("error with setsocketopt");
+                    // exit(-1);
+                };
+                if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
+                    close(server_fd);
+                    continue;
+                }
+                break ;
+            }
+            freeaddrinfo(ai);
+            if (point == NULL) {
+		    	throw std::string("there's no ip available in this host");
+                // std::cerr << "there's no ip available in this host" << std::endl;
+                // return;
+            }
+            if (listen(server_fd, 10) == -1) {
+                throw std::string("problem with listen");
+            }
+            int terminal_fd = open("ok.txt", O_CREAT | O_WRONLY, 0777);
+            if (terminal_fd == -1)
+                perror("fd");
+            fd_s[i].fd = server_fd;
+            fd_s[i].events = POLLIN;
+            timeout = (2 * 60 * 1000);
+            fd_counts = 1;
         }
-        freeaddrinfo(ai);
-        if (point == NULL) {
-			throw std::string("there's no ip available in this host");
-            // std::cerr << "there's no ip available in this host" << std::endl;
-            // return;
-        }
-        if (listen(server_fd, 10) == -1) {
-            throw std::string("problem with listen");
-        }
-        int terminal_fd = open("ok.txt", O_CREAT | O_WRONLY, 0777);
-        if (terminal_fd == -1)
-            perror("fd");
-        fd_s[0].fd = server_fd;
-        fd_s[0].events = POLLIN;
-        timeout = (2 * 60 * 1000);
-        fd_counts = 1;
 	}
     ~Server() {}
 
-   static void run(DataConf *data) {
+   static void run(std::vector<DataConf> &__vec_data) {
     print_error << "rijal" << std::endl;
-        Server  __my_ser(*data);
+        Server  __my_ser(__vec_data);
 		try
 		{
-			__my_ser.initial_server(data);
+			__my_ser.initial_server(__vec_data);
 		}
 		catch(const std::exception& e)
 		{
@@ -84,12 +89,13 @@ public:
                 std::cerr << "poll() timed out , End program\n" << std::endl;
                 break ;
             }
-            __my_ser.current_size = __my_ser.nfds;
+            // __my_ser.current_size = __my_ser.nfds;
             for (size_t i = 0; i < __my_ser.fd_s.size(); i++) {
                 if (__my_ser.fd_s[i].revents & POLLIN) {
-                    if (__my_ser.fd_s[i].fd == __my_ser.server_fd) {
+                    std::vector<int>::iterator find_;
+                    if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end()) {
                         __my_ser.addrlen = sizeof __my_ser.remoteaddr;
-                        int newfd = accept(__my_ser.server_fd, (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
+                        int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
                         if (newfd == -1)
                             perror("accept");
                         else {
@@ -107,7 +113,6 @@ public:
                             if (bytes == 0) 
 							{
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
-
 							}
 							else
 							{
@@ -128,7 +133,7 @@ public:
 			}
 		}
 	}
-		int									server_fd;
+		std::vector<int>					server_fds;
 		int									rcv;
 		int									on;
 		int							        rc;
@@ -140,8 +145,9 @@ public:
 		struct	sockaddr_storage			remoteaddr;
 		socklen_t 							addrlen;
 		char								buf[BUFFER_SIZE + 1];
-		_vector_fd	fd_s;
-        struct DataConf                     contain;
+		_vector_fd	                        fd_s;
+        // struct DataConf                     contain;
+        std::vector<DataConf>               _containers;
 };
                                
 

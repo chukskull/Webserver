@@ -16,7 +16,6 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 		DataConf _data;
 		std::stringstream	lol(it->get_body_size());
 		lol >> _data.__body_size;
-					puts("myaw");
 					// print_error << it->get_body_size() << std::endl;
 		if(lol.fail())
 			return -1;
@@ -52,12 +51,10 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			print_error << meth.size() << std::endl;
 			for(;it_3 != meth.end(); it_3++)
 			{
-				puts("hh");
 				std::vector<_string>::iterator t_1;
 				// print_error << *it_3 << std::endl;
 				if ((t_1 = std::find(allow_methods.begin(), allow_methods.end(), *it_3)) == allow_methods.end())
 				{
-					puts("am i here");
 					return -1;
 				}
 				else{
@@ -65,11 +62,8 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 					_allows[index] = true;
 				}
 			}
-			puts("SS");
 			req_loc._AllowMeth = _allows;
-			puts("SS 2");
 		}
-		puts("pop _ sure");
 		_vec_data.push_back(_data);
 	}
 	return 0;
@@ -271,14 +265,14 @@ int main(int ac, char *av[])
 	pars_2 = phase_to_req_res(vec, _vec_data);
 	if(pars_2 < 0)
 	{
-
-	puts("love like you do");
 		exit(0);
 	}
 	print_error << "thats msn" << std::endl;
-	for(size_t i = 0; i < _vec_data.size(); i++)
-	{
-		Server::run(&_vec_data[i]);
-	}
+	print_error << _vec_data.size() << std::endl;
+	// for(size_t i = 0; i < _vec_data.size(); i++)
+	// {
+		if (_vec_data.size())
+			Server::run(_vec_data);
+	// }
 	return 0;
 }
