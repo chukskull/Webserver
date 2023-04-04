@@ -114,7 +114,8 @@ int parsing_config_file(_string file, _server_config &servers)
 		size_t j = 0;
 		if(line.find("server {") != _string::npos)
 		{
-			_string listen, host, body_size, name;
+			std::vector<_string> ports;
+			_string	host, body_size, name;
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
@@ -124,7 +125,7 @@ int parsing_config_file(_string file, _server_config &servers)
 				{
 					size_t i = escape_white_space(line);
 					if (i == j)
-						listen = erase_some_charc(line.substr(line.find("listen") + 7));
+						ports.push_back(erase_some_charc(line.substr(line.find("listen") + 7)));
 				}
 				else if((j = line.find("host")) != _string::npos)
 				{
@@ -217,7 +218,7 @@ int parsing_config_file(_string file, _server_config &servers)
 				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
 				}
 			}
-			servers.push_back(ServerCongif(listen, body_size, host, name, locations));
+			servers.push_back(ServerCongif(ports, body_size, host, name, locations));
 		}
 	}
 	return 0;
@@ -247,7 +248,12 @@ int main(int ac, char *av[])
 	print_error << "here" << std::endl;
 	for(_server_config::iterator it = vec.begin(); it != vec.end(); ++it)
 	{
-		print_error <<"server - port: " << it->get_port()  << std::endl;
+		print_error <<"server - port: " << std::endl;
+		std::vector<_string> ports = it->get_port();
+		for(size_t	i = 0; i < ports.size(); i++)
+		{
+			print_error << ports[i] << std::endl;
+		}
 		print_error << "server - host " << it->get_host() << std::endl;
 
 		print_error <<"ss " <<it->get_body_size() << std::endl;
