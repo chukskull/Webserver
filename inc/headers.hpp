@@ -48,6 +48,7 @@ typedef std::vector<ServerCongif> _server_config;
 #define PORT 8080
 #define BUFFER_SIZE 1024
 #include "Server.hpp"
+#include "parsing.hpp"
 
 enum
 {

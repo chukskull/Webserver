@@ -1,6 +1,3 @@
-
-// #include "server.hpp"
-// #include "ConfigParser.hpp"
 #ifndef SERVER_HPP
 # define SERVER_HPP
 #include "headers.hpp"
@@ -12,20 +9,15 @@ public:
     }
 	void	initial_server(std::vector<DataConf> &data)
 	{
-            // fd_s.resize(1);
         bzero(&hints, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_flags = AI_PASSIVE;
-        // fd_s.resize(data.size());
         for(size_t  i = 0; i < data.size(); i++)
         {
-            // print_error << "i love my mum" << std::endl;
             for(size_t j = 0; j < data[i].__port.size(); j++)
             {
-                // print_error << data.size() << " " << data[i].__port.size() << std::endl;
                 int server_fd;
-                // this->current_size = 1;
                 print_error << data[i].__port[j].c_str() << std::endl;
                 if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
                     throw std::string("error in getaddrinfo");
@@ -41,9 +33,7 @@ public:
                     this->on = 1;
                     rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
                     if (rc < 0) {
-                        // perror("setsocketopt failed");
                         throw std::string("error with setsocketopt");
-                        // exit(-1);
                     }
                     if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
                     {
@@ -58,15 +48,9 @@ public:
                 freeaddrinfo(ai);
                 if (point == NULL) {
 		            	throw std::string("there's no ip available in this host");
-                    // std::cerr << "there's no ip available in this host" << std::endl;
-                    // return;
                 }
-                if (listen(server_fd, 10) == -1) {
+                if (listen(server_fd, 10) == -1)
                     throw std::string("problem with listen");
-                }
-                int terminal_fd = open("ok.txt", O_CREAT | O_WRONLY, 0777);
-                if (terminal_fd == -1)
-                    perror("fd");
                 pollfd  temp;
                 temp.fd = server_fd;
                 temp.events = POLLIN;
@@ -87,7 +71,7 @@ public:
 		}
 		catch(const std::string e)
 		{
-			std::cerr << e<< '\n';
+			std::cerr << e << '\n';
 		}
 		
         while (1) {
@@ -101,7 +85,6 @@ public:
                 std::cerr << "poll() timed out , End program\n" << std::endl;
                 break ;
             }
-            // __my_ser.current_size = __my_ser.nfds;
             for (size_t i = 0; i < __my_ser.fd_s.size(); i++) {
                 if (__my_ser.fd_s[i].revents & POLLIN) {
                     std::vector<int>::iterator find_;
@@ -121,6 +104,7 @@ public:
                         __my_ser.buf[bytes] = '\0';
                         std::string message(__my_ser.buf);
                         int sender_fd = __my_ser.fd_s[i].fd;
+                        print_error << message << std::endl;
                         if (bytes <= 0) {
                             if (bytes == 0) 
 							{
@@ -128,6 +112,7 @@ public:
 							}
 							else
 							{
+                                // write(0, __my_ser.buf, sizeof __my_ser.buf);
 								perror("rev");
 							}
 						
@@ -137,7 +122,7 @@ public:
 					}
 					else
 						{
-							//this part gonna send back the response to a client
+							// this part gonna send back the response to a client
 							// write(terminal_fd, message.c_str(), message.length());	
 						}
 					}
@@ -158,7 +143,6 @@ public:
 		socklen_t 							addrlen;
 		char								buf[BUFFER_SIZE + 1];
 		_vector_fd	                        fd_s;
-        // struct DataConf                     contain;
         std::vector<DataConf>               _containers;
 };
                                
