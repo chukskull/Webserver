@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-# define SERVER_HPP
+#ifndef EVERYTHING_HPP
+# define EVERYTHING_HPP
 
 
 
@@ -26,14 +26,34 @@
 #include <string>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <unistd.h>
 #include <fcntl.h>
 
+class Location;
+class ServerCongif;
 typedef	std::vector<struct pollfd > _vector_fd;
+typedef std::vector<std::string> _methods;
+typedef std::vector<Location> _locations;
+typedef std::string            _string ;
+typedef std::vector<ServerCongif> _server_config;
+#define print_error std::cerr
+#include "RequestConfig.hpp"
+
+#include "Location.hpp"
+#include "ServerCongif.hpp"
+
 
 #define	MAX_FD 200
 #define PORT 8080
 #define BUFFER_SIZE 1024
+#include "Server.hpp"
 
+enum
+{
+    con_GET = 0,
+    con_POST,
+    con_DELETE,
+};
 
 #endif
