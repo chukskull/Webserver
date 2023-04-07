@@ -8,18 +8,17 @@ public:
     Server(std::vector<DataConf> &data):_containers(data) {
     }
 
-    std::pair<size_t, size_t>   find_the_pair_connection(std::vector<std::pair<size_t, size_t>> &_concec, int fd)
+    static std::pair<size_t, size_t>   find_the_pair_connection(std::vector<std::pair<size_t, size_t> > &_concec, int fd)
     {
-        std::vector<std::pair<size_t, size_t>>::iterator    found_pair = _concec.end();
-        for(std::vector<std::pair<size_t, size_t>>::iterator it = _concec.begin(); it != _concec.end(); it++)
+        
+        for(std::vector<std::pair<size_t, size_t> >::iterator it = _concec.begin(); it != _concec.end(); it++)
         {
             if (it->first == static_cast<size_t>(fd))
             {
-                found_pair = it;
-                break;
+                return *it;
             }
         }
-
+       return *_concec.end();
     }
 	void	initial_server(std::vector<DataConf> &data)
 	{
@@ -108,7 +107,7 @@ public:
                     std::vector<int>::iterator find_;
                     if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end()) {
                         __my_ser.addrlen = sizeof __my_ser.remoteaddr;
-                        index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin();
+                        index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin()];
                         int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
                         // print_error << __my_ser.server_fds[find_ - __my_ser.server_fds.begin()] << " " << std::endl;
 
@@ -123,11 +122,15 @@ public:
                         }
                     } else {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
-                        find(__my_ser._connections.begin(), __my_ser._connections.begin(), )
                         __my_ser.buf[bytes] = '\0';
+                        std::pair<size_t, size_t>   pair_found = find_the_pair_connection(__my_ser._connections, __my_ser.fd_s[i].fd);
+                        Mesage  *mesg = new Mesage();
                         std::string message(__my_ser.buf);
+                        mesg->message = message;
+                        mesg->_connections = pair_found;
                         int sender_fd = __my_ser.fd_s[i].fd;
                         print_error << message << std::endl;
+                        // print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
                         if (bytes <= 0) {
                             if (bytes == 0) 
 							{
@@ -141,6 +144,8 @@ public:
 						
 						close(__my_ser.fd_s[i].fd);
 						__my_ser.fd_s[i] = __my_ser.fd_s.back();
+                        std::vector<std::pair<size_t, size_t> >::iterator it_pair_found = std::find(__my_ser._connections.begin(), __my_ser._connections.end(), pair_found);
+                        __my_ser._connections.erase(it_pair_found);
 						__my_ser.fd_s.pop_back();
 					}
 					else
@@ -167,7 +172,7 @@ public:
 		char								        buf[BUFFER_SIZE + 1];
 		_vector_fd	                                fd_s;
         std::vector<DataConf>                       _containers;
-        std::vector<std::pair<size_t, size_t>>      _connections;
+        std::vector<std::pair<size_t, size_t> >      _connections;
         // std::map<int, int>                  _server;
 };
                                
