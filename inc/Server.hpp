@@ -7,6 +7,20 @@ class Server {
 public:
     Server(std::vector<DataConf> &data):_containers(data) {
     }
+
+    std::pair<size_t, size_t>   find_the_pair_connection(std::vector<std::pair<size_t, size_t>> &_concec, int fd)
+    {
+        std::vector<std::pair<size_t, size_t>>::iterator    found_pair = _concec.end();
+        for(std::vector<std::pair<size_t, size_t>>::iterator it = _concec.begin(); it != _concec.end(); it++)
+        {
+            if (it->first == static_cast<size_t>(fd))
+            {
+                found_pair = it;
+                break;
+            }
+        }
+
+    }
 	void	initial_server(std::vector<DataConf> &data)
 	{
         bzero(&hints, sizeof(hints));
@@ -90,9 +104,11 @@ public:
             for (size_t i = 0; i < __my_ser.fd_s.size(); i++) {
                 if (__my_ser.fd_s[i].revents & POLLIN) {
                     print_error << __my_ser.fd_s[i].fd << "rumble " << std::endl;
+                    size_t  index;
                     std::vector<int>::iterator find_;
                     if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end()) {
                         __my_ser.addrlen = sizeof __my_ser.remoteaddr;
+                        index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin();
                         int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
                         // print_error << __my_ser.server_fds[find_ - __my_ser.server_fds.begin()] << " " << std::endl;
 
@@ -103,11 +119,11 @@ public:
                             __my_ser.fd_s.back().fd = newfd;
                             __my_ser.fd_s.back().events = POLLIN;
                             __my_ser.fd_counts++;
-                            _connections.push_back(std::make_pair());
+                            __my_ser._connections.push_back(std::make_pair(newfd, index));
                         }
                     } else {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
-                        print_error << __my_ser.fd_s[i].fd << " " << __my_ser.fd_s.size() << std::endl;
+                        find(__my_ser._connections.begin(), __my_ser._connections.begin(), )
                         __my_ser.buf[bytes] = '\0';
                         std::string message(__my_ser.buf);
                         int sender_fd = __my_ser.fd_s[i].fd;
