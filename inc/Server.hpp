@@ -49,8 +49,10 @@ public:
                 if (point == NULL) {
 		            	throw std::string("there's no ip available in this host");
                 }
-                if (listen(server_fd, 10) == -1)
+                if (listen(server_fd, 1) == -1)
                     throw std::string("problem with listen");
+                else
+                    print_error << server_fd << std::endl;
                 pollfd  temp;
                 temp.fd = server_fd;
                 temp.events = POLLIN;
@@ -87,10 +89,13 @@ public:
             }
             for (size_t i = 0; i < __my_ser.fd_s.size(); i++) {
                 if (__my_ser.fd_s[i].revents & POLLIN) {
+                    print_error << __my_ser.fd_s[i].fd << "rumble " << std::endl;
                     std::vector<int>::iterator find_;
                     if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end()) {
                         __my_ser.addrlen = sizeof __my_ser.remoteaddr;
                         int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
+                        // print_error << __my_ser.server_fds[find_ - __my_ser.server_fds.begin()] << " " << std::endl;
+
                         if (newfd == -1)
                             perror("accept");
                         else {
@@ -98,9 +103,11 @@ public:
                             __my_ser.fd_s.back().fd = newfd;
                             __my_ser.fd_s.back().events = POLLIN;
                             __my_ser.fd_counts++;
+                            _connections.push_back(std::make_pair());
                         }
                     } else {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
+                        print_error << __my_ser.fd_s[i].fd << " " << __my_ser.fd_s.size() << std::endl;
                         __my_ser.buf[bytes] = '\0';
                         std::string message(__my_ser.buf);
                         int sender_fd = __my_ser.fd_s[i].fd;
@@ -138,12 +145,14 @@ public:
 		int									timeout;
 		int									fd_counts;
 		int									current_size;
-		struct	addrinfo					hints, *ai, *point;
-		struct	sockaddr_storage			remoteaddr;
-		socklen_t 							addrlen;
-		char								buf[BUFFER_SIZE + 1];
-		_vector_fd	                        fd_s;
-        std::vector<DataConf>               _containers;
+		struct	addrinfo					    hints, *ai, *point;
+		struct	sockaddr_storage			        remoteaddr;
+		socklen_t 							        addrlen;
+		char								        buf[BUFFER_SIZE + 1];
+		_vector_fd	                                fd_s;
+        std::vector<DataConf>                       _containers;
+        std::vector<std::pair<size_t, size_t>>      _connections;
+        // std::map<int, int>                  _server;
 };
                                
 
