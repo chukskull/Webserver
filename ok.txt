@@ -1,2 +1,13 @@
 multiples files index
 chunks -- ????????????
+
+
+
+
+We have three ways to shorten the time sending extensive data by HTTP:
+
+    compress data
+    send chunked data
+    request data in a selected range
+
+They are not exclusive. You can use all means together depending on use cases.
