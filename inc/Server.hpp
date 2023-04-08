@@ -130,7 +130,7 @@ public:
                         mesg->_connections = pair_found;
                         int sender_fd = __my_ser.fd_s[i].fd;
                         print_error << message << std::endl;
-                        // print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+                        print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
                         if (bytes <= 0) {
                             if (bytes == 0) 
 							{
