@@ -1,5 +1,5 @@
 CC = c++
-INC = inc/
+INC = inc/ 
 
 FLAGS= -g -std=c++98 -Wall -Wextra -Werror 
 MAIN= webserver.cpp
