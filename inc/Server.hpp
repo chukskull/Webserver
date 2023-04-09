@@ -20,6 +20,36 @@ public:
         }
        return *_concec.end();
     }
+    static void    handle_chunked(_string   buffer, int bytes)
+    {
+        bool    chunked_bool = true;
+        std::stringstream   ss;
+        _string             _fill_buf;
+        int                 chunked_size;
+        for(int i = 0; i < bytes; i++)
+        {
+            if (chunked_bool)
+            {
+                if(buffer[i] == '\r' && buffer[i] == '\n')
+                {
+                    chunked_size = std::stoi(_fill_buf, nullptr, 16);
+                    if(chunked_size == 0)
+                    {
+                        break;
+                    }
+                    _fill_buf.clear();
+                    chunked_bool = false;
+                    i++;
+                }
+                else
+                {
+                    _fill_buf += buffer[i];
+                }
+            }
+
+
+        }
+    }
 	void	initial_server(std::vector<DataConf> &data)
 	{
         bzero(&hints, sizeof(hints));
@@ -123,6 +153,7 @@ public:
                     } else {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
                         __my_ser.buf[bytes] = '\0';
+                        handle_chunked(__my_ser.buf, bytes);
                         std::pair<size_t, size_t>   pair_found = find_the_pair_connection(__my_ser._connections, __my_ser.fd_s[i].fd);
                         Mesage  *mesg = new Mesage();
                         std::string message(__my_ser.buf);
