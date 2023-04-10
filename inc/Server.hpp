@@ -1,5 +1,6 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
+
 #include "headers.hpp"
 
 
@@ -22,7 +23,7 @@ public:
     }
     static void    handle_chunked(_string   buffer, int bytes)
     {
-        bool    chunked_bool = true;
+        bool                chunked_bool = true;
         std::stringstream   ss;
         _string             _fill_buf;
         int                 chunked_size;
@@ -34,26 +35,20 @@ public:
                 {
                     chunked_size = std::stoi(_fill_buf, nullptr, 16);
                     if(chunked_size == 0)
-                    {
                         break;
-                    }
                     _fill_buf.clear();
                     chunked_bool = false;
                     i++;
                 }
                 else
-                {
                     _fill_buf += buffer[i];
-                }
             }
             else
             {
                 ss.write(&buffer[i], 1);
                 chunked_size--;
                 if(chunked_size == 0)
-                {
                     chunked_bool = true;
-                }
             }
         }
     }
@@ -72,9 +67,8 @@ public:
                 if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
                     throw std::string("error in getaddrinfo");
                 }
-                print_error << "here" << std::endl;
-                print_error << " cringe " << std::endl;
-                for (point = ai; point != NULL; point = point->ai_next) {
+                for (point = ai; point != NULL; point = point->ai_next)
+                {
                     server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
                     if (server_fd < 0)
                         continue;
@@ -82,13 +76,10 @@ public:
                         this->server_fds.push_back(server_fd);
                     this->on = 1;
                     rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
-                    if (rc < 0) {
+                    if (rc < 0)
                         throw std::string("error with setsocketopt");
-                    }
                     if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
-                    {
                         throw std::string("error fcntl");
-                    }
                     if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
                         close(server_fd);
                         continue;
@@ -96,9 +87,8 @@ public:
                     break ;
                 }
                 freeaddrinfo(ai);
-                if (point == NULL) {
+                if (point == NULL)
 		            	throw std::string("there's no ip available in this host");
-                }
                 if (listen(server_fd, 1) == -1)
                     throw std::string("problem with listen");
                 else
@@ -114,7 +104,8 @@ public:
 	}
     ~Server() {}
 
-   static void run(std::vector<DataConf> &__vec_data) {
+   static void run(std::vector<DataConf> &__vec_data)
+   {
     print_error << "rijal" << std::endl;
         Server  __my_ser(__vec_data);
 		try
@@ -129,16 +120,20 @@ public:
         while (1) {
             __my_ser.rc = 1;
             __my_ser.rc = poll(&__my_ser.fd_s[0], __my_ser.fd_s.size(), __my_ser.timeout);
-            if (__my_ser.rc < 0) {
+            if (__my_ser.rc < 0)
+            {
                 perror("poll() failed");
                 break ;
             }
-            if (__my_ser.rc == 0) {
+            if (__my_ser.rc == 0)
+            {
                 std::cerr << "poll() timed out , End program\n" << std::endl;
                 break ;
             }
-            for (size_t i = 0; i < __my_ser.fd_s.size(); i++) {
-                if (__my_ser.fd_s[i].revents & POLLIN) {
+            for (size_t i = 0; i < __my_ser.fd_s.size(); i++)
+            {
+                if (__my_ser.fd_s[i].revents & POLLIN)
+                {
                     print_error << __my_ser.fd_s[i].fd << "rumble " << std::endl;
                     size_t  index;
                     std::vector<int>::iterator find_;
@@ -150,14 +145,16 @@ public:
                         print_error << "this  is the client" << " " << newfd << std::endl;
                         if (newfd == -1)
                             perror("accept");
-                        else {
+                        else
+                        {
                             __my_ser.fd_s.push_back(pollfd());
                             __my_ser.fd_s.back().fd = newfd;
                             __my_ser.fd_s.back().events = POLLIN;
                             __my_ser.fd_counts++;
                             __my_ser._connections.push_back(std::make_pair(newfd, index));
                         }
-                    } else {
+                    } else
+                    {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
                         __my_ser.buf[bytes] = '\0';
                         handle_chunked(__my_ser.buf, bytes);
@@ -172,21 +169,17 @@ public:
                         if (bytes <= 0)
                         {
                             if (bytes == 0) 
-							{
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
-							}
 							else
-							{
                                 // write(0, __my_ser.buf, sizeof __my_ser.buf);
 								perror("rev");
-							}
 						
-						close(__my_ser.fd_s[i].fd);
-						__my_ser.fd_s[i] = __my_ser.fd_s.back();
-                        std::vector<std::pair<size_t, size_t> >::iterator it_pair_found = std::find(__my_ser._connections.begin(), __my_ser._connections.end(), pair_found);
-                        __my_ser._connections.erase(it_pair_found);
-						__my_ser.fd_s.pop_back();
-					}
+						    close(__my_ser.fd_s[i].fd);
+						    __my_ser.fd_s[i] = __my_ser.fd_s.back();
+                            std::vector<std::pair<size_t, size_t> >::iterator it_pair_found = std::find(__my_ser._connections.begin(), __my_ser._connections.end(), pair_found);
+                            __my_ser._connections.erase(it_pair_found);
+						    __my_ser.fd_s.pop_back();
+					    }
 					else
 						{
                             print_error <<" "<< pair_found.first << std::endl;
@@ -200,15 +193,15 @@ public:
 			}
 		}
 	}
-		std::vector<int>					server_fds;
-		int									rcv;
-		int									on;
-		int							        rc;
-		int							        nfds;
-		int									timeout;
-		int									fd_counts;
-		int									current_size;
-		struct	addrinfo					    hints, *ai, *point;
+		std::vector<int>					        server_fds;
+		int									        rcv;
+		int									        on;
+		int							                rc;
+		int							                nfds;
+		int									        timeout;
+		int									        fd_counts;
+		int									        current_size;
+		struct	addrinfo					        hints, *ai, *point;
 		struct	sockaddr_storage			        remoteaddr;
 		socklen_t 							        addrlen;
 		char								        buf[BUFFER_SIZE + 1];
