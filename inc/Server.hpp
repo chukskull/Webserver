@@ -106,7 +106,6 @@ public:
 
    static void run(std::vector<DataConf> &__vec_data)
    {
-    print_error << "rijal" << std::endl;
         Server  __my_ser(__vec_data);
 		try
 		{
@@ -135,9 +134,10 @@ public:
                 if (__my_ser.fd_s[i].revents & POLLIN)
                 {
                     print_error << __my_ser.fd_s[i].fd << "rumble " << std::endl;
-                    size_t  index;
-                    std::vector<int>::iterator find_;
-                    if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end()) {
+                    size_t                      index;
+                    std::vector<int>::iterator  find_;
+                    if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end())
+                    {
                         __my_ser.addrlen = sizeof __my_ser.remoteaddr;
                         index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin()];
                         int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
@@ -157,7 +157,8 @@ public:
                     {
                         int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
                         __my_ser.buf[bytes] = '\0';
-                        handle_chunked(__my_ser.buf, bytes);
+                        //waiting si ayman here for handling chunked (aka " large data ")
+                        // handle_chunked(__my_ser.buf, bytes);
                         std::pair<size_t, size_t>   pair_found = find_the_pair_connection(__my_ser._connections, __my_ser.fd_s[i].fd);
                         Mesage  *mesg = new Mesage();
                         std::string message(__my_ser.buf);
@@ -208,7 +209,6 @@ public:
 		_vector_fd	                                fd_s;
         std::vector<DataConf>                       _containers;
         std::vector<std::pair<size_t, size_t> >      _connections;
-        // std::map<int, int>                  _server;
 };
                                
 
