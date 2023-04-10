@@ -46,8 +46,15 @@ public:
                     _fill_buf += buffer[i];
                 }
             }
-
-
+            else
+            {
+                ss.write(&buffer[i], 1);
+                chunked_size--;
+                if(chunked_size == 0)
+                {
+                    chunked_bool = true;
+                }
+            }
         }
     }
 	void	initial_server(std::vector<DataConf> &data)
@@ -140,7 +147,7 @@ public:
                         index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin()];
                         int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
                         // print_error << __my_ser.server_fds[find_ - __my_ser.server_fds.begin()] << " " << std::endl;
-
+                        print_error << "this  is the client" << " " << newfd << std::endl;
                         if (newfd == -1)
                             perror("accept");
                         else {
@@ -162,7 +169,8 @@ public:
                         int sender_fd = __my_ser.fd_s[i].fd;
                         print_error << message << std::endl;
                         print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
-                        if (bytes <= 0) {
+                        if (bytes <= 0)
+                        {
                             if (bytes == 0) 
 							{
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
@@ -181,8 +189,11 @@ public:
 					}
 					else
 						{
+                            print_error <<" "<< pair_found.first << std::endl;
 							// this part gonna send back the response to a client
-							// write(terminal_fd, message.c_str(), message.length());	
+							if(send(pair_found.first, "hello_there", 12, 0) < 0)
+                                perror("send");
+                            close(pair_found.first);
 						}
 					}
 				}
