@@ -89,8 +89,22 @@ void generate_autoindex(file_info file, HTTP_response &response)
 
 void fill_content_type(HTTP_request &req, string &content_type)
 {
-	req.content_type.first = content_type.substr(0, content_type.find(';'));
-	req.content_type.second = content_type.substr(content_type.find(';') + 1, content_type.size());
+	std::stringstream ss(content_type);
+	string line;
+	size_t pos;
+
+	std::getline(ss, req.content_type.first, ';');
+	std::getline(ss, line, '\r');
+	pos = line.find("boundary=");
+	if (pos != line.npos)
+	{
+		if (pos != 0)
+		{
+			// err with request 
+			return;
+		}
+		req.content_type.second = line.substr(line.size() + 9);
+	}
 }
 
 bool check_for_end_boundary(string &body, string &boundary)
@@ -110,7 +124,7 @@ bool find_boundary(std::stringstream &body_stream, string &boundary)
 	return false;
 }
 
-bool handle_content_disposition(std::stringstream &body_stream, form_part &part)
+bool handle_content_disposition(std::stringstream &body_stream, form_part &part, string &boundary)
 {
 	string line;
 	std::stringstream _stream;
@@ -120,6 +134,9 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part)
 	while (std::getline(body_stream, line, '\n') and line != string("\r"))
 	{
 		_stream.str(line);
+
+		if (line == "--" + boundary + '\r')
+			break;
 
 		std::getline(_stream, line, ':');
 		if (_to_lower(line) == "Content-Disposition")
@@ -152,10 +169,13 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part)
 			std::getline(_stream, line, '\r');
 			part.content_type = line;
 		}
+		if (body_stream.eof())
+			break;
 	}
+	if (line != "\r")
+		return false;
 	return ret;
 }
-
 
 bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 {
@@ -187,9 +207,8 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 	}
 }
 
-deque<form_part>    get_parts(string &body, string &boundary)
+bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 {
-	deque<form_part> parts;
 	std::stringstream body_stream(body);
 	string line;
 
@@ -197,15 +216,14 @@ deque<form_part>    get_parts(string &body, string &boundary)
 
 	if (find_boundary(body_stream, boundary) == false)
 	{
-		//do shit
-		return parts;
+		return false;
 	}
 	while (1)
 	{
-		if (handle_content_disposition(body_stream, part) == false)
+		if (handle_content_disposition(body_stream, part, boundary) == false)
 		{
 			part.clear();
-			continue;
+			return false;
 		}
 		if (read_part(body_stream, boundary, part) == false)
 		{
@@ -215,4 +233,140 @@ deque<form_part>    get_parts(string &body, string &boundary)
 		parts.push_back(part);
 		part = form_part();
 	}
+	return (true);
 }
+
+
+size_t write_to_file(string &file_path, string &content)
+{
+	std::ofstream file(file_path, std::ios::out | std::ios::trunc);
+
+	if (file.is_open())
+	{
+		file << content;
+		file.close();
+		return (200);
+	}
+	else
+	{
+		return 500;
+		// response.status_code = 500;
+		// response.status_message = "Internal Server Error";
+	}
+}
+
+void update_file(file_info file, HTTP_request &request_info, HTTP_response &response)
+{
+	if (write_to_file(file.file_path, request_info.body) >= 500)
+	{
+		response.set_status(500, "Internal Server Error");
+		return;
+	}
+	else
+	{
+		response.set_status(200, "OK");
+		response.content_type = file.content_type;
+		response.location = file.requested_path;
+	}
+}
+
+void creat_file(file_info file, HTTP_request &request_info, HTTP_response &response)
+{
+	if (write_to_file(file.file_path, request_info.body) >= 500)
+	{
+		response.set_status(500, "Internal Server Error");
+		return;
+	}
+	else
+	{
+		response.set_status(201, "Created");
+		response.content_type = file.content_type;
+		response.location = file.requested_path;
+	}
+}
+
+void generate_error(HTTP_response &response, int status_code, string status_message)
+{
+	response.set_status(status_code, status_message);
+	response.content_type = "text/html";
+	response.body = "<html><head><title>" + std::to_string(status_code) + " " + status_message + " it is a directory " + "</title></head><body><h1>" + std::to_string(status_code) + " " + status_message + "</h1></body></html>";
+}
+
+void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &request_info, HTTP_response &response)
+{
+	std::ofstream out_file;
+	for (deque<form_part>::iterator it = parts.begin(); it != parts.end(); it++)
+	{
+		string tmp_file;
+
+		if (it->filename != "")
+		{
+			tmp_file = file.file_path + it->filename;
+			if (!MIME.is_MIME_type(tmp_file))
+			{
+				if (it->content_type != "")
+					tmp_file = tmp_file + MIME.get_MIME_extention(it->content_type);
+			}
+			out_file.open(tmp_file, std::ios::out | std::ios::trunc);
+			if (out_file.is_open())
+			{
+				out_file << it->content;
+				it->success = FILE_SUCCESS;
+			}
+			else
+			{
+				it->comment = "unable to open file : " + tmp_file ;
+			}
+		}
+		else if (it->name != "")
+		{
+			tmp_file = file.file_path + "fake_db";
+			out_file.open(tmp_file, std::ios::out | std::ios::app);
+			if (out_file.is_open())
+			{
+				out_file << it->name << " : " << it->content << '\n';
+				it->success = DATA_SUCCESS;
+				it->comment = it->name + " was added to " + tmp_file;
+			}
+			else
+			{
+				it->comment = tmp_file + " is unavilable";
+			}
+		}
+	}
+}
+
+string generat_response(deque<form_part> &parts, HTTP_response &response)
+{
+	string body;
+
+	response.set_status(500, "Internal Server Error");
+	for (deque<form_part>::iterator it = parts.begin(); it != parts.end(); it++)
+	{
+		if (it->success != FAIL)
+			response.set_status(207, "Multi-Status");
+		body += it->comment + '\n';
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
