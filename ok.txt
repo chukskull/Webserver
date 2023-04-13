@@ -11,3 +11,7 @@ We have three ways to shorten the time sending extensive data by HTTP:
     request data in a selected range
 
 They are not exclusive. You can use all means together depending on use cases.
+
+
+
+upload key_word for location 

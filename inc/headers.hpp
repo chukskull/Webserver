@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
 class Location;
 class ServerCongif;
 typedef	std::vector<struct pollfd > _vector_fd;
@@ -42,13 +43,13 @@ typedef std::vector<ServerCongif> _server_config;
 
 #include "Location.hpp"
 #include "ServerCongif.hpp"
+#include "client.hpp"
 
 
 #define	MAX_FD 200
 #define PORT 8080
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 2048
 #include "mesage.hpp"
-#include "Server.hpp"
 #include "parsing.hpp"
 
 enum
