@@ -1,12 +1,13 @@
 CC = c++
-INC = inc/
+INC = inc/ 
 
-FLAGS= -std=c++98 -Wall -Wextra -Werror -g
+FLAGS= -g -std=c++98 -Wall -Wextra -Werror 
 MAIN= webserver.cpp
 B_DIR = build
 SERVER=$(addprefix server/, )
-HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp)
-FILES= $(addprefix src/, $(SERVER))
+PARSING=$(addprefix parsing/, prsn_cnfig_file.cpp prsn_req_res.cpp tools_for_parsing.cpp)
+HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp)
+FILES= $(addprefix src/, $(SERVER) $(PARSING))
 OBJ= $(addprefix build/, $(FILES:.cpp=.o) $(MAIN:.cpp=.o))
 NAME= webserv
 

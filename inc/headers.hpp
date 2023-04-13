@@ -47,7 +47,9 @@ typedef std::vector<ServerCongif> _server_config;
 #define	MAX_FD 200
 #define PORT 8080
 #define BUFFER_SIZE 1024
+#include "mesage.hpp"
 #include "Server.hpp"
+#include "parsing.hpp"
 
 enum
 {
