@@ -83,16 +83,17 @@ public:
 	}
 	static void	_pars_request(Client &_my_client)
 	{
-		_string			line;
-		_string			str;
+		_string						line;
+		_string						str;
+		std::stringstream			for_read(_my_client._buffer->str());
 		// std::stringstream	temp(_my_client.get_buffer());
 
 		// ssize_t			content_length = 0;
 		// print_error <<"" <<_my_client.get_buffer() << std::endl;
-		_my_client._buffer->seekg(0, std::ios::beg);
+		for_read.seekg(0, std::ios::beg);
 		// _my_client._buffer
 		print_error << "checking " << std::endl;
-		while(getline(*_my_client._buffer,  line))
+		while(getline(for_read,  line))
 		{
 			print_error << line << std::endl;
 			if (line.find("Content-Length:") != _string::npos)
