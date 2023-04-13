@@ -47,21 +47,32 @@ public:
 	}
 	static int	receiving(int fd, Client &_my_client, char *buff)
 	{
+		std::string	sure;
 		while (1)
 		{
+			bzero(buff, BUFFER_SIZE);
 			_gl_recv_return = recv(fd, buff, BUFFER_SIZE, 0);
-			_string	line;
+			sure.append(buff);
 			if(_gl_recv_return > 0)
 			{
-				_my_client.AppendData(buff);
 				if(_my_client._header_done)
 					return 0;
-				while (getline(*(_my_client._buffer), line))
+				_string	line;
+				std::istringstream	obj(sure);
+				while (getline(obj, line))
 				{
-					if(line.find("\r\n") != _string::npos)
+					size_t j = 0;
+					line += "\n";
+					print_error << line;
+					if((j = line.find("\r\n")) != _string::npos)
 					{
-						_my_client._header_done = true;
-						return 1;
+						if (j == 0)
+						{
+							print_error << "good sht" << std::endl;
+							_my_client._header_done = true;
+							_my_client.AppendData(sure);
+							return 1;
+						}
 					}
 				}
 			}
@@ -74,13 +85,22 @@ public:
 	{
 		_string			line;
 		_string			str;
+		// std::stringstream	temp(_my_client.get_buffer());
+
 		// ssize_t			content_length = 0;
-		while(getline(*(_my_client._buffer),  line))
+		// print_error <<"" <<_my_client.get_buffer() << std::endl;
+		_my_client._buffer->seekg(0, std::ios::beg);
+		// _my_client._buffer
+		print_error << "checking " << std::endl;
+		while(getline(*_my_client._buffer,  line))
 		{
+			print_error << line << std::endl;
 			if (line.find("Content-Length:") != _string::npos)
 			{
-				str = line.substr(line.find(("Content-Length:") + 16));
+				puts("amm heeeere ayman record00");
+				str = line.substr(line.find_first_of(" ") + 1);
 				_my_client.is_it_chunked_ = std::stoi(str);
+				print_error << std::stoi(str) << std::endl;
 				break ;
 			}
 			else if (line.find("Transfer-Encoding") != _string::npos)
@@ -156,6 +176,7 @@ public:
 		catch(const std::string e)
 		{
 			std::cerr << e << '\n';
+			exit(1);
 		}
 		
 		while (1) {
@@ -200,8 +221,10 @@ public:
 					{
 						int	_pars_req = receiving(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd], __my_ser.buf);
 						// int	pars_return;
+						print_error << _gl_recv_return << std::endl;
 						if(_gl_recv_return > 0)
 						{
+							print_error << "am here" << std::endl;
 							if (_pars_req)
 							{
 								_pars_request(__my_ser._connections[__my_ser.fd_s[i].fd]);
@@ -221,8 +244,9 @@ public:
 						// std::pair<size_t, size_t>   pair_found = find_the_pair_connection(__my_ser._connections, __my_ser.fd_s[i].fd);
 						Mesage  *mesg = new Mesage();
 						// std::string message(*__my_ser._connections[__my_ser.fd_s[i].fd]._buffer);
-						__my_ser._connections[__my_ser.fd_s[i].fd].AppendData(mesg->message);
+						// __my_ser._connections[__my_ser.fd_s[i].fd].AppendData(mesg->message);
 						// mesg->_connections = pair_found;
+						mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 						int sender_fd = __my_ser.fd_s[i].fd;
 						print_error << mesg->message << std::endl;
 						print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
