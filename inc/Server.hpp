@@ -11,89 +11,24 @@ class Server {
 public:
 	Server(std::vector<DataConf> &data):_containers(data) {
 	}
-
-	static std::pair<size_t, size_t>   find_the_pair_connection(std::vector<std::pair<size_t, size_t> > &_concec, int fd)
+	
+	static void    handle_chunked(Client &my_client)
 	{
-		
-		for(std::vector<std::pair<size_t, size_t> >::iterator it = _concec.begin(); it != _concec.end(); it++)
+		std::string line;
+		int chunkSize = 0;
+		std::stringstream	temp(my_client.get_buffer());
+		while (std::getline(temp, line))
 		{
-			if (it->first == static_cast<size_t>(fd))
+		   	if (isxdigit(line[0]))
 			{
-				return *it;
+				std::stringstream ss(line);
+				ss >> std::hex >> chunkSize;
+				if (chunkSize == 0)
+					my_client._done = true;
 			}
 		}
-	   return *_concec.end();
 	}
-	static void    handle_chunked(Client &my_client, int bytes)
-	{
-	(void)bytes;
-    std::string line;
-    int chunkSize = 0;
-	std::stringstream	temp(my_client.get_buffer());
-    // Read the body of the request line by line using getline()
-    while (std::getline(temp, line)) {
-        // If the line starts with a hex digit, it's the chunk size
-        if (isxdigit(line[0])) {
-            // Convert the hex string to an integer
-            std::stringstream ss(line);
-            ss >> std::hex >> chunkSize;
 
-            // Output the chunk size
-            std::cout << "Chunk size: " << chunkSize << std::endl;
-			if (chunkSize == 0)
-			{
-				my_client._done = true;
-				puts("hello");
-				getchar();
-
-			}
-
-            // Skip to the next line
-            // std::getline(std::cin, line);
-        }
-
-        // Process the chunk data
-        // if (!line.empty()) {
-        //     // Output the chunk data and its size
-        //     std::cout << "Chunk data: " << line << std::endl;
-        //     std::cout << "Chunk data size: " << line.size() << " bytes" << std::endl;
-        // }
-    }
-}
-
-		// print_error << "am handle" << std::endl;
-		// _string             _fill_buf;
-		// int                 chunked_size;
-		// (void)bytes;
-		// std::cout << my_client._size << " " << my_client._size + (size_t)(bytes) << std::endl;
-		// // getchar();
-		// for(size_t i = my_client._size; i < my_client._size + (size_t)(bytes) -1 ; i++)
-		// {
-		// 	// std::cout << my_client.get_buffer()[i] << std::endl;
-		// 	// puts("fire");
-		// 	if(my_client._buffer->str()[i] == '\r' && my_client._buffer->str()[i + 1] == '\n')
-		// 	{
-		// 		// print_error << _fill_buf << std::endl;
-		// 		// getchar();
-		// 		chunked_size = std::stoi(_fill_buf, nullptr, 16);
-				
-		// 		if(chunked_size == 0)
-		// 		{
-		// 			getchar();
-		// 			std::cerr << "myaaaaaawwwwww uwuw bzf" << std::endl;
-		// 			my_client._done = true;
-		// 		}
-		// 		_fill_buf.clear();
-		// 		i++;
-		// 	}
-		// 	else
-		// 	{
-		// 		// std::cerr << "ok i pull up "<< my_client._buffer->str()[i] << std::endl;
-		// 		_fill_buf.push_back(my_client._buffer->str()[i]);
-		// 	}
-		// }
-		// // my_client._size = my_client._buffer->str().size();
-	// }
 	static int	receiving(int fd, Client &_my_client, char *buff)
 	{
 		std::string	sure;
@@ -114,16 +49,11 @@ public:
 				{
 					size_t j = 0;
 					line += "\n";
-					print_error << line;
 					if((j = line.find("\r\n")) != _string::npos)
 					{
 						if (j == 0)
 						{
-							print_error << "good sht" << std::endl;
 							_my_client._header_done = true;
-							// _my_client.AppendData(sure);
-							// print_error << _my_client.get_buffer().size() << _my_client.get_buffer()[_my_client.get_buffer().size() - 1]<< std::endl;
-							// getchar();
 							return 1;
 						}
 					}
@@ -138,22 +68,17 @@ public:
 	{
 		_string						line;
 		std::stringstream			for_read(_my_client._buffer->str());
-		// std::stringstream	temp(_my_client.get_buffer());
 
-		// ssize_t			content_length = 0;
-		// print_error <<"" <<_my_client.get_buffer() << std::endl;
 		for_read.seekg(0, std::ios::beg);
-		// _my_client._buffer
-		print_error << "checking " << std::endl;
 		while(getline(for_read,  line))
 		{
-			print_error << line << std::endl;
 			if (line.find("Content-Length:") != _string::npos)
 			{
 				_string						str;
-				puts("amm heeeere ayman record00");
 				str = line.substr(line.find_first_of(" ") + 2);
-				_my_client.is_it_chunked_ = std::stoi(str);
+				std::stringstream convert;
+				convert << str;
+				convert >> _my_client.is_it_chunked_;
 				_my_client._done = true;
 				print_error << std::stoi(str) << std::endl;
 				break ;
@@ -251,7 +176,6 @@ public:
 			{
 				if (__my_ser.fd_s[i].revents & POLLIN)
 				{
-					print_error << __my_ser.fd_s[i].fd << "rumble " << std::endl;
 					size_t                      index = 0;
 					std::vector<int>::iterator  find_;
 					if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end())
@@ -259,8 +183,6 @@ public:
 						__my_ser.addrlen = sizeof __my_ser.remoteaddr;
 						index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin()];
 						int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
-						// print_error << __my_ser.server_fds[find_ - __my_ser.server_fds.begin()] << " " << std::endl;
-						print_error << "this  is the client" << " " << newfd << std::endl;
 						if (newfd == -1)
 							perror("accept");
 						else
@@ -275,11 +197,8 @@ public:
 					else
 					{
 						int	_pars_req = receiving(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd], __my_ser.buf);
-						// int	pars_return;
-						print_error << _gl_recv_return << std::endl;
 						if(_gl_recv_return > 0)
 						{
-							print_error << "am here" << std::endl;
 							if (_pars_req)
 							{
 								_pars_request(__my_ser._connections[__my_ser.fd_s[i].fd]);
@@ -288,27 +207,18 @@ public:
 							}
 							if (__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ == -1)
 							{
-									handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd], _gl_recv_return);
-									// getchar();
+									handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
 
 							}
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
 								perror("length size so big");
-							// else
-
 						}
-						// int bytes = recv(__my_ser.fd_s[i].fd, __my_ser.buf, BUFFER_SIZE, 0);
-						
-						//waiting si ayman here for handling chunked (aka " large data ")
-						// std::pair<size_t, size_t>   pair_found = find_the_pair_connection(__my_ser._connections, __my_ser.fd_s[i].fd);
 						Mesage  *mesg = new Mesage();
-						// std::string message(*__my_ser._connections[__my_ser.fd_s[i].fd]._buffer);
-						// __my_ser._connections[__my_ser.fd_s[i].fd].AppendData(mesg->message);
-						// mesg->_connections = pair_found;
-							int sender_fd = __my_ser.fd_s[i].fd;
+						int sender_fd = __my_ser.fd_s[i].fd;
 						if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
 						{
 							mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
+							mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
 							print_error << mesg->message << std::endl;
 							print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 						}
@@ -317,13 +227,10 @@ public:
 							if (_gl_recv_return == 0) 
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
 							else
-								// write(0, __my_ser.buf, sizeof __my_ser.buf);
-								perror("rev");
-						
+								perror("recv");
 							close(__my_ser.fd_s[i].fd);
 							__my_ser.fd_s[i] = __my_ser.fd_s.back();
-							// std::vector<std::pair<size_t, size_t> >::iterator it_pair_found = std::find(__my_ser._connections.begin(), __my_ser._connections.end(), pair_found);
-							// __my_ser._connections.erase(it_pair_found);
+							__my_ser._connections.erase(__my_ser.fd_s[i].fd);
 							__my_ser.fd_s.pop_back();
 						}
 					else

@@ -7,7 +7,7 @@ struct Mesage
 {
 	_string						message;
 	//lwl client tani is the server
-	std::pair<size_t, size_t>	_connections;
+	std::pair<int, int>	_connections;
 };
 
 
