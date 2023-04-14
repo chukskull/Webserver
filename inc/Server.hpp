@@ -26,25 +26,74 @@ public:
 	}
 	static void    handle_chunked(Client &my_client, int bytes)
 	{
-		_string             _fill_buf;
-		int                 chunked_size;
-		for(size_t i = my_client._size; i < (bytes +  my_client._size); i++)
-		{
-			if(my_client._buffer->str()[i] == '\r' && my_client._buffer->str()[i + 1] == '\n')
+	(void)bytes;
+    std::string line;
+    int chunkSize = 0;
+	std::stringstream	temp(my_client.get_buffer());
+    // Read the body of the request line by line using getline()
+    while (std::getline(temp, line)) {
+        // If the line starts with a hex digit, it's the chunk size
+        if (isxdigit(line[0])) {
+            // Convert the hex string to an integer
+            std::stringstream ss(line);
+            ss >> std::hex >> chunkSize;
+
+            // Output the chunk size
+            std::cout << "Chunk size: " << chunkSize << std::endl;
+			if (chunkSize == 0)
 			{
-				chunked_size = std::stoi(_fill_buf, nullptr, 16);
-				if(chunked_size == 0)
-				{
-					my_client._done = true;
-				}
-				_fill_buf.clear();
-				i++;
+				my_client._done = true;
+				puts("hello");
+				getchar();
+
 			}
-			else
-				_fill_buf += my_client._buffer->str()[i];
-		}
-		my_client._size = my_client._buffer->str().size();
-	}
+
+            // Skip to the next line
+            // std::getline(std::cin, line);
+        }
+
+        // Process the chunk data
+        // if (!line.empty()) {
+        //     // Output the chunk data and its size
+        //     std::cout << "Chunk data: " << line << std::endl;
+        //     std::cout << "Chunk data size: " << line.size() << " bytes" << std::endl;
+        // }
+    }
+}
+
+		// print_error << "am handle" << std::endl;
+		// _string             _fill_buf;
+		// int                 chunked_size;
+		// (void)bytes;
+		// std::cout << my_client._size << " " << my_client._size + (size_t)(bytes) << std::endl;
+		// // getchar();
+		// for(size_t i = my_client._size; i < my_client._size + (size_t)(bytes) -1 ; i++)
+		// {
+		// 	// std::cout << my_client.get_buffer()[i] << std::endl;
+		// 	// puts("fire");
+		// 	if(my_client._buffer->str()[i] == '\r' && my_client._buffer->str()[i + 1] == '\n')
+		// 	{
+		// 		// print_error << _fill_buf << std::endl;
+		// 		// getchar();
+		// 		chunked_size = std::stoi(_fill_buf, nullptr, 16);
+				
+		// 		if(chunked_size == 0)
+		// 		{
+		// 			getchar();
+		// 			std::cerr << "myaaaaaawwwwww uwuw bzf" << std::endl;
+		// 			my_client._done = true;
+		// 		}
+		// 		_fill_buf.clear();
+		// 		i++;
+		// 	}
+		// 	else
+		// 	{
+		// 		// std::cerr << "ok i pull up "<< my_client._buffer->str()[i] << std::endl;
+		// 		_fill_buf.push_back(my_client._buffer->str()[i]);
+		// 	}
+		// }
+		// // my_client._size = my_client._buffer->str().size();
+	// }
 	static int	receiving(int fd, Client &_my_client, char *buff)
 	{
 		std::string	sure;
@@ -55,6 +104,8 @@ public:
 			sure.append(buff);
 			if(_gl_recv_return > 0)
 			{
+				_my_client.AppendData(sure);
+				_my_client._size = _my_client.get_buffer().size() - 1;
 				if(_my_client._header_done)
 					return 0;
 				_string	line;
@@ -70,7 +121,9 @@ public:
 						{
 							print_error << "good sht" << std::endl;
 							_my_client._header_done = true;
-							_my_client.AppendData(sure);
+							// _my_client.AppendData(sure);
+							// print_error << _my_client.get_buffer().size() << _my_client.get_buffer()[_my_client.get_buffer().size() - 1]<< std::endl;
+							// getchar();
 							return 1;
 						}
 					}
@@ -84,7 +137,6 @@ public:
 	static void	_pars_request(Client &_my_client)
 	{
 		_string						line;
-		_string						str;
 		std::stringstream			for_read(_my_client._buffer->str());
 		// std::stringstream	temp(_my_client.get_buffer());
 
@@ -98,16 +150,18 @@ public:
 			print_error << line << std::endl;
 			if (line.find("Content-Length:") != _string::npos)
 			{
+				_string						str;
 				puts("amm heeeere ayman record00");
-				str = line.substr(line.find_first_of(" ") + 1);
+				str = line.substr(line.find_first_of(" ") + 2);
 				_my_client.is_it_chunked_ = std::stoi(str);
+				_my_client._done = true;
 				print_error << std::stoi(str) << std::endl;
 				break ;
 			}
-			else if (line.find("Transfer-Encoding") != _string::npos)
+			else if (line.find("Transfer-Encoding:") != _string::npos)
 			{
-				_string	str = line.substr(line.find("Transfer-Encoding") != _string::npos);
-				if (str.compare("chunked") == 0)
+				_string	str = line.substr(line.find("chunked"));
+				if (str.compare("chunked"))
 				{
 					_my_client.is_it_chunked_ = -1;
 						break ;
@@ -233,7 +287,11 @@ public:
 									perror("request header is not set corretely");
 							}
 							if (__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ == -1)
+							{
 									handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd], _gl_recv_return);
+									// getchar();
+
+							}
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
 								perror("length size so big");
 							// else
@@ -247,10 +305,13 @@ public:
 						// std::string message(*__my_ser._connections[__my_ser.fd_s[i].fd]._buffer);
 						// __my_ser._connections[__my_ser.fd_s[i].fd].AppendData(mesg->message);
 						// mesg->_connections = pair_found;
-						mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
-						int sender_fd = __my_ser.fd_s[i].fd;
-						print_error << mesg->message << std::endl;
-						print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+							int sender_fd = __my_ser.fd_s[i].fd;
+						if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
+						{
+							mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
+							print_error << mesg->message << std::endl;
+							print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+						}
 						if (_gl_recv_return <= 0)
 						{
 							if (_gl_recv_return == 0) 
