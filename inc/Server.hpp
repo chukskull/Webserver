@@ -4,7 +4,6 @@
 #include "headers.hpp"
 #include <map>
 
-
 int _gl_recv_return;
 class Server {
 	
