@@ -10,10 +10,10 @@ string _to_lower(string str);
 bool is_dir(string path);
 bool is_file(string path);
 
-class form_part;
-class file_info;
-class HTTP_request;
-class HTTP_response;
+struct form_part;
+struct file_info;
+struct HTTP_request;
+struct HTTP_response;
 
 
 size_t write_to_file(string &file_path, string &content);
@@ -26,7 +26,8 @@ void creat_file(file_info file, HTTP_request &request_info, HTTP_response &respo
 
 vector<std::string> read_dir(const std::string& dir_path);
 bool read_part(std::stringstream &body_stream, string &b, form_part &part);
-bool get_parts(string &body, string &boundary, deque<form_part> parts);
+// bool get_parts(string &body, string &boundary, deque<form_part> parts);
+bool get_parts(string &body, string &boundary, deque<form_part> &parts);
 
 void fill_content_type(HTTP_request &req, string &content_type);
 

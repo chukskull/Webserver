@@ -1,7 +1,8 @@
 #include "req_res.hpp"
 #include "req_headers.hpp"
-#include "../src/request_response/request.cpp"
+// #include "../src/request_response/request.cpp"
 // #include "Library.hpp"
+servers_library lib;
 
 class __GET
 {
@@ -178,14 +179,15 @@ class handler
 {
 	private:
 		// string str_request;
-		request req;
 		__GET GET_;
 		__POST POST_;
 	public:
 		handler() {}
-		handler(string re) : req(re){}
-		void handle()
+		// handler(string re) : req(re){}
+		void handle(string re)
 		{
+			request req(re);
+
 			req.request_checkpoint();
 			if (req.request_info.method == GET)
 				GET_.handle(req.request_info, req.response);

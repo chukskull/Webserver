@@ -1,5 +1,5 @@
 #include "../../inc/utils.hpp"
-#include "../../inc/req_headers.hpp"
+// #include "../../inc/req_headers.hpp"
 // #include "../../inc/req_res.hpp"
 #include <iostream>
 #include <sys/types.h>
@@ -95,7 +95,7 @@ void generate_autoindex(file_info file, HTTP_response &response)
 
 	string html = "<html><head><title>Index of " + file.file_path + "</title></head><body><h1>Index of " + file.file_path + "</h1><hr><pre><a href=\"../\">../</a>";
 	vector<std::string> dir_content = read_dir(file.file_path);
-	for (int i = 0; i < dir_content.size(); i++)
+	for (size_t i = 0; i < dir_content.size(); i++)
 	{
 		html += "<a href=\"" + dir_content[i] + "\">" + dir_content[i] + "</a>";
 	}
@@ -313,9 +313,14 @@ void generate_error(HTTP_response &response, int status_code, string status_mess
 void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &request_info, HTTP_response &response)
 {
 	std::ofstream out_file;
+
+	(void)request_info;
+	(void)response;
+
 	for (deque<form_part>::iterator it = parts.begin(); it != parts.end(); it++)
 	{
 		string tmp_file;
+		MIME_types MIME;
 
 		if (it->filename != "")
 		{

@@ -2,6 +2,7 @@
 # define SERVER_HPP
 
 #include "headers.hpp"
+#include "methods.hpp"
 #include <map>
 
 int _gl_recv_return;
@@ -103,6 +104,12 @@ public:
 						break ;
 				}
 			}
+			else if (line.find("Accept-Encoding:") != _string::npos)
+			{
+				_my_client.is_it_chunked_ = 1;
+				_my_client._done = true;
+				break;
+			}
 		}
 		// 	else if (line.find("Accept-Encoding:") != _string::npos)
 		// 	{
@@ -177,6 +184,7 @@ public:
 
    static void run(std::vector<DataConf> &__vec_data)
    {
+		handler handl_request;
 		Server  __my_ser(__vec_data);
 		try
 		{
@@ -191,7 +199,7 @@ public:
 		while (1)
 		{
 			// __my_ser.rc = 1;
-			__my_ser.rc = poll(&__my_ser.fd_s[0], __my_ser.fd_s.size(), __my_ser.timeout);
+			__my_ser.rc = poll(&__my_ser.fd_s[0], __my_ser.fd_s.size(), -1);
 			if (__my_ser.rc < 0)
 			{
 				perror("poll() failed");
@@ -251,8 +259,8 @@ public:
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
 								print_error << mesg->message << std::endl;
-								// std::cerr << mesg->message.size() << std::endl;
-								print_error << "object send to ayman " << mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+								std::cerr << mesg->message.size() << std::endl;
+								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
 						int sender_fd = __my_ser.fd_s[i].fd;
@@ -271,7 +279,7 @@ public:
 							__my_ser._connections.erase(__my_ser.fd_s[i].fd);
 							__my_ser.fd_s.pop_back();
 						}
-					else
+						else
 						{
 							// print_error <<" "<< pair_found.first << std::endl;
 							// this part gonna send back the response to a client
