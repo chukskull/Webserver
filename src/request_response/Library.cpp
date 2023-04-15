@@ -50,3 +50,8 @@
 		}
 		return info;
     }
+
+	void servers_library::set(vector<DataConf> servers)
+	{
+		
+	}

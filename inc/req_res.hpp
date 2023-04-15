@@ -44,7 +44,7 @@ struct HTTP_request
 	string host;
 	std::pair<string, string> content_type;
 	// string content_type;
-	size_t content_length;
+	long long content_length;
 	string connection;
 	string body;
 	//construsctor for request empty strings and -1 in numbers
@@ -98,4 +98,31 @@ struct form_part
 	}
 };
 
-class request;
+class request
+{
+	vector<string> start_line;
+	vector<pair<string, string> > headers;
+	string body;
+
+public:
+
+	HTTP_request request_info;
+	HTTP_response response;
+
+	request();
+	request(string req);
+	void request_checkpoint();
+	void parse(string req);
+
+private:
+
+	short method_num();
+	int fill_req();
+	void validate_start_line();
+	
+public:
+	void print_req();
+	void print_req(std::string req);
+	void print(string s);
+	
+};

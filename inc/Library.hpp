@@ -8,13 +8,13 @@ struct file_info
     string file_path;
     string content_type;
 
-    bool file_exists;
     bool is_dir;
     bool is_file;
-	MethAllow _allowMeth;
-    // bool is_allowed;
     bool is_autoindex;
     bool is_redirect;
+    bool file_exists;
+	MethAllow _allowMeth;
+    // bool is_allowed;
 
     ReqLoc location;
 
@@ -34,7 +34,7 @@ public:
     servers_library(vector<DataConf> servers) : _servers(servers) {}
 
     file_info get_requested_file(string path, size_t s_index);
-
+    void set(vector<DataConf> servers);
 };
 
 
