@@ -1,2 +1,6 @@
 build/
 *.o
+*.
+z_explore.cpp
+webserv
+ok.txt

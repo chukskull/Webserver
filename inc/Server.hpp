@@ -1,8 +1,8 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-#include "headers.hpp"
-
+// #include "headers.hpp"
+#include "RequestConfig.hpp"
 
 class Server {
 public:

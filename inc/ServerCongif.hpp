@@ -2,7 +2,6 @@
 #define SERVERCONFIG_HPP
 
 #include "headers.hpp"
-
 class ServerCongif
 {
 private:
@@ -34,8 +33,5 @@ public:
 	}
 	~ServerCongif(){};
 };
-
-
-
 
 #endif

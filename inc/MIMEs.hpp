@@ -1,4 +1,5 @@
-#include <typedefs.hpp>
+#pragma once
+#include "typedefs.hpp"
 #include <map>
 
 class MIME_types
@@ -30,77 +31,85 @@ public:
         return "";
     }
 
-    
+    string get_extention(string file_name)
+    {
+        size_t pos;
+
+        pos = file_name.rfind(".");
+        if (pos == 0 || pos == file_name.npos)
+        {
+            return "no_type";
+        }
+        return file_name.substr(pos);
+    }
 
 private:
     void init_()
     {
-        types.insert({"html", "text/html"});
-        types.insert({"htm", "text/html"});
-        types.insert({"shtml", "text/html"});
-        types.insert({"css", "text/css"});
-        types.insert({"xml", "text/xml"});
-        types.insert({"gif", "image/gif"});
-        types.insert({"jpeg", "image/jpeg"});
-        types.insert({"jpg", "image/jpeg"});
-        types.insert({"js", "application/javascript"});
-        types.insert({"atom", "application/atom+xml"});
-        types.insert({"rss", "application/rss+xml"});
-        types.insert({"mml", "text/mathml"});
-        types.insert({"txt", "text/plain"});
-        types.insert({"jad", "text/vnd.sun.j2me.app-descriptor"});
-        types.insert({"wml", "text/vnd.wap.wml"});
-        types.insert({"htc", "text/x-component"});
-        types.insert({"png", "image/png"});
-        types.insert({"tif", "image/tiff"});
-        types.insert({"tiff", "image/tiff"});
-        types.insert({"wbmp", "image/vnd.wap.wbmp"});
-        types.insert({"ico", "image/x-icon"});
-        types.insert({"jng", "image/x-jng"});
-        types.insert({"bmp", "image/x-ms-bmp"});
-        types.insert({"svg", "image/svg+xml"});
-        types.insert({"svgz", "image/svg+xml"});
-        types.insert({"webp", "image/webp"});
-        types.insert({"woff", "application/font-woff"});
-        types.insert({"jar", "application/java-archive"});
-        types.insert({"war", "application/java-archive"});
-        types.insert({"ear", "application/java-archive"});
-        types.insert({"json", "application/json"});
-        types.insert({"hqx", "application/mac-binhex40"});
-        types.insert({"doc", "application/msword"});
-        types.insert({"pdf", "application/pdf"});
-        types.insert({"ps", "application/postscript"});
-        types.insert({"eps", "application/postscript"});
-        types.insert({"ai", "application/postscript"});
-        types.insert({"rtf", "application/rtf"});
-        types.insert({"m3u8", "application/vnd.apple.mpegurl"});
-        types.insert({"xls", "application/vnd.ms-excel"});
-        types.insert({"eot", "application/vnd.ms-fontobject"});
-        types.insert({"ppt", "application/vnd.ms-powerpoint"});
-        types.insert({"wmlc", "application/vnd.wap.wmlc"});
-        types.insert({"kml", "application/vnd.google-earth.kml+xml"});
-        types.insert({"kmz", "application/vnd.google-earth.kmz"});
-        types.insert({"7z", "application/x-7z-compressed"});
-        types.insert({"cco", "application/x-cocoa"});
-        types.insert({"jardiff", "application/x-java-archive-diff"});
-        types.insert({"jnlp", "application/x-java-jnlp-file"});
-        types.insert({"run", "application/x-makeself"});
-        types.insert({"pl", "application/x-perl"});
-        types.insert({"pm", "application/x-perl"});
-        types.insert({"prc", "application/x-pilot"});
-        types.insert({"pdb", "application/x-pilot"});
-        types.insert({"rar", "application/x-rar-compressed"});
-        types.insert({"rpm", "application/x-redhat-package-manager"});
-        types.insert({"sea", "application/x-sea"});
+        types.insert(std::make_pair("html", "text/html"));
+        types.insert(std::make_pair("htm", "text/html"));
+        types.insert(std::make_pair("shtml", "text/html"));
+        types.insert(std::make_pair("css", "text/css"));
+        types.insert(std::make_pair("xml", "text/xml"));
+        types.insert(std::make_pair("gif", "image/gif"));
+        types.insert(std::make_pair("jpeg", "image/jpeg"));
+        types.insert(std::make_pair("jpg", "image/jpeg"));
+        types.insert(std::make_pair("js", "application/javascript"));
+        types.insert(std::make_pair("atom", "application/atom+xml"));
+        types.insert(std::make_pair("rss", "application/rss+xml"));
+        types.insert(std::make_pair("mml", "text/mathml"));
+        types.insert(std::make_pair("txt", "text/plain"));
+        types.insert(std::make_pair("jad", "text/vnd.sun.j2me.app-descriptor"));
+        types.insert(std::make_pair("wml", "text/vnd.wap.wml"));
+        types.insert(std::make_pair("htc", "text/x-component"));
+        types.insert(std::make_pair("png", "image/png"));
+        types.insert(std::make_pair("tif", "image/tiff"));
+        types.insert(std::make_pair("tiff", "image/tiff"));
+        types.insert(std::make_pair("wbmp", "image/vnd.wap.wbmp"));
+        types.insert(std::make_pair("ico", "image/x-icon"));
+        types.insert(std::make_pair("jng", "image/x-jng"));
+        types.insert(std::make_pair("bmp", "image/x-ms-bmp"));
+        types.insert(std::make_pair("svg", "image/svg+xml"));
+        types.insert(std::make_pair("svgz", "image/svg+xml"));
+        types.insert(std::make_pair("webp", "image/webp"));
+        types.insert(std::make_pair("woff", "application/font-woff"));
+        types.insert(std::make_pair("jar", "application/java-archive"));
+        types.insert(std::make_pair("war", "application/java-archive"));
+        types.insert(std::make_pair("ear", "application/java-archive"));
+        types.insert(std::make_pair("json", "application/json"));
+        types.insert(std::make_pair("hqx", "application/mac-binhex40"));
+        types.insert(std::make_pair("doc", "application/msword"));
+        types.insert(std::make_pair("pdf", "application/pdf"));
+        types.insert(std::make_pair("ps", "application/postscript"));
+        types.insert(std::make_pair("eps", "application/postscript"));
+        types.insert(std::make_pair("ai", "application/postscript"));
+        types.insert(std::make_pair("rtf", "application/rtf"));
+        types.insert(std::make_pair("m3u8", "application/vnd.apple.mpegurl"));
+        types.insert(std::make_pair("xls", "application/vnd.ms-excel"));
+        types.insert(std::make_pair("eot", "application/vnd.ms-fontobject"));
+        types.insert(std::make_pair("ppt", "application/vnd.ms-powerpoint"));
+        types.insert(std::make_pair("wmlc", "application/vnd.wap.wmlc"));
+        types.insert(std::make_pair("kml", "application/vnd.google-earth.kml+xml"));
+        types.insert(std::make_pair("kmz", "application/vnd.google-earth.kmz"));
+        types.insert(std::make_pair("7z", "application/x-7z-compressed"));
+        types.insert(std::make_pair("cco", "application/x-cocoa"));
+        types.insert(std::make_pair("jardiff", "application/x-java-archive-diff"));
+        types.insert(std::make_pair("jnlp", "application/x-java-jnlp-file"));
+        types.insert(std::make_pair("run", "application/x-makeself"));
+        types.insert(std::make_pair("pl", "application/x-perl"));
+        types.insert(std::make_pair("pm", "application/x-perl"));
+        types.insert(std::make_pair("prc", "application/x-pilot"));
+        types.insert(std::make_pair("pdb", "application/x-pilot"));
+        types.insert(std::make_pair("rar", "application/x-rar-compressed"));
+        types.insert(std::make_pair("rpm", "application/x-redhat-package-manager"));
+        types.insert(std::make_pair("sea", "application/x-sea"));
     } 
     void reverse_()
     {
         for (std::multimap<string, string>::iterator it = types.begin(); it != types.end(); it++)
         {
-            types_.insert({it->second, it->first});
+            types_.insert(std::make_pair(it->second, it->first));
         }
     }
 
 };
-
-MIME_types MIME;

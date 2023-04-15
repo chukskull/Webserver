@@ -1,18 +1,19 @@
 #include "req_res.hpp"
+#include "req_headers.hpp"
 #include "../src/request_response/request.cpp"
-#include "Library.hpp"
+// #include "Library.hpp"
 
 class __GET
 {
-	__GET() {}
 
 public:
+	__GET() {}
 
 	void handle(HTTP_request &request_info, HTTP_response &response)
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file);
+		file = lib.get_requested_file(request_info.requested_file, 0);
 
 		if (request_info.connection == "close")
 			response.connection = CLOSE_CONNECTION;
@@ -39,7 +40,7 @@ public:
 			}
 			else if (file.is_file)
 			{
-				if (file.file_exist)
+				if (file.file_exists)
 				{
 					response.set_status(200, "OK");
 					response.content_type = file.content_type;
@@ -65,22 +66,25 @@ private:
 
 		if (file.fail())
 		{
-			response.set_status(404, "file not found");
-			response.body += "The requested file was not found on this server.";
+			response.set_status(500, "file couldn't be opend");
+			response.body += "The server couldn't open the file try agin later.";
 			// return ;
 		}
 		else
 		{
 			string buffer;
+			char *buff;
 			size_t max_size = MAX_READ_SIZE;
 
 			// max_size = set_max_size(host) ;
-			buffer.resize(max_size);
-			while (file.read(buffer.c_str() , max_size))
+
+			buff = new char[max_size];
+			// buffer.resize(max_size);
+			while (file.read(buff , max_size))
 			{
 				try
 				{
-					file_content += buffer;
+					file_content += buff;
 				}
 				catch (...)
 				{
@@ -98,23 +102,26 @@ private:
 			file.close();
 			response.content_length = file_content.size();
 			response.body.swap(file_content);
-			response.content_type = ;
+			// response.content_type = ;
 		}
 	}
 };
 
 class __POST
 {
+public:
 	void handle(HTTP_request &request_info, HTTP_response &response)
 	{
 		file_info file;
 
-		file = lib.get_requested_file();
+		file = lib.get_requested_file(request_info.requested_file, 0);
+		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
 			if (file.is_redirect)
 			{
-
+				std::cout << "waa nwaa3\n";
+				exit(0);
 			}
 			else
 			{
@@ -131,7 +138,7 @@ class __POST
 							{
 								if(get_parts(request_info.body, request_info.content_type.second, parts))
 								{
-									handle_parts(parts, response);
+									handle_parts(file, parts, request_info, response);
 									generat_response(parts, response);
 								}
 								else
@@ -147,13 +154,17 @@ class __POST
 						}
 					}
 					else
-						generate_error();
+						generate_error(response, 800, "no idea why i have this condition here");
 				}
 				else
 				{
 					creat_file(file, request_info, response);
 				}
 			}
+		}
+		else
+		{
+			response.set_status(405, "Method Not Allowed");
 		}
 	}
 };
@@ -163,23 +174,23 @@ class __DELETE
 
 };
 
-class handler 
+class handler
 {
 	private:
-		string request;
+		// string str_request;
 		request req;
 		__GET GET_;
 		__POST POST_;
 	public:
 		handler() {}
-		handler(string req) : request(req) {}
+		handler(string re) : req(re){}
 		void handle()
 		{
 			req.request_checkpoint();
 			if (req.request_info.method == GET)
-				GET_.handle();
+				GET_.handle(req.request_info, req.response);
 			else if (req.request_info.method == POST)
-				POST_.handle();
+				POST_.handle(req.request_info, req.response);
 			// else if (req.request_info.method == DELETE)
 			// 	handle_delete();
 		}
