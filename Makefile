@@ -6,7 +6,7 @@ MAIN= webserver.cpp
 B_DIR = build
 SERVER=$(addprefix server/, )
 PARSING=$(addprefix parsing/, prsn_cnfig_file.cpp prsn_req_res.cpp tools_for_parsing.cpp)
-HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp)
+HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp client.hpp)
 FILES= $(addprefix src/, $(SERVER) $(PARSING))
 OBJ= $(addprefix build/, $(FILES:.cpp=.o) $(MAIN:.cpp=.o))
 NAME= webserv
@@ -14,7 +14,7 @@ NAME= webserv
 all:$(NAME)
 
 $(NAME) : $(OBJ)
-	$(CC) $(FLAGS) $(OBJ) -I $(INC) -o $(NAME) 
+	$(CC) $(FLAGS) $(OBJ) -I $(INC) -o $(NAME)
 
 $(B_DIR)/%.o: %.cpp $(HEADER)
 	@mkdir -p $(dir $@)
