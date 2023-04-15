@@ -1,12 +1,11 @@
-#include "../../inc/req_resp.hpp"
-#include "../../inc/utils.hpp"
+#include "../../inc/req_res.hpp"
+// #include "../../inc/utils.hpp"
 
 class request
 {
 	vector<string> start_line;
 	vector<pair<string, string> > headers;
 	string body;
-
 
 public:
 
@@ -65,11 +64,11 @@ public:
 
 private:
 
-	void set_status(short code, string text)
-	{
-		response.status_code = code;
-		response.status_text = text;
-	}
+	// void set_status(short code, string text)
+	// {
+	// 	response.status_code = code;
+	// 	response.status_text = text;
+	// }
 	
 	short method_num()
 	{
@@ -79,37 +78,10 @@ private:
 			return (POST);
 		if (start_line[METHOD] == "DELETE")
 			return (DELETE);
+		return -1;
 	}
 
-	// void get_accept_priority(vector<string> attr)
-	// {
-	// 	size_t pos;
-	// 	string tmp_str;
-	// 	for (vec_str_it it = attr.begin(), it != attr.end())
-	// 	{
-	// 		std::stringstream tmp(*it);
-
-	// 		std::getline(tmp, tmp_str, ';');
-	// 		pos = it->rfind("q=");
-	// 		if (pos != it->npos)
-	// 			request_info.accept.insert(std::make_pair(std::stof(*it + pos + 2), tmp_str));
-	// 		else
-	// 			request_info.accept.insert(std::make_pair(1, tmp_str));
-	// 	}
-	// }
-
-	// void fill_accept(std::pair<string, string> header_pair)
-	// {
-	// 	std::stringstream accept_att(header_pair->second);
-	// 	vector<string> tmp_;
-	// 	int i = 0;
-
-	// 	while (std::getline(accept_att, tmp_[i], ','))
-	// 		i++;
-	// 	get_accept_priority(accept_att);
-	// }
-
-	void fill_req()
+	int fill_req()
 	{
 		request_info.method = method_num();
 		request_info.requested_file = start_line[SOURCE];
@@ -120,41 +92,44 @@ private:
 			{
 				if (request_info.host != "")
 				{
-					set_status(400, "bad request")
-					return ;
+					response.set_status(400, "bad request");
+					return 1;
 				}
 				request_info.host = it->second;
 			}
 			if (_to_lower(it->first) == "content-type")
 			{
-				if (request_info.content_type != "")
+				if (request_info.content_type.first != "")
 				{
-					set_status(400, "bad request")
-					return ;
+					response.set_status(400, "bad request");
+					return 1;
 				}
-				fill_content_type(request_info.content_type , it->second);
+				fill_content_type(request_info , it->second);
 				// request_info.content_type = it->second;
 			}
 			if (_to_lower(it->first) == "content-length")
 			{
 				if (request_info.content_length != -1)
 				{
-					set_status(400, "bad request")
-					return ;
+					response.set_status(400, "bad request");
+					return 1;
 				}
+				// std::cout << it->second <<;
+				// print(it->second);
 				request_info.content_length = std::stoi(it->second);
 				if (request_info.content_length < 0)
 				{
-					set_status(400, "bad request")
-					return ;
+					response.set_status(400, "bad request");
+					return 1;
 				}
 			}
+
 			if (_to_lower(it->first) == "connection")
 			{
 				if (request_info.connection != "")
 				{
-					set_status(400, "bad request")
-					return ;
+					response.set_status(400, "bad request");
+					return 1;
 				}
 				request_info.connection = it->second;
 			}
@@ -164,6 +139,7 @@ private:
 			// }
 		}
 		request_info.body.swap(body);
+		return 0;
 	}
 
 	void validate_start_line()
@@ -183,22 +159,22 @@ private:
 			*/
 			if (valid_http(start_line[SOURCE]) == false)
 			{
-				set_status(505, "HTTP Version Not Supported");
+				response.set_status(505, "HTTP Version Not Supported");
 				return ;
 			}
-			
+
 			// checking for source existence
-			methods.handler(start_line[METHOD], req);
+			// methods.handler(start_line[METHOD], req);
 
 		   // check for source accessibility using sngat's config file for allowed paths and method (using the method class)
 			// * to be done 
 		}
 		else
 		{
-			set_status(501, "Not Implemented");
+			response.set_status(501, "Not Implemented");
 		}
 	}
-
+public:
 	void print_req()
 	{
 		for (vec_str_it it = start_line.begin();it != start_line.end(); it++)
@@ -210,8 +186,12 @@ private:
 		}
 		// std::cout << std::endl;
 
-		for (vec_strp_it it = headers.begin(); it != headers.end(); it++)
-			std::cout << it->first << ":" << it->second << std::endl;
+		// for (vec_strp_it it = headers.begin(); it != headers.end(); it++)
+		// 	std::cout << it->first << ":" << it->second << std::endl;
+		std::cout << "host: " << request_info.host << std::endl;
+		std::cout << "content_length: " << request_info.content_length << std::endl;
+		std::cout << "connection: " << request_info.connection << std::endl;
+		// std::cout << 
 		std::cout << std::endl;
 		std::cout << std::endl << body;
 	}
@@ -220,5 +200,22 @@ private:
 	{
 		this->parse(req);
 		this->print_req();
+	}
+
+	void print(string s)
+	{
+		int i = 0;
+		while (i < s.size())
+		{
+			if (s[i] == '\n')
+				std::cout << "\\n";
+			else if (s[i] == '\r')
+				std::cout << "\\r";
+			else
+				std::cout << s[i];
+			// cout << s[i];
+			i++;
+		}
+		std::cout << std::endl;
 	}
 };

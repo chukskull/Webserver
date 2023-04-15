@@ -1,4 +1,6 @@
 #include "../../inc/utils.hpp"
+#include "../../inc/req_headers.hpp"
+// #include "../../inc/req_res.hpp"
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -25,8 +27,23 @@ bool valid_http(string http_ver)
 	return false;
 }
 
+// std::string str_toupper(char *str)
+// {
+//     std::string new_str = str;
+//     int len = new_str.size();
+//     for(int j = 0; j < len; j++)
+//     {
+//         new_str[j] = std::toupper(new_str[j]);
+//     }
+//     return (new_str);
+// }
+
 string _to_lower(string str)
 {
+	for (string::iterator it = str.begin(); it != str.end(); ++it)
+	{
+		*it = std::tolower(*it);
+	}
 	return str;
 }
 
@@ -46,7 +63,8 @@ bool is_file(string path)
 	return S_ISREG(statbuf.st_mode);
 }
 
-vector<std::string> read_dir(const std::string& dir_path) {
+vector<std::string> read_dir(const std::string& dir_path)
+{
 	std::vector<std::string> filenames;
 
 	DIR* dir = opendir(dir_path.c_str());
@@ -63,7 +81,7 @@ vector<std::string> read_dir(const std::string& dir_path) {
 		{
 			continue;
 		}
-		filenames.emplace_back(entry->d_name);
+		filenames.push_back(entry->d_name);
 	}
 
 	closedir(dir);
@@ -302,7 +320,7 @@ void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &reques
 		if (it->filename != "")
 		{
 			tmp_file = file.file_path + it->filename;
-			if (!MIME.is_MIME_type(tmp_file))
+			if (!MIME.is_MIME_type(MIME.get_extention(tmp_file)))
 			{
 				if (it->content_type != "")
 					tmp_file = tmp_file + MIME.get_MIME_extention(it->content_type);
@@ -347,6 +365,7 @@ string generat_response(deque<form_part> &parts, HTTP_response &response)
 			response.set_status(207, "Multi-Status");
 		body += it->comment + '\n';
 	}
+	return body;
 }
 
 
