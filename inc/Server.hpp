@@ -10,17 +10,30 @@ class Server {
 public:
 	Server(std::vector<DataConf> &data):_containers(data) {
 	}
-	
+		static bool isHexadecimal(const std::string& str)
+		{
+    	for (size_t i = 0; i < str.length() - 2; ++i)
+		{
+    	    if (!isxdigit(str[i]))
+    	        return false;
+    	}
+   	 	return true;
+	}
 	static void    handle_chunked(Client &my_client)
 	{
 		std::string line;
+		std::string fusil("");
+		std::string	replace;
 		int chunkSize = 0;
 		std::stringstream	temp(my_client.get_buffer());
+		// my_client._buffer->str("");
 		while (std::getline(temp, line))
 		{
-		   	if (isxdigit(line[0]))
+			line += '\n';
+		   	if (isHexadecimal(line))
 			{
 				std::stringstream ss(line);
+				std::cerr << line << std::endl;
 				ss >> std::hex >> chunkSize;
 				if (chunkSize == 0)
 					my_client._done = true;
@@ -62,6 +75,7 @@ public:
 	{
 		_string						line;
 		std::stringstream			for_read(_my_client._buffer->str());
+		bool						ok = false;
 
 		for_read.seekg(0, std::ios::beg);
 		while(getline(for_read,  line))
@@ -73,20 +87,41 @@ public:
 				std::stringstream convert;
 				convert << str;
 				convert >> _my_client.is_it_chunked_;
-				_my_client._done = true;
 				// print_error << std::stoi(str) << std::endl;
 				break ;
 			}
 			else if (line.find("Transfer-Encoding:") != _string::npos)
 			{
+				puts("here");
+				_my_client.is_it_chunked_ = 1;
 				_string	str = line.substr(line.find("chunked"));
 				if (str.compare("chunked"))
 				{
+					_my_client._done = false;
+					ok = true;
 					_my_client.is_it_chunked_ = -1;
 						break ;
 				}
 			}
 		}
+		// 	else if (line.find("Accept-Encoding:") != _string::npos)
+		// 	{
+		// 		// _string						str;
+		// 		// str = line.substr(line.find_first_of(" ") + 2);
+		// 		// std::stringstream convert;
+		// 		// convert << str;
+		// 		// convert >> _my_client.is_it_chunked_;
+		// 		_my_client.is_it_chunked_ = 1;
+		// 		if(ok == false)
+		// 		{
+		// 			_my_client._done = true;
+		// 			// getchar();
+		// 			break ;
+
+		// 		}
+
+		// 	// }
+		// }
 	}
 	void	initial_server(std::vector<DataConf> &data)
 	{
@@ -187,7 +222,7 @@ public:
 							__my_ser.fd_s.back().events = POLLIN;
 							__my_ser.fd_counts++;
 							__my_ser._connections.insert(std::make_pair(newfd, Client(index)));
-							puts("here");
+							// puts("here");
 						}
 					} 
 					else
@@ -206,15 +241,18 @@ public:
 								handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
 							}
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
+							{
 								perror("length size so big");
+
+							}
 							if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
 							{
 								Mesage  *mesg = new Mesage();
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
 								print_error << mesg->message << std::endl;
-								std::cerr << mesg->message.size() << std::endl;
-								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+								// std::cerr << mesg->message.size() << std::endl;
+								print_error << "object send to ayman " << mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
 						int sender_fd = __my_ser.fd_s[i].fd;

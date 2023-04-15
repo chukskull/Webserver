@@ -12,7 +12,7 @@ class Client {
             this->is_it_chunked_ = 0;
             _buffer = new std::stringstream();
             this->_size = 0;
-            this->_done = false;
+            this->_done = true;
             this->_header_done = false;
             
         }
