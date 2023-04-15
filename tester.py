@@ -1,7 +1,7 @@
 import http.client
 
 host = "127.0.0.1:8080"
-body = "A" * 100000
+body = "A" * 1000000
 
 def chunk_data(data, chunk_size):
     dl = len(data)

@@ -32,15 +32,13 @@ public:
 	static int	receiving(int fd, Client &_my_client, char *buff)
 	{
 		std::string	sure;
-		while (1)
-		{
 			bzero(buff, BUFFER_SIZE);
 			_gl_recv_return = recv(fd, buff, BUFFER_SIZE, 0);
-			sure.append(buff);
+			// print_error << " am lonley " << _gl_recv_return << std::endl;
 			if(_gl_recv_return > 0)
 			{
+				sure.append(buff);
 				_my_client.AppendData(sure);
-				_my_client._size = _my_client.get_buffer().size() - 1;
 				if(_my_client._header_done)
 					return 0;
 				_string	line;
@@ -58,9 +56,6 @@ public:
 						}
 					}
 				}
-			}
-			else
-				break;
 		}
 		return 0;
 	}
@@ -80,7 +75,7 @@ public:
 				convert << str;
 				convert >> _my_client.is_it_chunked_;
 				_my_client._done = true;
-				print_error << std::stoi(str) << std::endl;
+				// print_error << std::stoi(str) << std::endl;
 				break ;
 			}
 			else if (line.find("Transfer-Encoding:") != _string::npos)
@@ -159,8 +154,9 @@ public:
 			exit(1);
 		}
 		
-		while (1) {
-			__my_ser.rc = 1;
+		while (1)
+		{
+			// __my_ser.rc = 1;
 			__my_ser.rc = poll(&__my_ser.fd_s[0], __my_ser.fd_s.size(), __my_ser.timeout);
 			if (__my_ser.rc < 0)
 			{
@@ -192,6 +188,7 @@ public:
 							__my_ser.fd_s.back().events = POLLIN;
 							__my_ser.fd_counts++;
 							__my_ser._connections.insert(std::make_pair(newfd, Client(index)));
+							puts("here");
 						}
 					} 
 					else
@@ -207,27 +204,31 @@ public:
 							}
 							if (__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ == -1)
 							{
-									handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
-
+								handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
 							}
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
 								perror("length size so big");
+							if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
+							{
+								Mesage  *mesg = new Mesage();
+								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
+								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
+								print_error << mesg->message << std::endl;
+								std::cerr << mesg->message.size() << std::endl;
+								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+							}
 						}
-						Mesage  *mesg = new Mesage();
 						int sender_fd = __my_ser.fd_s[i].fd;
-						if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
-						{
-							mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
-							mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
-							print_error << mesg->message << std::endl;
-							print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
-						}
 						if (_gl_recv_return <= 0)
 						{
 							if (_gl_recv_return == 0) 
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
 							else
+							{
+								//ayman needs to send the client 404 bad request in this
+								puts("sure");
 								perror("recv");
+							}
 							close(__my_ser.fd_s[i].fd);
 							__my_ser.fd_s[i] = __my_ser.fd_s.back();
 							__my_ser._connections.erase(__my_ser.fd_s[i].fd);
