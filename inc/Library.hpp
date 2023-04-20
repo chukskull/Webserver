@@ -22,6 +22,12 @@ struct file_info
 	{
 		_allowMeth.resize(3, false);
 	}
+    // file_info &operator=(file_info &other)
+    // {
+    //     std::cout << "++++\n";
+    //     this->_allowMeth = other._allowMeth;
+    //     return (*this);
+    // }
 };
 
 class servers_library 
@@ -34,7 +40,7 @@ public:
     servers_library(vector<DataConf> servers) : _servers(servers) {}
 
     file_info get_requested_file(string path, size_t s_index);
-    void set(vector<DataConf> servers);
+    void set(vector<DataConf> &servers);
 };
 
 

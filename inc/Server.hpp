@@ -182,9 +182,26 @@ public:
 	}
 	~Server() {}
 
+	// static void print_locations(std::vector<ReqLoc> &vec)
+	// {
+
+	// 	std::cout << "locs== \n";
+	// 	for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
+	// 	{
+	// 		std::cout << "loc== ";
+	// 		std::cout << "file: " << it->__file;
+	// 		std::cout << " path: " << it->__path;
+	// 		std::cout << " root: " << it->__root << std::endl;
+	// 	}
+	// }
+
    static void run(std::vector<DataConf> &__vec_data)
    {
 		handler handl_request;
+
+
+		lib.set(__vec_data);
+
 		Server  __my_ser(__vec_data);
 		try
 		{
@@ -195,7 +212,7 @@ public:
 			std::cerr << e << '\n';
 			exit(1);
 		}
-		
+
 		while (1)
 		{
 			// __my_ser.rc = 1;
@@ -255,12 +272,18 @@ public:
 							}
 							if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
 							{
+
 								Mesage  *mesg = new Mesage();
+								string res;
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
-								print_error << mesg->message << std::endl;
-								std::cerr << mesg->message.size() << std::endl;
-								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+								std::cout << "===========\n";
+								handl_request.handle(mesg->message, res);
+								std::cout << res << std::endl;
+								std::cout << "===========\n";
+								// print_error << mesg->message << std::endl;
+								// std::cerr << mesg->message.size() << std::endl;
+								// print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
 						int sender_fd = __my_ser.fd_s[i].fd;

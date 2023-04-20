@@ -1,6 +1,13 @@
 #include "parsing.hpp"
 
-
+// void print_meth(MethAllow meth)
+// {
+// 	for (MethAllow::iterator it = meth.begin(); it != meth.end(); it++)
+// 	{
+// 		std::cout << *it << " ";
+// 	}
+// 	std::cout << std::endl;
+// }
 
 int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 {
@@ -46,9 +53,10 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			req_loc.__root = it_2->get_root();
 			req_loc.__redirect = it_2->get_redirect();
 			_methods	meth = it_2->get_methods();
+			// print_meth(meth);
 			_methods::iterator it_3 = meth.begin();
 			MethAllow	_allows(3, false);
-			print_error << meth.size() << std::endl;
+			// print_error << meth.size() << std::endl;
 			for(;it_3 != meth.end(); it_3++)
 			{
 				std::vector<_string>::iterator t_1;
@@ -63,6 +71,7 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 				}
 			}
 			req_loc._AllowMeth = _allows;
+			_data.__locations.push_back(req_loc);
 		}
 		_vec_data.push_back(_data);
 	}

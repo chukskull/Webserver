@@ -3,6 +3,33 @@
 // #include "../src/request_response/request.cpp"
 // #include "Library.hpp"
 servers_library lib;
+void print_meth(MethAllow meth)
+{
+	for (MethAllow::iterator it = meth.begin(); it != meth.end(); it++)
+	{
+		std::cout << *it << " ";
+	}
+	std::cout << std::endl;
+}
+void print_locations(ReqLoc &vec)
+	{
+
+		// std::cout << "locs== \n";
+		// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
+		// {
+			std::cout << "loc== ";
+			std::cout << "file: " << vec.__file;
+			std::cout << " path: " << vec.__path;
+			std::cout << " root: " << vec.__root << std::endl;
+			print_meth(vec._AllowMeth);
+		// }
+	}
+void print_file(file_info &file)
+{
+	std::cout << "file path : " << file.file_path << "\n";
+	print_locations(file.location);
+	print_meth(file._allowMeth);
+}
 
 class __GET
 {
@@ -13,9 +40,9 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response)
 	{
 		file_info file;
-
-		file = lib.get_requested_file(request_info.requested_file, 0);
-
+		file = lib.get_requested_file(request_info.requested_file, 1);
+		print_file(file);
+		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection == "close")
 			response.connection = CLOSE_CONNECTION;
 		else
@@ -55,7 +82,7 @@ public:
 		}
 		else
 		{
-			response.set_status(405, "Method Not Allowed");
+			response.set_status(405, "Method Not Allowed1");
 			// change the content type to maybe html
 		}
 	}
@@ -144,13 +171,13 @@ public:
 								}
 								else
 								{
-									response.set_status(400, "Bad Request");
+									response.set_status(400, "Bad Request1");
 								}
 
 							}
 							else
 							{
-								response.set_status(400, "Bad Request");
+								response.set_status(400, "Bad Request2");
 							}
 						}
 					}
@@ -177,24 +204,58 @@ class __DELETE
 
 class handler
 {
+	//
+	/// if the request is not chunked and the server received -1 then error
+	//
+
 	private:
 		// string str_request;
 		__GET GET_;
 		__POST POST_;
 	public:
+
 		handler() {}
 		// handler(string re) : req(re){}
-		void handle(string re)
+		void handle(string re, string &res)
 		{
 			request req(re);
 
-			req.request_checkpoint();
+			// req.request_checkpoint();
 			if (req.request_info.method == GET)
 				GET_.handle(req.request_info, req.response);
 			else if (req.request_info.method == POST)
 				POST_.handle(req.request_info, req.response);
+
+			fill_response(req, res);
 			// else if (req.request_info.method == DELETE)
 			// 	handle_delete();
 		}
+
+	private:
+	void fill_response(request &req, string &res)
+	{
+		res.append("HTTP/1.1 ");
+		res.append(std::to_string(req.response.status_code) + " ");
+		res.append(req.response.status_text);
+		res.append(CRLF);
+		if (req.response.content_length != "")
+		{ res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
+
+		if (req.response.content_type != "")
+		{ res.append("content_type: "); res.append(req.response.content_type); res.append(CRLF);}
+		
+		if (req.response.location != "")
+		{ res.append("Location: "); res.append(req.response.location); res.append(CRLF);}
+		
+		if (req.response.connection != "")
+		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
+		res.append(CRLF);
+		// res.append(req.response.body);
+	}
 };
+
+
+
+
+
 

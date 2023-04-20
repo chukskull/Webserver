@@ -22,7 +22,7 @@ struct ReqLoc
 		_AllowMeth.resize(3, false);
 	}
 
-	ReqLoc operator=(const ReqLoc &other)
+	ReqLoc &operator=(const ReqLoc &other)
 	{
 		this->_autoindex = other._autoindex;
 		this->__path = other.__path;
@@ -30,9 +30,9 @@ struct ReqLoc
 		this->__root = other.__root;
 		this->__redirect = other.__redirect;
 		set = true;
-		this->_AllowMeth = other._AllowMeth;
-		// for (size_t i = 0; i < 3; i++)
-		// 	this->_AllowMeth[i] = other._AllowMeth[i];
+		// this->_AllowMeth = other._AllowMeth;
+		for (size_t i = 0; i < 3; i++)
+			this->_AllowMeth[i] = other._AllowMeth[i];
 		return *this;
 	}
 	

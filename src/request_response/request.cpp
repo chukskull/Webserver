@@ -37,15 +37,19 @@ void request::parse(string req)
     if (i != 3)
         std::cout << "err msg\n";
 
+    std::cout << s_request.str() << std::endl;
     while (std::getline(s_request, tmp_str, '\n') and tmp_str != string("\r"))
     {
         size_t pos = tmp_str.find(":");
         headers.push_back(std::make_pair(string(tmp_str.substr(0, pos)), string(tmp_str.substr(pos + 1))));
+        // std::cout << headers.back()->fist;
     }
     if (tmp_str != "\r")
         std::cout << "err msg\n";
     while (std::getline(s_request, tmp_str))
         body.append(tmp_str);
+
+
     
     request_checkpoint();
 }
@@ -68,11 +72,12 @@ int request::fill_req()
 
     for(vec_strp_it it = headers.begin(); it != headers.end(); it++)
     {
+        // std::cout << "=" << it->first << std::endl;
         if (_to_lower(it->first) == "host")
         {
             if (request_info.host != "")
             {
-                response.set_status(400, "bad request");
+                response.set_status(400, "bad request3");
                 return 1;
             }
             request_info.host = it->second;
@@ -81,7 +86,7 @@ int request::fill_req()
         {
             if (request_info.content_type.first != "")
             {
-                response.set_status(400, "bad request");
+                response.set_status(400, "bad request4");
                 return 1;
             }
             fill_content_type(request_info , it->second);
@@ -91,7 +96,7 @@ int request::fill_req()
         {
             if (request_info.content_length != -1)
             {
-                response.set_status(400, "bad request");
+                response.set_status(400, "bad request5");
                 return 1;
             }
             // std::cout << it->second <<;
@@ -108,7 +113,7 @@ int request::fill_req()
         {
             if (request_info.connection != "")
             {
-                response.set_status(400, "bad request");
+                response.set_status(400, "bad request6");
                 return 1;
             }
             request_info.connection = it->second;
@@ -137,7 +142,7 @@ void request::validate_start_line()
             check for the source existence and accessibility ;
             methods.check_content_type(req, &reference) ;
         */
-        if (valid_http(start_line[SOURCE]) == false)
+        if (valid_http(start_line[PROTOCOL]) == false)
         {
             response.set_status(505, "HTTP Version Not Supported");
             return ;
@@ -176,11 +181,11 @@ void request::print_req()
     std::cout << std::endl << body;
 }
 
-void request::print_req(std::string req)
-{
-    this->parse(req);
-    this->print_req();
-}
+// void request::print_req(std::string req)
+// {
+//     this->parse(req);
+//     this->print_req();
+// }
 
 void request::print(string s)
 {

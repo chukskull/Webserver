@@ -7,15 +7,19 @@
 
         for (std::vector<ReqLoc>::iterator it = _servers[s_index].__locations.begin(); it != _servers[s_index].__locations.end(); it++)
         {
+
+			// std::cout << "! get lucky\n";
             if (path.find(it->__path) != string::npos) // possibly check that the npos is zero
             {
                 if (loc.__path.length() < it->__path.length())
 					loc = *it;
+
             }
         }
 		if (loc.is_set())
 		{
 			info.location = loc;
+			info._allowMeth = loc._AllowMeth;
 			info.requested_path = path;
             info.file_path = loc.__root + path.substr(loc.__path.length());
 			// info.type = path.substr(path.rfind('.') + 1);
@@ -51,7 +55,7 @@
 		return info;
     }
 
-	void servers_library::set(vector<DataConf> servers)
+	void servers_library::set(vector<DataConf> &srvrs)
 	{
-		
+		_servers = srvrs;
 	}

@@ -6,7 +6,7 @@ MAIN= webserver.cpp
 B_DIR = build
 SERVER=$(addprefix server/, )
 PARSING=$(addprefix parsing/, prsn_cnfig_file.cpp prsn_req_res.cpp tools_for_parsing.cpp)
-HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp client.hpp)
+HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp client.hpp methods.hpp)
 REC_RES=$(addprefix request_response/, utils.cpp request.cpp Library.cpp)
 FILES= $(addprefix src/, $(SERVER) $(PARSING) $(REC_RES))
 OBJ= $(addprefix build/, $(FILES:.cpp=.o) $(MAIN:.cpp=.o))

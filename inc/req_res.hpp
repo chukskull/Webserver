@@ -56,12 +56,14 @@ struct HTTP_request
 struct HTTP_response
 {
 	size_t status_code;
-	bool close_connection;
 	string status_text;
+
+	string content_length;
 	string content_type;
 	string location;
-	string content_length;
 	string connection;
+	bool close_connection;
+
 	string body;
 
 	bool stop;
@@ -73,7 +75,7 @@ struct HTTP_response
 		if (status_code > 399)
 			stop = true;
 	}
-	HTTP_response(): stop(false) {}
+	HTTP_response(): status_code(180), stop(false){}
 	void set_stop(bool b){stop = b;}
 	//string content_encoding; :: possibly
 };

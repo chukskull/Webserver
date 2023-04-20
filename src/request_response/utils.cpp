@@ -19,13 +19,6 @@ bool file_exist(string file_path)
 	}
 }
 
-bool valid_http(string http_ver)
-{
-	if (http_ver == "http/1.1" || http_ver == "http/1.0")
-		return true;
-	
-	return false;
-}
 
 // std::string str_toupper(char *str)
 // {
@@ -45,6 +38,14 @@ string _to_lower(string str)
 		*it = std::tolower(*it);
 	}
 	return str;
+}
+
+bool valid_http(string http_ver)
+{
+	if (_to_lower(http_ver) == "http/1.1" || _to_lower(http_ver) == "http/1.0")
+		return true;
+	
+	return false;
 }
 
 bool is_dir(string path)

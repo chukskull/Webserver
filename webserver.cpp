@@ -2,6 +2,28 @@
 #include "Server.hpp"
 #include <algorithm>
 
+// 	void print_meth(MethAllow meth)
+// {
+// 	for (MethAllow::iterator it = meth.begin(); it != meth.end(); it++)
+// 	{
+// 		std::cout << *it << " ";
+// 	}
+// 	std::cout << std::endl;
+// }
+
+// void print_locations(std::vector<ReqLoc> &vec)
+// 	{
+
+// 		std::cout << "locs== \n";
+// 		for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
+// 		{
+// 			std::cout << "loc== ";
+// 			std::cout << "file: " << it->__file;
+// 			std::cout << " path: " << it->__path;
+// 			std::cout << " root: " << it->__root << std::endl;
+// 			print_meth(it->_AllowMeth);
+// 		}
+// 	}
 
 void	_begin_function(char *av)
 {
@@ -24,6 +46,17 @@ void	_begin_function(char *av)
 	pars = phase_to_req_res(vec, _vec_data);
 	if(pars < 0)
 		exit(0);
+
+		// for (std::vector<DataConf>::iterator it = _vec_data.begin(); it != _vec_data.end(); it++)
+		// {
+		// 	std::cout << it->__body_size << ", ";
+		// 	std::cout << it->__host << ", ";
+		// 	std::cout << it->__name << ", ";
+		// 	std::cout << it->__port[0] << ", ";
+		// 	print_locations(it->__locations);
+		// 	// std::cout << it->__locations[0].__path << std::endl;
+		// }
+
 	if (_vec_data.size())
 		Server::run(_vec_data);
 }
