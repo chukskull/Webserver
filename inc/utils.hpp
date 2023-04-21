@@ -37,3 +37,6 @@ void fill_content_type(HTTP_request &req, string &content_type);
 bool check_for_end_boundary(string &body, string &boundary);
 bool find_boundary(std::stringstream &body_stream, string &boundary);
 bool handle_content_disposition(std::stringstream &body_stream, form_part &part, string &boundary);
+
+
+string get_exten(string file);

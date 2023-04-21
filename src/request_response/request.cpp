@@ -37,13 +37,13 @@ void request::parse(string req)
     if (i != 3)
         std::cout << "err msg\n";
 
-    std::cout << s_request.str() << std::endl;
     while (std::getline(s_request, tmp_str, '\n') and tmp_str != string("\r"))
     {
         size_t pos = tmp_str.find(":");
         headers.push_back(std::make_pair(string(tmp_str.substr(0, pos)), string(tmp_str.substr(pos + 1))));
         // std::cout << headers.back()->fist;
     }
+
     if (tmp_str != "\r")
         std::cout << "err msg\n";
     while (std::getline(s_request, tmp_str))

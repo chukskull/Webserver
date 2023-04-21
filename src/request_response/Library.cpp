@@ -22,6 +22,8 @@
 			info._allowMeth = loc._AllowMeth;
 			info.requested_path = path;
             info.file_path = loc.__root + path.substr(loc.__path.length());
+			info.content_type = get_exten(info.file_path);
+			std::cout << "the glory type: " << info.content_type << std::endl;
 			// info.type = path.substr(path.rfind('.') + 1);
 
 			if (loc.__redirect.first)

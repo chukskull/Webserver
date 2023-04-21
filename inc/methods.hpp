@@ -43,42 +43,52 @@ public:
 		file = lib.get_requested_file(request_info.requested_file, 1);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
-		if (request_info.connection == "close")
-			response.connection = CLOSE_CONNECTION;
-		else
-			response.connection = KEEP_ALIVE;
+		if (request_info.connection != "")
+		{
+			if (request_info.connection == "close")
+			{
+				response.connection = CLOSE_CONNECTION;
+				response.connection = "close";
+			}
+			else
+			{
+				response.connection = KEEP_ALIVE;
+				response.connection = "Keep-alive";
+			}
 
+		}
 		if (file._allowMeth[con_GET])
 		{
-			if (file.is_redirect)
+			if (file.file_exists)
 			{
-			}
-			else if (file.is_dir)
-			{
-				if (file.is_autoindex)
-				{
-					generate_autoindex(file, response);
-					response.set_status(200, "OK");
-					// serve autoindex
-					// create the html page
-				}
-				else
+				if (file.is_redirect)
 				{
 				}
-			}
-			else if (file.is_file)
-			{
-				if (file.file_exists)
+				else if (file.is_dir)
 				{
-					response.set_status(200, "OK");
-					response.content_type = file.content_type;
-					read_file(file.file_path, response);
+					if (file.is_autoindex)
+					{
+						generate_autoindex(file, response);
+						response.set_status(200, "OK");
+						// serve autoindex
+						// create the html page
+					}
+					else
+					{
+					}
 				}
-				else
+				else if (file.is_file)
 				{
-					response.set_status(404, "File Not Found");
+						response.set_status(200, "OK");
+						response.content_type = file.content_type;
+						read_file(file.file_path, response);
 				}
 			}
+			else
+			{
+				response.set_status(404, "File Not Found");
+			}
+
 		}
 		else
 		{
@@ -108,8 +118,9 @@ private:
 
 			buff = new char[max_size];
 			// buffer.resize(max_size);
-			while (file.read(buff , max_size))
+			while (1)
 			{
+				file.read(buff , max_size);
 				try
 				{
 					file_content += buff;
@@ -128,7 +139,7 @@ private:
 					break;
 			}
 			file.close();
-			response.content_length = file_content.size();
+			response.content_length = std::to_string(file_content.size());
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -250,7 +261,7 @@ class handler
 		if (req.response.connection != "")
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 		res.append(CRLF);
-		// res.append(req.response.body);
+		res.append(req.response.body);
 	}
 };
 

@@ -40,7 +40,19 @@ public:
         {
             return "no_type";
         }
-        return file_name.substr(pos);
+        return file_name.substr(pos + 1);
+    }
+
+    string get_type(string ext)
+    {
+        std::multimap<string, string>::iterator it;
+
+        it = types.find(ext);
+        if (it != types.end())
+        {
+            return it->second;
+        }
+        return "";
     }
 
 private:

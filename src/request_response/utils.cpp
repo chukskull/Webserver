@@ -310,6 +310,14 @@ void generate_error(HTTP_response &response, int status_code, string status_mess
 	response.content_type = "text/html";
 	response.body = "<html><head><title>" + std::to_string(status_code) + " " + status_message + " it is a directory " + "</title></head><body><h1>" + std::to_string(status_code) + " " + status_message + "</h1></body></html>";
 }
+string get_exten(string file)
+{
+	MIME_types MIME;
+	string s_type;
+
+	s_type = MIME.get_extention(file);
+    return (MIME.get_type(s_type));
+}
 
 void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &request_info, HTTP_response &response)
 {

@@ -252,6 +252,8 @@ public:
 					} 
 					else
 					{
+						string res;
+
 						int	_pars_req = receiving(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd], __my_ser.buf);
 						if(_gl_recv_return > 0)
 						{
@@ -274,13 +276,14 @@ public:
 							{
 
 								Mesage  *mesg = new Mesage();
-								string res;
+								// string res;
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
-								std::cout << "===========\n";
+
+							// need to fill the sockets values in the response
+
 								handl_request.handle(mesg->message, res);
-								std::cout << res << std::endl;
-								std::cout << "===========\n";
+								// std::cout << res << std::endl;
 								// print_error << mesg->message << std::endl;
 								// std::cerr << mesg->message.size() << std::endl;
 								// print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
