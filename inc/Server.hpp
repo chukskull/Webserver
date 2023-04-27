@@ -198,7 +198,7 @@ public:
    static void run(std::vector<DataConf> &__vec_data)
    {
 		handler handl_request;
-
+		deque<Mesage*> messages;
 
 		lib.set(__vec_data);
 
@@ -267,23 +267,27 @@ public:
 							{
 								handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
 							}
+
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
 							{
 								perror("length size so big");
-
 							}
+
 							if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
 							{
 
 								Mesage  *mesg = new Mesage();
 								// string res;
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
+								__my_ser._connections[__my_ser.fd_s[i].fd].clear_buffer();
+
 								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
 
 							// need to fill the sockets values in the response
 
-								handl_request.handle(mesg->message, res);
-								// std::cout << res << std::endl;
+								handl_request.handle(*mesg);
+								messages.push_back(mesg);
+								// std::cout << mesg->response << std::endl;
 								// print_error << mesg->message << std::endl;
 								// std::cerr << mesg->message.size() << std::endl;
 								// print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
@@ -307,10 +311,20 @@ public:
 						}
 						else
 						{
+							Mesage *mesg;
+							if (!messages.empty())
+							{
+								mesg = messages.front();
+								
+								std::cout << mesg->message << std::endl;
+								std::cout << mesg->response << std::endl;
+								if(send(mesg->_connections.first, mesg->response.c_str(), mesg->response.length(), 0) < 0)
+									perror("send");
+								messages.pop_front();
+								close(mesg->_connections.first);
+							}
 							// print_error <<" "<< pair_found.first << std::endl;
 							// this part gonna send back the response to a client
-							// if(send(pair_found.first, "hello_there", 12, 0) < 0)
-							// 	perror("send");
 							// close(pair_found.first);
 						}
 					}

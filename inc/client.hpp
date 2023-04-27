@@ -34,6 +34,11 @@ class Client {
         {
             return (*_buffer).str();
         }
+        void clear_buffer()
+        {
+            (*_buffer).str("");
+        }
+
         ~Client(){
             // delete _buffer;
         };

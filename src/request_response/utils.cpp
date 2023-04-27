@@ -19,7 +19,6 @@ bool file_exist(string file_path)
 	}
 }
 
-
 // std::string str_toupper(char *str)
 // {
 //     std::string new_str = str;
@@ -98,7 +97,9 @@ void generate_autoindex(file_info file, HTTP_response &response)
 	vector<std::string> dir_content = read_dir(file.file_path);
 	for (size_t i = 0; i < dir_content.size(); i++)
 	{
-		html += "<a href=\"" + dir_content[i] + "\">" + dir_content[i] + "</a>";
+		// std::cout << "++++++>" << file.file_path << "\n";
+		// std::cout << "------>" << dir_content[i] << "\n";
+		html += "<a href=\"" + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
 	}
 	html += "</pre><hr></body></html>";
 	// MIME type

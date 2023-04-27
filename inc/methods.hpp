@@ -1,5 +1,6 @@
 #include "req_res.hpp"
 #include "req_headers.hpp"
+#include "mesage.hpp"
 // #include "../src/request_response/request.cpp"
 // #include "Library.hpp"
 servers_library lib;
@@ -12,18 +13,19 @@ void print_meth(MethAllow meth)
 	std::cout << std::endl;
 }
 void print_locations(ReqLoc &vec)
-	{
+{
 
-		// std::cout << "locs== \n";
-		// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
-		// {
-			std::cout << "loc== ";
-			std::cout << "file: " << vec.__file;
-			std::cout << " path: " << vec.__path;
-			std::cout << " root: " << vec.__root << std::endl;
-			print_meth(vec._AllowMeth);
-		// }
-	}
+	// std::cout << "locs== \n";
+	// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
+	// {
+		std::cout << "loc== ";
+		std::cout << "file: " << vec.__file;
+		std::cout << " path: " << vec.__path;
+		std::cout << " root: " << vec.__root << std::endl;
+		print_meth(vec._AllowMeth);
+	// }
+}
+
 void print_file(file_info &file)
 {
 	std::cout << "file path : " << file.file_path << "\n";
@@ -66,8 +68,9 @@ public:
 				}
 				else if (file.is_dir)
 				{
-					if (file.is_autoindex)
+					if (file.is_autoindex || 1)
 					{
+						std::cout << "got into autoindex\n";
 						generate_autoindex(file, response);
 						response.set_status(200, "OK");
 						// serve autoindex
@@ -75,6 +78,7 @@ public:
 					}
 					else
 					{
+						response.set_status(403, "Forbidden");
 					}
 				}
 				else if (file.is_file)
@@ -168,7 +172,7 @@ public:
 				{
 					if (file.is_file)
 						update_file(file, request_info, response);
-					if (file.is_dir)
+					else if (file.is_dir)
 					{
 						if (request_info.content_type.first == "multipart/form-data")
 						{
@@ -193,7 +197,7 @@ public:
 						}
 					}
 					else
-						generate_error(response, 800, "no idea why i have this condition here");
+						generate_error(response, 800, "no idea on why i have this condition here");
 				}
 				else
 				{
@@ -227,9 +231,10 @@ class handler
 
 		handler() {}
 		// handler(string re) : req(re){}
-		void handle(string re, string &res)
+		// void handle(string re, string &res)
+		void handle(Mesage &msg)
 		{
-			request req(re);
+			request req(msg.message);
 
 			// req.request_checkpoint();
 			if (req.request_info.method == GET)
@@ -237,7 +242,7 @@ class handler
 			else if (req.request_info.method == POST)
 				POST_.handle(req.request_info, req.response);
 
-			fill_response(req, res);
+			fill_response(req, msg.response);
 			// else if (req.request_info.method == DELETE)
 			// 	handle_delete();
 		}

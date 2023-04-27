@@ -4,13 +4,15 @@
     {
         file_info info;
         ReqLoc loc;
+		size_t pos;
 
         for (std::vector<ReqLoc>::iterator it = _servers[s_index].__locations.begin(); it != _servers[s_index].__locations.end(); it++)
         {
-
+			pos = path.find(it->__path);
 			// std::cout << "! get lucky\n";
-            if (path.find(it->__path) != string::npos) // possibly check that the npos is zero
+            if (pos != path.npos && pos == 0) // possibly check that the npos is zero
             {
+				// std::cout << "++++++++++> got here\n";
                 if (loc.__path.length() < it->__path.length())
 					loc = *it;
 
@@ -21,9 +23,21 @@
 			info.location = loc;
 			info._allowMeth = loc._AllowMeth;
 			info.requested_path = path;
-            info.file_path = loc.__root + path.substr(loc.__path.length());
+			if (loc.__path == path)
+			{
+				// this will be a problem in POST requests
+
+				loc.__file = "index.html";
+				std::cout << "file:" << loc.__file << std::endl;
+	            info.file_path = loc.__root + path.substr(loc.__path.length()) + loc.__file;
+			}
+			else
+			{
+            	info.file_path = loc.__root + path.substr(loc.__path.length());
+			}
+
 			info.content_type = get_exten(info.file_path);
-			std::cout << "the glory type: " << info.content_type << std::endl;
+			// std::cout << "the glory type: " << info.content_type << std::endl;
 			// info.type = path.substr(path.rfind('.') + 1);
 
 			if (loc.__redirect.first)
@@ -42,8 +56,11 @@
 					{
 						info.is_dir = true;
 						// check if autoindex is allowed
+						std::cout << "the file is a directory\n";
+
 						if (loc._autoindex)
 						{
+							std::cout << "autoindex is allowed\n";
 							info.is_autoindex = true;
 						}
 					}
