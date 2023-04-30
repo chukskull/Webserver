@@ -199,7 +199,6 @@ public:
    {
 		handler handl_request;
 		deque<Mesage*> messages;
-
 		lib.set(__vec_data);
 
 		Server  __my_ser(__vec_data);

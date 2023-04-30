@@ -39,6 +39,33 @@ string _to_lower(string str)
 	return str;
 }
 
+string removeNonPrintableChars(string str)
+{
+    size_t i = 0;
+    while (str[i] != '\0' && (std::isspace(str[i]) || std::isprint(str[i]) == false))
+	{
+        i++;
+    }
+    return str.substr(i);
+}
+
+void print(string s)
+{
+    size_t i = 0;
+    while (i < s.size())
+    {
+        if (s[i] == '\n')
+            std::cout << "\\n";
+        else if (s[i] == '\r')
+            std::cout << "\\r";
+        else
+            std::cout << s[i];
+        // cout << s[i];
+        i++;
+    }
+    std::cout << std::endl;
+}
+
 bool valid_http(string http_ver)
 {
 	if (_to_lower(http_ver) == "http/1.1" || _to_lower(http_ver) == "http/1.0")
@@ -113,8 +140,13 @@ void fill_content_type(HTTP_request &req, string &content_type)
 	string line;
 	size_t pos;
 
+	// std::cout << "::" << content_type << std::endl;
 	std::getline(ss, req.content_type.first, ';');
+	req.content_type.first = removeNonPrintableChars(req.content_type.first);
+	// std::cout << "+++content_type:" << req.content_type.first << "\n";
 	std::getline(ss, line, '\r');
+	line = removeNonPrintableChars(line);
+	// std::cout << "+++line:" << line << "\n";
 	pos = line.find("boundary=");
 	if (pos != line.npos)
 	{
@@ -123,13 +155,15 @@ void fill_content_type(HTTP_request &req, string &content_type)
 			// err with request 
 			return;
 		}
-		req.content_type.second = line.substr(line.size() + 9);
+		// std::cout << "+++subline:" << line.substr(pos + 9) << "\n";
+		req.content_type.second = line.substr(pos + 9);
 	}
 }
 
 bool check_for_end_boundary(string &body, string &boundary)
 {
-	if (body.find(boundary) != string::npos && body.find(boundary + "--") == body.size() - (boundary.size() + 2))
+	// print("body:" + body);
+	if (body.find("--" + boundary) != string::npos && (body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 5))) )
 		return true;
 	return false;
 }
@@ -138,9 +172,11 @@ bool find_boundary(std::stringstream &body_stream, string &boundary)
 {
 	string line;
 
-	std::getline(body_stream, line);
-	if (boundary + '\r' == line)
+	std::getline(body_stream, line, '\r');
+	if ("--" + boundary == line)
+	{
 		return true;
+	}
 	return false;
 }
 
@@ -151,20 +187,25 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 	size_t pos;
 	bool ret = false;
 
-	while (std::getline(body_stream, line, '\n') and line != string("\r"))
+	while (std::getline(body_stream, line, '\r') and line != string(""))
 	{
+
 		_stream.str(line);
+		std::cout << "line:" << line << "\n";
 
-		if (line == "--" + boundary + '\r')
+		if (line == "--" + boundary)
+		{
+			std::cout << "function was broken here 1\n";
 			break;
-
+		}
 		std::getline(_stream, line, ':');
-		if (_to_lower(line) == "Content-Disposition")
+		if (_to_lower(line) == "content-disposition")
 		{
 			ret = true;
 			std::getline(_stream, line, ';');
 			if (line.find("form-data") == line.npos)
 			{
+				std::cout << "form-data not found\n";
 				return false;
 			}
 			while (1)
@@ -181,7 +222,11 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 					part.name = line.substr(pos + 6, line.rfind("\"") - 7);
 				}
 				if (_stream.eof())
+				{
+
+					std::cout << "function was broken here 2\n";
 					break;
+				}
 			}
 		}
 		else if(_to_lower(line) == "Content-Type")
@@ -190,10 +235,17 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 			part.content_type = line;
 		}
 		if (body_stream.eof())
+		{
+
+			std::cout << "function was broken here 3\n";
 			break;
+		}
 	}
-	if (line != "\r")
+	if (line != "")
+	{
+		std::cout << "line is not \\r\n";
 		return false;
+	}
 	return ret;
 }
 
@@ -207,9 +259,10 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 	while (1)// check also for max_read_size
 	{
 		// cout << "got here2\n";
+		// print(p);
 		body_stream.get(c);
 		p.append(1, c);
-		pos = p.rfind(boundary + "\r\n");
+		pos = p.rfind(boundary + "\r");
 		// cout << p << std::endl;
 		if ((pos != p.npos))
 		{
@@ -217,7 +270,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			part.content.swap(p);
 			return (true);
 		}
-		pos = p.rfind(boundary + "--\r\n");
+		pos = p.rfind(boundary + "--\r");
 		if ((pos != p.npos))
 		{
 			p.erase(pos);
@@ -240,8 +293,10 @@ bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 	}
 	while (1)
 	{
+
 		if (handle_content_disposition(body_stream, part, boundary) == false)
 		{
+			std::cout << "handle_content_disposition failed\n";
 			part.clear();
 			return false;
 		}
@@ -255,7 +310,6 @@ bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 	}
 	return (true);
 }
-
 
 size_t write_to_file(string &file_path, string &content)
 {
@@ -277,6 +331,7 @@ size_t write_to_file(string &file_path, string &content)
 
 void update_file(file_info file, HTTP_request &request_info, HTTP_response &response)
 {
+	std::cout << "------------->updating_file\n" << std::endl;
 	if (write_to_file(file.file_path, request_info.body) >= 500)
 	{
 		response.set_status(500, "Internal Server Error");
@@ -292,6 +347,7 @@ void update_file(file_info file, HTTP_request &request_info, HTTP_response &resp
 
 void creat_file(file_info file, HTTP_request &request_info, HTTP_response &response)
 {
+	std::cout << "------------->creating_file\n" << std::endl;
 	if (write_to_file(file.file_path, request_info.body) >= 500)
 	{
 		response.set_status(500, "Internal Server Error");
@@ -357,9 +413,12 @@ void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &reques
 			out_file.open(tmp_file, std::ios::out | std::ios::app);
 			if (out_file.is_open())
 			{
+				// std::cout << "tmp_file:" << tmp_file << std::endl;
+				// std::cout << "name:" << it->name << std::endl;
 				out_file << it->name << " : " << it->content << '\n';
 				it->success = DATA_SUCCESS;
 				it->comment = it->name + " was added to " + tmp_file;
+				out_file.close();
 			}
 			else
 			{
@@ -384,7 +443,21 @@ string generat_response(deque<form_part> &parts, HTTP_response &response)
 }
 
 
-
+// deletion 
+void delete_file(file_info file, HTTP_request &request_info, HTTP_response &response)
+{
+	if (std::remove(file.file_path.c_str()) != 0)
+	{
+		response.set_status(500, "Internal Server Error");
+		return;
+	}
+	else
+	{
+		response.set_status(204, "No Content");
+		// response.content_type = file.content_type;
+		// response.location = file.requested_path;
+	}
+}
 
 
 

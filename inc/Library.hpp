@@ -34,10 +34,12 @@ class servers_library
 {
     vector<DataConf> _servers;
     string _path;
+	// static std::ofstream fake_db;
 
 public:
+    // servers_library() {fake_db.open("fake_db.txt", std::ios::app | std::ios::out); }
     servers_library() {}
-    servers_library(vector<DataConf> servers) : _servers(servers) {}
+    servers_library(vector<DataConf> servers) : _servers(servers){}
 
     file_info get_requested_file(string path, size_t s_index);
     void set(vector<DataConf> &servers);

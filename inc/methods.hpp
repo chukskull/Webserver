@@ -174,13 +174,17 @@ public:
 						update_file(file, request_info, response);
 					else if (file.is_dir)
 					{
+						// std::cout << request_info.content_type.first << std::endl;
 						if (request_info.content_type.first == "multipart/form-data")
 						{
 							deque<form_part> parts;
+							// std::cout << "++++++>>>> " << request_info.content_type.second << "\n";
 							if (check_for_end_boundary(request_info.body, request_info.content_type.second))
 							{
 								if(get_parts(request_info.body, request_info.content_type.second, parts))
 								{
+									//print parts
+
 									handle_parts(file, parts, request_info, response);
 									generat_response(parts, response);
 								}
@@ -214,6 +218,44 @@ public:
 
 class __DELETE
 {
+public:
+	void handle(HTTP_request &request_info, HTTP_response &response)
+	{
+		file_info file;
+
+		file = lib.get_requested_file(request_info.requested_file, 0);
+		if (file._allowMeth[con_DELETE])
+		{
+			if (file.is_redirect)
+			{
+				std::cout << "waa nwaa3\n";
+				exit(0);
+			}
+			else
+			{
+				if (file.file_exists)
+				{
+					if (file.is_file)
+					{
+						
+					}
+						// delete_file(file, request_info, response);
+					// else if (file.is_dir)
+						// delete_dir(file, request_info, response);
+					else
+						generate_error(response, 800, "no idea on why i have this condition here");
+				}
+				else
+				{
+					response.set_status(404, "File Not Found");
+				}
+			}
+		}
+		else
+		{
+			response.set_status(405, "Method Not Allowed");
+		}
+	}
 
 };
 
