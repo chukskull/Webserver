@@ -39,4 +39,8 @@ bool find_boundary(std::stringstream &body_stream, string &boundary);
 bool handle_content_disposition(std::stringstream &body_stream, form_part &part, string &boundary);
 
 
+// void delete_file(file_info file, HTTP_response &response);
+bool delete_file(string file_path, HTTP_response &response);
+void delete_dir(file_info file, HTTP_response &response);
+
 string get_exten(string file);

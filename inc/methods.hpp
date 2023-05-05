@@ -39,10 +39,10 @@ class __GET
 public:
 	__GET() {}
 
-	void handle(HTTP_request &request_info, HTTP_response &response)
+	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		file = lib.get_requested_file(request_info.requested_file, 1);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
@@ -153,11 +153,11 @@ private:
 class __POST
 {
 public:
-	void handle(HTTP_request &request_info, HTTP_response &response)
+	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, 0);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
@@ -219,11 +219,11 @@ public:
 class __DELETE
 {
 public:
-	void handle(HTTP_request &request_info, HTTP_response &response)
+	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, 0);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
 		if (file._allowMeth[con_DELETE])
 		{
 			if (file.is_redirect)
@@ -237,11 +237,11 @@ public:
 				{
 					if (file.is_file)
 					{
+						delete_file(file.file_path, response);
 						
 					}
-						// delete_file(file, request_info, response);
-					// else if (file.is_dir)
-						// delete_dir(file, request_info, response);
+					else if (file.is_dir)
+						delete_dir(file, response);
 					else
 						generate_error(response, 800, "no idea on why i have this condition here");
 				}
@@ -269,6 +269,7 @@ class handler
 		// string str_request;
 		__GET GET_;
 		__POST POST_;
+		__DELETE DELETE_;
 	public:
 
 		handler() {}
@@ -280,12 +281,13 @@ class handler
 
 			// req.request_checkpoint();
 			if (req.request_info.method == GET)
-				GET_.handle(req.request_info, req.response);
+				GET_.handle(req.request_info, req.response, msg);
 			else if (req.request_info.method == POST)
-				POST_.handle(req.request_info, req.response);
+				POST_.handle(req.request_info, req.response, msg);
+			else if (req.request_info.method == DELETE)
+				DELETE_.handle(req.request_info, req.response, msg);
 
 			fill_response(req, msg.response);
-			// else if (req.request_info.method == DELETE)
 			// 	handle_delete();
 		}
 

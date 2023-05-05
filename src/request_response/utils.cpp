@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <dirent.h>
+#include <filesystem>
 
 bool file_exist(string file_path)
 {
@@ -126,6 +127,9 @@ void generate_autoindex(file_info file, HTTP_response &response)
 	{
 		// std::cout << "++++++>" << file.file_path << "\n";
 		// std::cout << "------>" << dir_content[i] << "\n";
+		// std::cout << "========= " << i << '\n';
+		if (dir_content[i] == "." || dir_content[i] == "..")
+			continue;
 		html += "<a href=\"" + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
 	}
 	html += "</pre><hr></body></html>";
@@ -444,12 +448,12 @@ string generat_response(deque<form_part> &parts, HTTP_response &response)
 
 
 // deletion 
-void delete_file(file_info file, HTTP_request &request_info, HTTP_response &response)
+bool delete_file(string file_path, HTTP_response &response)
 {
-	if (std::remove(file.file_path.c_str()) != 0)
+	if (std::remove(file_path.c_str()) != 0)
 	{
 		response.set_status(500, "Internal Server Error");
-		return;
+		return false;
 	}
 	else
 	{
@@ -457,8 +461,37 @@ void delete_file(file_info file, HTTP_request &request_info, HTTP_response &resp
 		// response.content_type = file.content_type;
 		// response.location = file.requested_path;
 	}
+	return true;
 }
 
+bool delete_internal_files(file_info &file, HTTP_response &response)
+{
+	vector<std::string> dir_content = read_dir(file.file_path);
+	for (size_t i = 0; i < dir_content.size(); i++)
+	{
+		if (delete_file(file.file_path + dir_content[i], response) == false)
+			return false;
+	}
+	return true;
+}
+
+void delete_dir(file_info file, HTTP_response &response)
+{
+	if (delete_internal_files(file, response) == false)
+	{
+		return;
+	}
+
+	if (rmdir(file.file_path.c_str()) != 0)
+	{
+		std::cout << "reasion : " << std::strerror(errno) << std::endl;
+		response.set_status(500, "Internal Server Error");
+	}
+	else
+	{
+		response.set_status(204, "No Content");
+	}
+}
 
 
 
