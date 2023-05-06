@@ -6,7 +6,8 @@
         ReqLoc loc;
 		size_t pos;
 
-        for (std::vector<ReqLoc>::iterator it = _servers[s_index].__locations.begin(); it != _servers[s_index].__locations.end(); it++)
+		std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;hhh : " << _servers.size() << std::endl;
+        for (std::vector<ReqLoc>::iterator it = _servers[s_index - 1].__locations.begin(); it != _servers[s_index - 1].__locations.end(); it++)
         {
 			pos = path.find(it->__path);
 			// std::cout << "! get lucky\n";
@@ -28,6 +29,7 @@
 				// this will be a problem in POST requests
 
 				// loc.__file = "index2.html";
+
 				std::cout << "file:" << loc.__file << std::endl;
 	            info.file_path = loc.__root + path.substr(loc.__path.length()) + loc.__file;
 			}

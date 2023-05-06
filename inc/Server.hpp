@@ -230,12 +230,11 @@ public:
 			{
 				if (__my_ser.fd_s[i].revents & POLLIN)
 				{
-					size_t                      index = 0;
 					std::vector<int>::iterator  find_;
 					if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end())
 					{
 						__my_ser.addrlen = sizeof __my_ser.remoteaddr;
-						index = find_ - __my_ser.server_fds.begin();
+						int index = find_ - __my_ser.server_fds.begin();
 						
 						std::cerr << "fds " << index << " " << __my_ser.server_fds.size() << std::endl;
 						int newfd = accept(__my_ser.server_fds[index], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
@@ -247,7 +246,8 @@ public:
 							__my_ser.fd_s.back().fd = newfd;
 							__my_ser.fd_s.back().events = POLLIN;
 							__my_ser.fd_counts++;
-							__my_ser._connections.insert(std::make_pair(newfd, Client(index)));
+							// __my_ser._connections.insert(std::make_pair(newfd, Client(index)));
+							__my_ser._connections[newfd] = index;
 							// puts("here");
 						}
 					} 

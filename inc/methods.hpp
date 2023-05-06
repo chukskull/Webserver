@@ -42,6 +42,7 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
+		std::cout << "----------> " << msg._connections.second << std::endl;
 		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
