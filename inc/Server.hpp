@@ -280,7 +280,7 @@ public:
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								__my_ser._connections[__my_ser.fd_s[i].fd].clear_buffer();
 
-								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
+								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, index);
 
 							// need to fill the sockets values in the response
 
