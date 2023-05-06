@@ -151,7 +151,7 @@ public:
 					if (server_fd < 0)
 						continue;
 					else
-						this->server_fds.push_back(server_fd);
+						this->server_fds[server_fd] = std::make_pair(i, j);
 					this->on = 1;
 					rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
 					if (rc < 0)
@@ -230,11 +230,10 @@ public:
 			{
 				if (__my_ser.fd_s[i].revents & POLLIN)
 				{
-					std::vector<int>::iterator  find_;
-					if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end())
+					// std::map<int, pair<int, int>>::iterator	find_;
+					if (__my_ser.server_fds.find(__my_ser.fd_s[i].fd) != __my_ser.server_fds.end())
 					{
 						__my_ser.addrlen = sizeof __my_ser.remoteaddr;
-						int index = find_ - __my_ser.server_fds.begin();
 						
 						std::cerr << "fds " << index << " " << __my_ser.server_fds.size() << std::endl;
 						int newfd = accept(__my_ser.server_fds[index], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
@@ -334,7 +333,7 @@ public:
 			}
 		}
 	}
-		std::vector<int>					        server_fds;
+		std::map<int, std::pair<int, int> >			server_fds;
 		int									        rcv;
 		int									        on;
 		int							                rc;
