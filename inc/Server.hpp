@@ -30,8 +30,8 @@ public:
 		// my_client._buffer->str("");
 		while (std::getline(temp, line))
 		{
-			line += '\n';
-		   	if (isHexadecimal(line))
+			line.push_back('\n');
+		if (isHexadecimal(line))
 			{
 				std::stringstream ss(line);
 				std::cerr << line << std::endl;
@@ -235,8 +235,10 @@ public:
 					if ((find_ = find(__my_ser.server_fds.begin(), __my_ser.server_fds.end(), __my_ser.fd_s[i].fd)) != __my_ser.server_fds.end())
 					{
 						__my_ser.addrlen = sizeof __my_ser.remoteaddr;
-						index = __my_ser.server_fds[find_ - __my_ser.server_fds.begin()];
-						int newfd = accept(__my_ser.server_fds[find_ - __my_ser.server_fds.begin()], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
+						index = find_ - __my_ser.server_fds.begin();
+						
+						std::cerr << "fds " << index << " " << __my_ser.server_fds.size() << std::endl;
+						int newfd = accept(__my_ser.server_fds[index], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
 						if (newfd == -1)
 							perror("accept");
 						else
@@ -266,9 +268,10 @@ public:
 							{
 								handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
 							}
-
 							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
 							{
+								std::cerr << __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
+								std::cerr <<"for length"<< __my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ << __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size << std::endl;
 								perror("length size so big");
 							}
 
@@ -279,8 +282,8 @@ public:
 								// string res;
 								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
 								__my_ser._connections[__my_ser.fd_s[i].fd].clear_buffer();
-
-								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, index);
+								
+								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
 
 							// need to fill the sockets values in the response
 
@@ -289,7 +292,7 @@ public:
 								// std::cout << mesg->response << std::endl;
 								// print_error << mesg->message << std::endl;
 								// std::cerr << mesg->message.size() << std::endl;
-								// print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
+								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
 						int sender_fd = __my_ser.fd_s[i].fd;
