@@ -194,6 +194,12 @@ public:
 	// 		std::cout << " root: " << it->__root << std::endl;
 	// 	}
 	// }
+	static	std::pair<int , int>	get_server_infos(std::map<int, int> &servers, int fd, std::map<int, Client> &concts)
+	{
+		int srvr = concts[fd].host_src;
+		std::map<int, int>::iterator	it = servers.find(srvr);
+
+	}
 
    static void run(std::vector<DataConf> &__vec_data)
    {
@@ -201,10 +207,10 @@ public:
 		deque<Mesage*> messages;
 		lib.set(__vec_data);
 
-		Server  __my_ser(__vec_data);
+		Server  ser(__vec_data);
 		try
 		{
-			__my_ser.initial_server(__vec_data);
+			ser.initial_server(__vec_data);
 		}
 		catch(const std::string e)
 		{
@@ -214,39 +220,39 @@ public:
 
 		while (1)
 		{
-			// __my_ser.rc = 1;
-			__my_ser.rc = poll(&__my_ser.fd_s[0], __my_ser.fd_s.size(), -1);
-			if (__my_ser.rc < 0)
+			// ser.rc = 1;
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
+			if (ser.rc < 0)
 			{
 				perror("poll() failed");
 				break ;
 			}
-			if (__my_ser.rc == 0)
+			if (ser.rc == 0)
 			{
 				std::cerr << "poll() timed out , End program\n" << std::endl;
 				break ;
 			}
-			for (size_t i = 0; i < __my_ser.fd_s.size(); i++)
+			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{
-				if (__my_ser.fd_s[i].revents & POLLIN)
+				if (ser.fd_s[i].revents & POLLIN)
 				{
 					// std::map<int, pair<int, int>>::iterator	find_;
-					if (__my_ser.server_fds.find(__my_ser.fd_s[i].fd) != __my_ser.server_fds.end())
+					if (ser.server_fds.find(ser.fd_s[i].fd) != ser.server_fds.end())
 					{
-						__my_ser.addrlen = sizeof __my_ser.remoteaddr;
+						ser.addrlen = sizeof ser.remoteaddr;
 						
-						std::cerr << "fds " << index << " " << __my_ser.server_fds.size() << std::endl;
-						int newfd = accept(__my_ser.server_fds[index], (struct sockaddr *) &__my_ser.remoteaddr, &__my_ser.addrlen);
+						std::cerr << "fds " << index << " " << ser.server_fds.size() << std::endl;
+						int newfd = accept(ser.fd_s[i].fd, (struct sockaddr *) &ser.remoteaddr, &ser.addrlen);
 						if (newfd == -1)
 							perror("accept");
 						else
 						{
-							__my_ser.fd_s.push_back(pollfd());
-							__my_ser.fd_s.back().fd = newfd;
-							__my_ser.fd_s.back().events = POLLIN;
-							__my_ser.fd_counts++;
-							// __my_ser._connections.insert(std::make_pair(newfd, Client(index)));
-							__my_ser._connections[newfd] = index;
+							ser.fd_s.push_back(pollfd());
+							ser.fd_s.back().fd = newfd;
+							ser.fd_s.back().events = POLLIN;
+							ser.fd_counts++;
+							// ser._connections.insert(std::make_pair(newfd, Client()));
+							ser._connections[newfd] = Client(ser.fd_s[i].fd);
 							// puts("here");
 						}
 					} 
@@ -254,35 +260,37 @@ public:
 					{
 						string res;
 
-						int	_pars_req = receiving(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd], __my_ser.buf);
+						int	_pars_req = receiving(ser.fd_s[i].fd, ser._connections[ser.fd_s[i].fd], ser.buf);
 						if(_gl_recv_return > 0)
 						{
 							if (_pars_req)
 							{
-								_pars_request(__my_ser._connections[__my_ser.fd_s[i].fd]);
-								if (__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ == 0)
+								_pars_request(ser._connections[ser.fd_s[i].fd]);
+								if (ser._connections[ser.fd_s[i].fd].is_it_chunked_ == 0)
 									perror("request header is not set corretely");
 							}
-							if (__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ == -1)
+							if (ser._connections[ser.fd_s[i].fd].is_it_chunked_ == -1)
 							{
-								handle_chunked(__my_ser._connections[__my_ser.fd_s[i].fd]);
+								handle_chunked(ser._connections[ser.fd_s[i].fd]);
 							}
-							else if(static_cast<size_t>(__my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_) > __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size)
+							else if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd].is_it_chunked_) > ser._containers[ser._connections[ser.fd_s[i].fd]._host_src].__body_size)
 							{
-								std::cerr << __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
-								std::cerr <<"for length"<< __my_ser._connections[__my_ser.fd_s[i].fd].is_it_chunked_ << __my_ser._containers[__my_ser._connections[__my_ser.fd_s[i].fd]._host_src].__body_size << std::endl;
+								std::cerr << ser._connections[ser.fd_s[i].fd].get_buffer();
+								std::cerr <<"for length"<< ser._connections[ser.fd_s[i].fd].is_it_chunked_ << ser._containers[ser._connections[ser.fd_s[i].fd]._host_src].__body_size << std::endl;
 								perror("length size so big");
 							}
 
-							if (__my_ser._connections[__my_ser.fd_s[i].fd]._done)
+							if (ser._connections[ser.fd_s[i].fd]._done)
 							{
-
+								std::pair<int, int>	server_infos;
 								Mesage  *mesg = new Mesage();
 								// string res;
-								mesg->message = __my_ser._connections[__my_ser.fd_s[i].fd].get_buffer();
-								__my_ser._connections[__my_ser.fd_s[i].fd].clear_buffer();
+								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
+								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								
-								mesg->_connections = std::make_pair(__my_ser.fd_s[i].fd, __my_ser._connections[__my_ser.fd_s[i].fd]._host_src);
+								server_infos = get_server_infos(ser.server_fds, ser.fd_s[i].fd, ser._connections);
+								
+								mesg->_connections = std::make_pair(ser.fd_s[i].fd, );
 
 							// need to fill the sockets values in the response
 
@@ -294,7 +302,7 @@ public:
 								print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
-						int sender_fd = __my_ser.fd_s[i].fd;
+						int sender_fd = ser.fd_s[i].fd;
 						if (_gl_recv_return <= 0)
 						{
 							if (_gl_recv_return == 0) 
@@ -305,10 +313,10 @@ public:
 								puts("sure");
 								perror("recv");
 							}
-							close(__my_ser.fd_s[i].fd);
-							__my_ser.fd_s[i] = __my_ser.fd_s.back();
-							__my_ser._connections.erase(__my_ser.fd_s[i].fd);
-							__my_ser.fd_s.pop_back();
+							close(ser.fd_s[i].fd);
+							ser.fd_s[i] = ser.fd_s.back();
+							ser._connections.erase(ser.fd_s[i].fd);
+							ser.fd_s.pop_back();
 						}
 						else
 						{
@@ -333,21 +341,21 @@ public:
 			}
 		}
 	}
-		std::map<int, std::pair<int, int> >			server_fds;
-		int									        rcv;
-		int									        on;
-		int							                rc;
-		int							                nfds;
-		int									        timeout;
-		int									        fd_counts;
-		int									        current_size;
-		struct	addrinfo					        hints, *ai, *point;
-		struct	sockaddr_storage			        remoteaddr;
-		socklen_t 							        addrlen;
-		char								        buf[BUFFER_SIZE + 1];
-		_vector_fd	                                fd_s;
-		std::vector<DataConf>                       _containers;
-		std::map<int, Client >      				_connections;
+		std::map<int, std::pair<int, int> >		server_fds;
+		int										rcv;
+		int										on;
+		int										rc;
+		int										nfds;
+		int										timeout;
+		int										fd_counts;
+		int										current_size;
+		struct	addrinfo						hints, *ai, *point;
+		struct	sockaddr_storage				remoteaddr;
+		socklen_t 								addrlen;
+		char									buf[BUFFER_SIZE + 1];
+		_vector_fd	                        	fd_s;
+		std::vector<DataConf>                      _containers;
+		std::map<int, Client >					_connections;
 };
 							   
 
