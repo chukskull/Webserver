@@ -42,8 +42,8 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		std::cout << "----------> " << msg._connections.second << std::endl;
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
+		// std::cout << "----------> " << msg._connections.second << std::endl;
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
@@ -158,7 +158,7 @@ public:
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
@@ -224,7 +224,7 @@ public:
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		if (file._allowMeth[con_DELETE])
 		{
 			if (file.is_redirect)
