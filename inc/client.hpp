@@ -12,8 +12,10 @@ class Client {
 			this->is_it_chunked_ = false;
 			_buffer = new std::stringstream();
 			this->_size = 0;
-			this->_done = true;
+			this->current_size = 0;
+			this->_done = false;
 			this->_header_done = false;
+			this->header_size = 0;
 			
 		}
 		Client()
@@ -47,6 +49,8 @@ class Client {
 		std::pair<int, int>			host_src;
 		bool	 					is_it_chunked_;
 		size_t						_size;
+		size_t						current_size;
+		size_t						header_size;
 		bool  						_done;
 		bool  						_header_done;
 };

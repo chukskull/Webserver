@@ -25,7 +25,7 @@ url = "/"
 conn.putrequest('POST', url)
 conn.putheader('Transfer-Encoding', 'chunked')
 conn.endheaders()
-conn.send(chunk_data(body, 30000).encode('utf-8'))
+conn.send(chunk_data(body, 300).encode('utf-8'))
 
 resp = conn.getresponse()
 print(resp.status, resp.reason)
