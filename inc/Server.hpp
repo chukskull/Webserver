@@ -22,24 +22,31 @@ public:
 	}
 	static void    handle_chunked(Client &my_client)
 	{
-		std::string line;
-		std::string fusil("");
-		std::string	replace;
-		int chunkSize = 0;
+		// std::string line;
+		// std::string fusil("");
+		// std::string	replace;
+		// int chunkSize = 0;
 		std::stringstream	temp(my_client.get_buffer());
-		// my_client._buffer->str("");
-		while (std::getline(temp, line))
+		std::cerr << "ok sure 1" << std::endl;
+		std::cerr << temp.str() << std::endl;
+		if (temp.str().find("0\r\n\r\n") != _string::npos)
 		{
-			line.push_back('\n');
-		if (isHexadecimal(line))
-			{
-				std::stringstream ss(line);
-				std::cerr << line << std::endl;
-				ss >> std::hex >> chunkSize;
-				if (chunkSize == 0)
-					my_client._done = true;
-			}
+			my_client._done = true;
 		}
+		
+		// my_client._buffer->str("");
+		// while (std::getline(temp, line))
+		// {
+		// 	line.push_back('\n');
+		// if (isHexadecimal(line))
+		// 	{
+		// 		std::stringstream ss(line);
+		// 		std::cerr << line << std::endl;
+		// 		ss >> std::hex >> chunkSize;
+		// 		if (chunkSize == 0)
+		// 			my_client._done = true;
+		// 	}
+		// }
 	}
 
 	static int	receiving(int fd, Client &_my_client, char *buff)
@@ -49,7 +56,7 @@ public:
 			bzero(buff, BUFFER_SIZE);
 			_gl_recv_return = recv(fd, buff, BUFFER_SIZE, 0);
 			buff[_gl_recv_return] = '\0';
-			std::cerr << buff << std::endl;
+			// std::cerr << buff << std::endl;
 			if(_gl_recv_return > 0)
 			{
 				sure.append(buff);
@@ -77,12 +84,47 @@ public:
 	static void	_pars_request(Client &_my_client)
 	{
 		_string						line;
-		std::stringstream			for_read(_my_client._buffer->str());
+		size_t							index = 0;
+		// std::stringstream			for_read(_my_client._buffer->str());
 		std::string					header_check;
-		bool						ok = false;
+		// bool						ok = false;
 
-		for_read.seekg(0, std::ios::beg);
-		for
+		// for_read.seekg(0, std::ios::beg);
+		header_check  = _my_client._buffer->str();
+		if ((index = header_check.find("Content-Length: ")) != _string::npos)
+		{
+			index += 16;
+			size_t	endindex = header_check.find("\r\n", index);
+			_string		str;
+			
+			str = header_check.substr(index, endindex - index);
+			_my_client._size = atoi(str.c_str());
+		}
+		else if ((index = header_check.find("Transfer-Encoding: ")) != _string::npos)
+		{
+			std::cerr << index << '\t' << header_check.find("Transfer-Encoding: ")<< " ??0" << std::endl;
+			index += 19;
+			size_t	endindex = header_check.find("\r\n", index);
+			_string	str;
+			str = header_check.substr(index, endindex - index);
+			puts(str.c_str());
+			if(str == "chunked")
+			{
+				puts("chnkd ok ");
+				_my_client._done = false;
+				_my_client.is_it_chunked_= true;
+
+			}
+		}
+		else if (header_check.find("Accept-Encoding:") != _string::npos)
+		{
+
+		}
+		else
+		{
+			perror("request header is not set corretely");
+			// s error
+		}
 		// while(getline(for_read,  line))
 		// {
 		// 	// line += '\n';
@@ -118,7 +160,7 @@ public:
 			// 	_my_client._done = true;
 			// 	break;
 			// }
-		}
+		// }
 		// 	else if (line.find("Accept-Encoding:") != _string::npos)
 		// 	{
 		// 		// _string						str;
@@ -280,21 +322,20 @@ public:
 							if (_pars_req)
 							{
 								_pars_request(ser._connections[ser.fd_s[i].fd]);
-								if (ser._connections[ser.fd_s[i].fd].is_it_chunked_ == 0)
-									perror("request header is not set corretely");
+									
 							}
-							if (ser._connections[ser.fd_s[i].fd].is_it_chunked_ == -1)
+							if (ser._connections[ser.fd_s[i].fd].is_it_chunked_)
 							{
 								handle_chunked(ser._connections[ser.fd_s[i].fd]);
 							}
-							else if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd].is_it_chunked_) > ser._containers[server_infos.first].__body_size)
+							else if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd]._size) > ser._containers[server_infos.first].__body_size)
 							{
 								std::cerr << ser._connections[ser.fd_s[i].fd].get_buffer();
 								perror("length size so big");
 							}
 
 								std::cerr <<  "index server "<< ser._connections[ser.fd_s[i].fd].server_file << std::endl;
-								std::cerr <<"for length"<< ser._connections[ser.fd_s[i].fd].is_it_chunked_ << '\t' << ser._containers[server_infos.first].__body_size;
+								// std::cerr <<"for length"<< ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._containers[server_infos.first].__body_size;
 							if (ser._connections[ser.fd_s[i].fd]._done)
 							{
 								Mesage  *mesg = new Mesage();

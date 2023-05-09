@@ -9,7 +9,7 @@ class Client {
 	public:
 		Client(size_t   _file):server_file(_file)
 		{
-			this->is_it_chunked_ = 0;
+			this->is_it_chunked_ = false;
 			_buffer = new std::stringstream();
 			this->_size = 0;
 			this->_done = true;
@@ -45,7 +45,7 @@ class Client {
 		std::stringstream			*_buffer;
 		int							server_file;
 		std::pair<int, int>			host_src;
-		int	 						is_it_chunked_;
+		bool	 					is_it_chunked_;
 		size_t						_size;
 		bool  						_done;
 		bool  						_header_done;
