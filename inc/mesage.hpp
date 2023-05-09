@@ -10,7 +10,7 @@ struct Mesage
 	_string									response;
 	//lwl client tani is the server
 	//int lwla index server;
-	//int tanya index client;
+	//int tanya index port;
 	std::pair<int, std::pair<int, int> >	_connections;
 };
 

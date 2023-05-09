@@ -6,8 +6,7 @@
         ReqLoc loc;
 		size_t pos;
 
-		std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;hhh : " << _servers.size() << std::endl;
-        for (std::vector<ReqLoc>::iterator it = _servers[s_index - 1].__locations.begin(); it != _servers[s_index - 1].__locations.end(); it++)
+        for (std::vector<ReqLoc>::iterator it = _servers[s_index].__locations.begin(); it != _servers[s_index].__locations.end(); it++)
         {
 			pos = path.find(it->__path);
 			// std::cout << "! get lucky\n";
