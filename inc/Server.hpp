@@ -56,9 +56,9 @@ public:
 		buff[BUFFER_SIZE + 1] = '\0';
 			bzero(buff, BUFFER_SIZE);
 			_gl_recv_return = recv(fd, buff, BUFFER_SIZE, 0);
-			buff[_gl_recv_return] = '\0';
+			_my_client.current_size += _gl_recv_return;
+			// buff[_gl_recv_return] = '\0';
 			// std::cerr << buff << std::endl;
-				_my_client.current_size += _gl_recv_return;
 			if(_gl_recv_return > 0)
 			{
 				sure.append(buff);
@@ -71,12 +71,12 @@ public:
 				{
 					size_t j = 0;
 					line += "\n";
+					_my_client.header_size += line.size();
 					if((j = line.find("\r\n")) != _string::npos)
 					{
 						if (j == 0)
 						{
 							_my_client._header_done = true;
-							_my_client.header_size = _my_client.get_buffer().size();
 							return 1;
 						}
 					}
@@ -346,9 +346,10 @@ public:
 							}
 							
 								std::cerr << "SIZE !!!" << ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size<< std::endl;
+								getchar();
 								std::cerr <<  "index server "<< ser._connections[ser.fd_s[i].fd].server_file << std::endl;
 								puts("gets ready");
-								getchar();
+								
 								std::cerr << ser._connections[ser.fd_s[i].fd].get_buffer() << std::endl;
 								// std::cerr <<"for length"<< ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._containers[server_infos.first].__body_size;
 							if (ser._connections[ser.fd_s[i].fd]._done)
@@ -394,7 +395,7 @@ public:
 							if (!messages.empty())
 							{
 								mesg = messages.front();
-								getchar();
+								
 								std::cout << mesg->message << std::endl;
 								std::cout << mesg->response << std::endl;
 								if(send(mesg->_connections.first, mesg->response.c_str(), mesg->response.length(), 0) < 0)
