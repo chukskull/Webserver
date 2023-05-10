@@ -28,8 +28,6 @@ public:
 		// std::string	replace;
 		// int chunkSize = 0;
 		std::stringstream	temp(my_client.get_buffer());
-		std::cerr << "ok sure 1" << std::endl;
-		std::cerr << temp.str() << std::endl;
 		if (temp.str().find("0\r\n\r\n") != _string::npos)
 		{
 			my_client._done = true;
@@ -57,7 +55,7 @@ public:
 			bzero(buff, BUFFER_SIZE);
 			_gl_recv_return = recv(fd, buff, BUFFER_SIZE, 0);
 			_my_client.current_size += _gl_recv_return;
-			// buff[_gl_recv_return] = '\0';
+			buff[_gl_recv_return] = '\0';
 			// std::cerr << buff << std::endl;
 			if(_gl_recv_return > 0)
 			{
@@ -86,113 +84,45 @@ public:
 	}
 	static void	_pars_request(Client &_my_client)
 	{
-		_string						line;
 		size_t							index = 0;
-		// std::stringstream			for_read(_my_client._buffer->str());
 		std::string					header_check;
-		// bool						ok = false;
+		_string						str;
+		size_t						endindex;
 
-		// for_read.seekg(0, std::ios::beg);
 		header_check  = _my_client._buffer->str();
 		if ((index = header_check.find("Content-Length: ")) != _string::npos)
 		{
 			index += 16;
-			size_t	endindex = header_check.find("\r\n", index);
-			_string		str;
-			
+			endindex= header_check.find("\r\n", index);
 			str = header_check.substr(index, endindex - index);
 			_my_client._size = atoi(str.c_str());
 		}
 		else if ((index = header_check.find("Transfer-Encoding: ")) != _string::npos)
 		{
-			std::cerr << index << '\t' << header_check.find("Transfer-Encoding: ")<< " ??0" << std::endl;
 			index += 19;
-			size_t	endindex = header_check.find("\r\n", index);
-			_string	str;
+			endindex = header_check.find("\r\n", index);
 			str = header_check.substr(index, endindex - index);
-			puts(str.c_str());
 			if(str == "chunked")
 			{
-				puts("chnkd ok ");
 				_my_client._done = false;
 				_my_client.is_it_chunked_= true;
-
 			}
 			else
-			{
 				_my_client._done = true;
-			}
 		}
 		else if (header_check.find("Accept-Encoding:") != _string::npos)
-		{
 			_my_client._done = true;
-		}
 		else
-		{
 			perror("request header is not set corretely");
-			// s error
-		}
-		// while(getline(for_read,  line))
-		// {
-		// 	// line += '\n';
-		// 	std::cerr << line << std::endl;
-		// 	getchar();
-		// 	if (line.find("Content-Length:") != _string::npos)
-		// 	{
-		// 		_string						str;
-		// 		str = line.substr(line.find_first_of(" ") + 2);
-		// 		std::stringstream convert;
-		// 		convert << str;
-		// 		convert >> _my_client.is_it_chunked_;
-		// 		std::cerr << _my_client.is_it_chunked_ << "size contentleng " << std::endl;
-		// 		// print_error << std::stoi(str) << std::endl;
-		// 		break ;
-		// 	}
-		// 	else if (line.find("Transfer-Encoding:") != _string::npos)
-		// 	{
-		// 		puts("here");
-		// 		_my_client.is_it_chunked_ = 1;
-		// 		_string	str = line.substr(line.find("chunked"));
-		// 		if (str.compare("chunked"))
-		// 		{
-		// 			_my_client._done = false;
-		// 			ok = true;
-		// 			_my_client.is_it_chunked_ = -1;
-		// 				break ;
-		// 		}
-		// 	}
-			// else if (line.find("Accept-Encoding:") != _string::npos)
-			// {
-			// 	_my_client.is_it_chunked_ = 1;
-			// 	_my_client._done = true;
-			// 	break;
-			// }
-		// }
-		// 	else if (line.find("Accept-Encoding:") != _string::npos)
-		// 	{
-		// 		// _string						str;
-		// 		// str = line.substr(line.find_first_of(" ") + 2);
-		// 		// std::stringstream convert;
-		// 		// convert << str;
-		// 		// convert >> _my_client.is_it_chunked_;
-		// 		_my_client.is_it_chunked_ = 1;
-		// 		if(ok == false)
-		// 		{
-		// 			_my_client._done = true;
-		// 			// getchar();
-		// 			break ;
-
-		// 		}
-
-		// 	// }
-		// }
 	}
+
 	void	initial_server(std::vector<DataConf> &data)
 	{
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
+
 		for(size_t  i = 0; i < data.size(); i++)
 		{
 			for(size_t j = 0; j < data[i].__port.size(); j++)
@@ -208,11 +138,7 @@ public:
 					if (server_fd < 0)
 						continue;
 					else
-					{
 						this->server_fds[server_fd] = std::make_pair(i, j);
-						std::cerr << i << " " << j << std::endl;
-
-					}
 					this->on = 1;
 					rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
 					if (rc < 0)
@@ -281,7 +207,6 @@ public:
 
 		while (1)
 		{
-			// ser.rc = 1;
 			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
 			if (ser.rc < 0)
 			{
@@ -297,12 +222,9 @@ public:
 			{
 				if (ser.fd_s[i].revents & POLLIN || (ser.fd_s[i].revents & POLLOUT))
 				{
-					// std::map<int, pair<int, int>>::iterator	find_;
 					if (ser.server_fds.find(ser.fd_s[i].fd) != ser.server_fds.end())
 					{
 						ser.addrlen = sizeof ser.remoteaddr;
-						
-						// std::cerr << "fds " << index << " " << ser.server_fds.size() << std::endl;
 						int newfd = accept(ser.fd_s[i].fd, (struct sockaddr *) &ser.remoteaddr, &ser.addrlen);
 						if (newfd == -1)
 							perror("accept");
@@ -312,10 +234,8 @@ public:
 							ser.fd_s.back().fd = newfd;
 							ser.fd_s.back().events = POLLIN;
 							ser.fd_counts++;
-							// ser._connections.insert(std::make_pair(newfd, Client()));
 							ser._connections[newfd] = Client(ser.fd_s[i].fd);
 						}
-							puts("here");
 					} 
 					else
 					{
@@ -327,40 +247,23 @@ public:
 						if(_gl_recv_return > 0)
 						{
 							if (_pars_req)
-							{
 								_pars_request(ser._connections[ser.fd_s[i].fd]);
-									
-							}
+
 							if (ser._connections[ser.fd_s[i].fd].is_it_chunked_)
-							{
 								handle_chunked(ser._connections[ser.fd_s[i].fd]);
-							}
+							
 							else if (ser._connections[ser.fd_s[i].fd]._size == (ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size))
-							{
 								ser._connections[ser.fd_s[i].fd]._done = true;
-							}
+
 							if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd]._size) > ser._containers[server_infos.first].__body_size)
 							{
-								std::cerr << ser._connections[ser.fd_s[i].fd].get_buffer();
 								perror("length size so big");
 							}
-							
-								std::cerr << "SIZE !!!" << ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size<< std::endl;
-								getchar();
-								std::cerr <<  "index server "<< ser._connections[ser.fd_s[i].fd].server_file << std::endl;
-								puts("gets ready");
-								
-								std::cerr << ser._connections[ser.fd_s[i].fd].get_buffer() << std::endl;
-								// std::cerr <<"for length"<< ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._containers[server_infos.first].__body_size;
 							if (ser._connections[ser.fd_s[i].fd]._done)
 							{
 								Mesage  *mesg = new Mesage();
-								// string res;
 								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
-								
-								
-								
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
 								std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << std::endl;
 							// need to fill the sockets values in the response
@@ -381,7 +284,7 @@ public:
 							else
 							{
 								//ayman needs to send the client 404 bad request in this
-								puts("sure");
+								
 								perror("recv");
 							}
 							close(ser.fd_s[i].fd);
