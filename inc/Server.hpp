@@ -28,8 +28,8 @@ public:
 		// std::string	replace;
 		// int chunkSize = 0;
 		std::stringstream	temp(my_client.get_buffer());
-		std::cerr << "ok sure 1" << std::endl;
-		std::cerr << temp.str() << std::endl;
+		// std::cerr << "ok sure 1" << std::endl;
+		// std::cerr << temp.str() << std::endl;
 		if (temp.str().find("0\r\n\r\n") != _string::npos)
 		{
 			my_client._done = true;
@@ -346,7 +346,7 @@ public:
 							}
 							
 								std::cerr << "SIZE !!!" << ser._connections[ser.fd_s[i].fd]._size << '\t' << ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size<< std::endl;
-								getchar();
+								// getchar();
 								std::cerr <<  "index server "<< ser._connections[ser.fd_s[i].fd].server_file << std::endl;
 								puts("gets ready");
 								
