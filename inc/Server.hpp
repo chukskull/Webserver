@@ -21,18 +21,78 @@ public:
     	}
    	 	return true;
 	}
+	static bool		decoding_chunked(Client &my_client, _string	&temp)
+	{
+		std::string chunk_size_str;
+    	int chunk_size = 0;
+    	bool read_chunk_size = true;
+		_string	_header = temp.substr(0, my_client.header_size);
+		_string _body = temp.substr(my_client.header_size);
+		std::stringstream _clean_body;
+		// std::cerr << _body << std::endl;
+		(*my_client._buffer).str("");
+		(*my_client._buffer).clear();
+
+		std::cerr << "BUFFEr" << my_client.get_buffer() << std::endl;
+		size_t n = _body.size();
+		for (size_t i = 0; i < n; i++)
+        {
+            if (read_chunk_size)
+            {
+                if (_body[i] == '\r' && _body[i + 1] == '\n')
+                {
+					// std::cerr << chunk_size_str << std::endl;
+					for(size_t k = 0; k <  chunk_size_str.size(); k++)
+					{
+						std::cerr << (int)chunk_size_str[k] << std::endl;
+					}
+					std::stringstream(chunk_size_str) >> std::hex >> chunk_size;
+                    // chunk_size = std::stoi(chunk_size_str, nullptr, 16);
+                    if (chunk_size == 0)
+                    {
+                        // End of chunks
+                        break;
+                    }
+                    chunk_size_str.clear();
+                    read_chunk_size = false;
+                    i++; // Skip '\n'
+                }
+                else
+                {
+                    chunk_size_str += _body[i];
+                }
+            }
+            else
+            {
+                _clean_body.write(&_body[i], 1);
+				// std::cerr << _body[i] << std::endl;
+                chunk_size--;
+                if (chunk_size == 0)
+                {
+                    // End of current chunk
+                    read_chunk_size = true;
+                }
+            }
+		}
+		(*my_client._buffer) << (_header + _clean_body.str());
+		return 1;
+	}
 	static void    handle_chunked(Client &my_client)
 	{
 		// std::string line;
 		// std::string fusil("");
 		// std::string	replace;
 		// int chunkSize = 0;
-		std::stringstream	temp(my_client.get_buffer());
-		if (temp.str().find("0\r\n\r\n") != _string::npos)
+		bool	error;
+		_string	temp(my_client.get_buffer());
+		if (temp.find("0\r\n\r\n") != _string::npos)
 		{
 			my_client._done = true;
 		}
-		
+		if (my_client._done)
+		{
+			error = decoding_chunked(my_client, temp);
+		}
 		// my_client._buffer->str("");
 		// while (std::getline(temp, line))
 		// {
