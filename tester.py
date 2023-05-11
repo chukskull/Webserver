@@ -1,7 +1,7 @@
 import http.client
 
 host = "127.0.0.1:8081"
-body = "0" * 10000
+body = "0" * 17999
 
 def chunk_data(data, chunk_size):
     dl = len(data)
@@ -25,7 +25,7 @@ url = "/"
 conn.putrequest('POST', url)
 conn.putheader('Transfer-Encoding', 'chunked')
 conn.endheaders()
-conn.send(chunk_data(body, 30000).encode('utf-8'))
+conn.send(chunk_data(body, 300).encode('utf-8'))
 
 resp = conn.getresponse()
 print(resp.status, resp.reason)

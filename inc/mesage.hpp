@@ -3,12 +3,15 @@
 
 #include "headers.hpp"
 
+
 struct Mesage
 {
-	_string						message;
-	_string						response;
+	_string									message;
+	_string									response;
 	//lwl client tani is the server
-	std::pair<int, int>	_connections;
+	//int lwla index server;
+	//int tanya index port;
+	std::pair<int, std::pair<int, int> >	_connections;
 };
 
 
