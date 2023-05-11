@@ -167,6 +167,8 @@ void fill_content_type(HTTP_request &req, string &content_type)
 bool check_for_end_boundary(string &body, string &boundary)
 {
 	// print("body:" + body);
+	if (body.find("--" + boundary) != string::npos)
+		std::cout << "wa mok\n";
 	if (body.find("--" + boundary) != string::npos && (body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 5))) )
 		return true;
 	return false;

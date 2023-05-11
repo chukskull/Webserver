@@ -128,7 +128,8 @@ private:
 				file.read(buff , max_size);
 				try
 				{
-					file_content += buff;
+					// std::cout << "gcount: " << file.gcount() << std::endl;
+					file_content.append(buff, file.gcount());
 				}
 				catch (...)
 				{
