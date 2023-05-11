@@ -42,7 +42,7 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
@@ -129,6 +129,7 @@ private:
 				{
 					// std::cout << "gcount: " << file.gcount() << std::endl;
 					file_content.append(buff, file.gcount());
+					std::cout << "------>" << file_content.length() << std::endl;
 				}
 				catch (...)
 				{
@@ -144,7 +145,7 @@ private:
 					break;
 			}
 			file.close();
-			response.content_length = std::to_string(file_content.size());
+			response.content_length = std::to_string(file_content.length());
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -158,7 +159,7 @@ public:
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second);
+		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
