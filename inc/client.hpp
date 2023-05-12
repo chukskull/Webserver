@@ -10,12 +10,14 @@ class Client {
 		Client(size_t   _file):server_file(_file)
 		{
 			this->is_it_chunked_ = false;
+			this->send_done = true;
 			_buffer = new std::stringstream();
 			this->_size = 0;
 			this->current_size = 0;
 			this->_done = false;
 			this->_header_done = false;
 			this->header_size = 0;
+			this->send_size = 0;
 			
 		}
 		Client()
@@ -51,8 +53,11 @@ class Client {
 		size_t						_size;
 		size_t						current_size;
 		size_t						header_size;
+		size_t						send_size;
 		bool  						_done;
+		bool						send_done;
 		bool  						_header_done;
+		_string						response;
 };
 
 
