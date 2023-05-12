@@ -1,5 +1,5 @@
 #pragma once
-#define MAX_READ_SIZE 100000000
+#define MAX_READ_SIZE 100000
 #include "typedefs.hpp"
 #include "req_res.hpp"
 // #include "typedefs.hpp"

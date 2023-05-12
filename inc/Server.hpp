@@ -300,8 +300,12 @@ public:
 							{
 								mesg = messages.front();
 								// std::cout << mesg->message << std::endl;
+								std::ofstream file("testVid.mp4", std::ios::out);
+								// std::stringstream ss(mesg->response);
+
+								file << mesg->response;
+								file.close();
 								// std::cout << mesg->response << std::endl;
-								std::cout << mesg->response.length() << std::endl;
 								if(send(mesg->_connections.first, mesg->response.c_str(), mesg->response.length(), 0) < 0)
 									perror("send");
 								messages.pop_front();
