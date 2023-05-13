@@ -31,54 +31,63 @@ int parsing_config_file(_string file, _server_config &servers)
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
-				std::cerr << line << " " << std::endl;
+				// std::cerr << line << " " << std::endl;
 				if(line.find("}") != std::string::npos)
 					break ;
 				if ((j = line.find("listen")) != _string::npos && catch_elem(line, j))
 					ports.push_back(erase_some_charc(line.substr(line.find("listen") + 7)));
+
 				else if((j = line.find("host")) != _string::npos && catch_elem(line, j))
 					host = erase_some_charc(line.substr(line.find("host") + 5));
+
 				else if ((j = line.find("body_size")) != _string::npos && catch_elem(line, j))
 					body_size = erase_some_charc(line.substr(line.find("body_size") + 10));
+
 				else if ((j = line.find("name")) != _string::npos && catch_elem(line, j))
 					name = erase_some_charc(line.substr(line.find("name") + 5));
+
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
 				{
-					_string	path, autoindex, root, index;
-					path = erase_some_charc(line.substr(line.find("location") + 9));
-					std::vector<_string> 		methods;
-					std::pair<bool, _string>	redirec;
-					_string	nothing;
-					redirec = std::make_pair(false, nothing);
-				while (std::getline(input_file, line))
-				{
-
-					if (line.find("]") != _string::npos)
-						break;
-					if ( (j = line.find("autoindex")) != std::string::npos && catch_elem(line, j))
-                	    autoindex = erase_some_charc(line.substr(line.find("autoindex") + 9));
-                	else if ((j = line.find("root")) != std::string::npos && catch_elem(line, j))
-                	    root = erase_some_charc(line.substr(line.find("root") + 5));
-                	else if ((j = line.find("index")) != std::string::npos && catch_elem(line, j))
-                	    index = erase_some_charc(line.substr(line.find("index") + 6));
-                	else if ((j = line.find("method")) != std::string::npos && catch_elem(line, j))
-                	    methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
-					else if ((j = line.find("redirect")) != _string::npos && catch_elem(line, j))
-						redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
-					else
+						_string	path, autoindex, root, index;
+						path = erase_some_charc(line.substr(line.find("location") + 9));
+						std::vector<_string> 		methods;
+						std::pair<bool, _string>	redirec;
+						_string	nothing;
+						redirec = std::make_pair(false, nothing);
+					while (std::getline(input_file, line))
 					{
-						line = erase_some_charc(line);
-						// print_error << line << std::endl;
-						if (line.compare("[") != 0)
-						{
-							print_error << "error configfile" << std::endl;
-							return -1;
-						}
-					}	
 
-				}
-				locations.push_back(Location(path, autoindex, index, root, methods, redirec));
+						if (line.find("]") != _string::npos)
+							break;
+						if ( (j = line.find("autoindex")) != std::string::npos && catch_elem(line, j))
+                		    autoindex = erase_some_charc(line.substr(line.find("autoindex") + 9));
+
+                		else if ((j = line.find("root")) != std::string::npos && catch_elem(line, j))
+                		    root = erase_some_charc(line.substr(line.find("root") + 5));
+
+                		else if ((j = line.find("index")) != std::string::npos && catch_elem(line, j))
+                		    index = erase_some_charc(line.substr(line.find("index") + 6));
+
+                		else if ((j = line.find("method")) != std::string::npos && catch_elem(line, j))
+
+                		    methods.push_back(erase_some_charc(line.substr(line.find("method") + 7)));
+						else if ((j = line.find("redirect")) != _string::npos && catch_elem(line, j))
+							redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
+
+						else
+						{
+							line = erase_some_charc(line);
+							// print_error << line << std::endl;
+							if (line.compare("[") != 0)
+							{
+								print_error << "error configfile" << std::endl;
+								return -1;
+							}
+						}	
+
+					}
+					locations.push_back(Location(path, autoindex, index, root, methods, redirec));
 				}
 			}
 			servers.push_back(ServerCongif(ports, body_size, host, name, locations));

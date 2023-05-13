@@ -19,6 +19,7 @@ size_t	escape_white_space(_string my_string)
 _string		erase_some_charc(_string my_string)
 {
 	std::vector<char> sure;
+
 	sure.push_back(' ');
 	sure.push_back('\t');
 	sure.push_back('\n');
