@@ -322,7 +322,7 @@ public:
 			{
 				if (ser.fd_s[i].revents & POLLIN)
 				{
-					std::cerr << "waiting..." << std::endl;
+					// std::cerr << "waiting..." << std::endl;
 					if (ser.server_fds.find(ser.fd_s[i].fd) != ser.server_fds.end())
 					{
 						ser.addrlen = sizeof ser.remoteaddr;
@@ -369,14 +369,16 @@ public:
 								Mesage  *mesg = new Mesage();
 								//std::cerr <<  ser._connections[ser.fd_s[i].fd].get_buffer().size() << '\t' <<ser._connections[ser.fd_s[i].fd]._size << '\t' <<  (ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size) << std::endl;
 								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
-								//std::cerr << mesg->message.size() -  ser._connections[ser.fd_s[i].fd].header_size<< "PURITY" << std::endl;
+								// std::cerr << mesg->message.size() -  ser._connections[ser.fd_s[i].fd].header_size<< "PURITY" << std::endl;
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
 								// //std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								
+								// std::cout << ":::" << mesg->message.size() << std::endl;
+								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
+								// std::cout << ":-:" << mesg->message.substr(0, 400) << std::endl;
 								handl_request.handle(*mesg);
 								
-								ser._connections[ser.fd_s[i].fd].response = mesg->response;
+								ser._connections[ser.fd_s[i].fd].response.swap(mesg->response);
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}

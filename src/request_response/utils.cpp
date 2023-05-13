@@ -167,8 +167,10 @@ void fill_content_type(HTTP_request &req, string &content_type)
 bool check_for_end_boundary(string &body, string &boundary)
 {
 	// print("body:" + body);
-	if (body.find("--" + boundary) != string::npos)
-		std::cout << "wa mok\n";
+	// if (body.find("--" + boundary) != string::npos)
+	// print(boundary);
+	// print(body.substr(body.size() - 200));
+	// print(body + body.find("--" + boundary + "--"));
 	if (body.find("--" + boundary) != string::npos && (body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 5))) )
 		return true;
 	return false;
@@ -323,7 +325,10 @@ size_t write_to_file(string &file_path, string &content)
 
 	if (file.is_open())
 	{
-		file << content;
+		std::cout << content.size() << std::endl;
+		// std::cout << content.substr(0, 300) << std::endl;
+		file.write(content.c_str(), content.size());
+		// file << content;
 		file.close();
 		return (200);
 	}
