@@ -39,13 +39,9 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 		{
 			ReqLoc req_loc;
 			if(it_2->get_auto_index().compare("false"))
-			{
 				req_loc._autoindex = false;
-			}
 			else if (it_2->get_auto_index().compare("true"))
-			{
 				req_loc._autoindex = true;
-			}
 			else
 				return -1;
 			req_loc.__path = it_2->get_path();

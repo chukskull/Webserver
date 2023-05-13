@@ -9,7 +9,7 @@ struct ReqLoc
 {
 	bool                        _autoindex;
 	_string		                __path;
-	// vector<_string>             __files;
+	// vector<_string>			__files;
 	_string						__file;
 	_string                     __root;
 	MethAllow                   _AllowMeth;
