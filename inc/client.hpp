@@ -10,7 +10,6 @@ class Client {
 		Client(size_t   _file):server_file(_file)
 		{
 			this->is_it_chunked_ = false;
-			this->send_done = true;
 			_buffer = new std::stringstream();
 			this->_size = 0;
 			this->current_size = 0;
@@ -32,16 +31,13 @@ class Client {
 		void	clear()
 		{
 			this->is_it_chunked_ = false;
-			this->send_done = true;
 			if (_buffer != NULL)
 			{
 				delete _buffer;
 				_buffer = new std::stringstream();
 			}
 			else
-			{
 				_buffer = new std::stringstream();
-			}
 			this->_size = 0;
 			this->current_size = 0;
 			this->_done = false;
