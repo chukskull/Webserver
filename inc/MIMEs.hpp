@@ -115,6 +115,7 @@ private:
         types.insert(std::make_pair("rar", "application/x-rar-compressed"));
         types.insert(std::make_pair("rpm", "application/x-redhat-package-manager"));
         types.insert(std::make_pair("sea", "application/x-sea"));
+        types.insert(std::make_pair("mp4", "video/mp4"));
     } 
     void reverse_()
     {

@@ -32,6 +32,7 @@ struct file_info
 
 class servers_library 
 {
+    public:
     vector<DataConf> _servers;
     string _path;
 	// static std::ofstream fake_db;

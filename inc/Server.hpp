@@ -281,8 +281,9 @@ public:
 			}
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{
-				if (ser.fd_s[i].revents & POLLIN || (ser.fd_s[i].revents & POLLOUT))
+				if (ser.fd_s[i].revents & POLLIN)
 				{
+					std::cerr << "waiting..." << std::endl;
 					if (ser.server_fds.find(ser.fd_s[i].fd) != ser.server_fds.end())
 					{
 						ser.addrlen = sizeof ser.remoteaddr;
@@ -291,15 +292,18 @@ public:
 							perror("accept");
 						else
 						{
+							std::cerr << ser.fd_s[i].fd << std::endl;
+							std::cerr << "dima new client ??" << std::endl;
 							ser.fd_s.push_back(pollfd());
 							ser.fd_s.back().fd = newfd;
 							ser.fd_s.back().events = POLLIN;
 							ser.fd_counts++;
 							ser._connections[newfd] = Client(ser.fd_s[i].fd);
 						}
-					} 
+					}
 					else
 					{
+						std:: cerr << "client phase " <<ser.fd_s[i].fd << std::endl;
 						std::pair<int, int> server_infos;
 						server_infos = get_server_infos(ser.server_fds, ser.fd_s[i].fd, ser._connections);
 						string res;
@@ -320,17 +324,23 @@ public:
 							{
 								perror("length size so big");
 							}
-							if (ser._connections[ser.fd_s[i].fd]._done)
+							std::cerr << ser._connections[ser.fd_s[i].fd].send_done << std::endl;
+							if (ser._connections[ser.fd_s[i].fd]._done && ser._connections[ser.fd_s[i].fd].send_done)
 							{
 								Mesage  *mesg = new Mesage();
+
 								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
-								std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << std::endl;
+								std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
+								std::cerr << mesg->message  << std::endl;
 							// need to fill the sockets values in the response
 
 								handl_request.handle(*mesg);
 								messages.push_back(mesg);
+								ser._connections[ser.fd_s[i].fd].response = mesg->response;
+								ser.fd_s[i].events = POLLOUT;
+								// ser._connections[ser.fd_s[i].fd] = POLLOUT;
 								// std::cout << mesg->response << std::endl;
 								// print_error << mesg->message << std::endl;
 								// std::cerr << mesg->message.size() << std::endl;
@@ -338,8 +348,10 @@ public:
 							}
 						}
 						int sender_fd = ser.fd_s[i].fd;
+						std::cerr << "here client" << std::endl;
 						if (_gl_recv_return <= 0)
 						{
+							std::cerr << "pretty sure " << std::endl;
 							if (_gl_recv_return == 0) 
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
 							else
@@ -353,28 +365,114 @@ public:
 							ser._connections.erase(ser.fd_s[i].fd);
 							ser.fd_s.pop_back();
 						}
-						else
-						{
-							Mesage *mesg;
-							if (!messages.empty())
-							{
-								mesg = messages.front();
+						// else
+						// {
+						// 	Mesage *mesg;
+						// 	ssize_t s;
+						// 	std::cerr << "pop" << std::endl;
+						// 	if (!messages.empty())
+						// 	{
+						// 		mesg = messages.front();
+						// 		// std::cout << mesg->message << std::endl;
+						// 		// std::ofstream file("testVid.mp4", std::ios::out);
+						// 		// std::stringstream ss(mesg->response);
+
+						// 		// file << mesg->response;
+						// 		// file.close();
+						// 		// std::cout << mesg->response << std::endl
+						// 		// size_t	size_bod = mesg->response.length();
 								
-								std::cout << mesg->message << std::endl;
-								std::cout << mesg->response << std::endl;
-								if(send(mesg->_connections.first, mesg->response.c_str(), mesg->response.length(), 0) < 0)
-									perror("send");
-								messages.pop_front();
-								close(mesg->_connections.first);
-							}
-							// print_error <<" "<< pair_found.first << std::endl;
-							// this part gonna send back the response to a client
-							// close(pair_found.first);
-						}
+						// 		s = send(mesg->_connections.first, mesg->response.c_str(), 2000, 0);
+
+						// 		mesg->response.erase(0, 2000);
+						// 		// if (s != static_cast<ssize_t>(mesg->response.length()))
+						// 		// {
+						// 		// 	std::cerr << "FLAWLESS " << std::endl;
+						// 		// 	std:: cerr << mesg->_connections.first << std::endl;
+						// 		// 	ser._connections[ser.fd_s[i].fd].send_done = false;
+						// 		// }
+						// 		ser._connections[ser.fd_s[i].fd].send_size += s;
+						// 		// else
+						// 		// {
+						// 		// 	std::cerr << "sure done" <<std::endl;
+						// 		// 	ser._connections[ser.fd_s[i].fd].send_done = true;
+						// 		// 	close(mesg->_connections.first);
+						// 		// }
+						// 		std::cerr << s  << '\t' << mesg->response.length() << std::endl;
+						// 		if( s <= 0 )
+						// 		{
+						// 			std::cerr << "sure done" <<std::endl;
+						// 			ser._connections[ser.fd_s[i].fd].send_size = 0;
+						// 			ser._connections[ser.fd_s[i].fd].send_done = true;
+						// 			messages.pop_front();
+
+						// 			close(mesg->_connections.first);
+						// 		}
+								
+
+						// 	continue;
+						// 	}
+						// 	// print_error <<" "<< pair_found.first << std::endl;
+						// 	// this part gonna send back the response to a client
+						// 	// close(pair_found.first);
+						// }
 					}
-					continue;
 				}
-			}
+				else if (ser.fd_s[i].revents & POLLOUT)
+				{
+					// Mesage *mesg;
+					std::cerr << mesg.size() << std::endl;
+					ssize_t s;
+					std::cerr << "pop" << std::endl;
+						if (ser._connections[ser.fd_s[i].fd].response.size())
+						{
+						
+							// std::cout << mesg->message << std::endl;
+							// std::ofstream file("testVid.mp4", std::ios::out);
+							// std::stringstream ss(mesg->response);
+
+							// file << mesg->response;
+							// file.close();
+							// std::cout << mesg->response << std::endl
+							// size_t	size_bod = mesg->response.length();
+
+							s = send(ser.fd_s[i].fd,ser._connections[ser.fd_s[i].fd].response.c_str(), 1200, 0);
+							if (s < 0)
+							{
+								// getchar();
+								perror("send");
+							}
+							if (s > 0)
+							{
+								ser._connections[ser.fd_s[i].fd].response.erase(0, 1200);
+							}
+							// if (s != static_cast<ssize_t>(mesg->response.length()))
+							// {
+							// 	std::cerr << "FLAWLESS " << std::endl;
+							// 	std:: cerr << mesg->_connections.first << std::endl;
+							// 	ser._connections[ser.fd_s[i].fd].send_done = false;
+							// }
+							// ser._connections[ser.fd_s[i].fd].send_size += s;
+							// else
+							// {
+							// 	std::cerr << "sure done" <<std::endl;
+							// 	ser._connections[ser.fd_s[i].fd].send_done = true;
+							// 	close(mesg->_connections.first);
+							// }
+							std::cerr << s  << '\t' << ser._connections[ser.fd_s[i].fd].response.length() << std::endl;
+							if(ser._connections[ser.fd_s[i].fd].response.size() == 0)
+							{
+								// getchar();
+								std::cerr << "sure done" <<std::endl;
+								ser._connections[ser.fd_s[i].fd].send_size = 0;
+								ser._connections[ser.fd_s[i].fd].send_done = true;
+								messages.pop_front();
+								close(ser.fd_s[i].fd);
+							}
+						}
+						
+				}
+			}		
 		}
 	}
 		std::map<int, std::pair<int, int> >		server_fds;
