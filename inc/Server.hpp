@@ -248,11 +248,44 @@ public:
 		std::map<int, std::pair<int, int> >::iterator	it = servers.find(srvr);
 		return it->second;
 	}
+	static	int	send_response(Client &my_client, int fd)
+	{
+			ssize_t		s;
+			if (my_client.response.size())
+			{
+				if (my_client.response.size() > BUFFER_SEND)
+				{
+					s = send(fd ,my_client.response.c_str(), BUFFER_SEND, 0);
+					if (s < 0)
+						return -1;
+					if (s > 0)
+						my_client.response.erase(0, 1200);
+				}
+				else
+				{
+					s = send(fd, my_client.response.c_str(), my_client.response.length(), 0);
+					if (s > 0)
+						my_client.response.clear();
+
+					else
+						return -1;
+
+				}
+				std::cerr << s  << '\t' << my_client.response.length() << std::endl;
+				if(my_client.response.size() == 0)
+				{
+					// getchar();
+					my_client.clear();
+					close(fd);
+				}
+			}
+			return 0;		
+	}
 
    static void run(std::vector<DataConf> &__vec_data)
    {
 		handler handl_request;
-		deque<Mesage*> messages;
+		// deque<Mesage*> messages;
 		lib.set(__vec_data);
 
 		Server  ser(__vec_data);
@@ -332,19 +365,12 @@ public:
 								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
-								std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								std::cerr << mesg->message  << std::endl;
-							// need to fill the sockets values in the response
-
+								// std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
+								// std::cerr << mesg->message  << std::endl;
 								handl_request.handle(*mesg);
-								messages.push_back(mesg);
+								
 								ser._connections[ser.fd_s[i].fd].response = mesg->response;
 								ser.fd_s[i].events = POLLOUT;
-								// ser._connections[ser.fd_s[i].fd] = POLLOUT;
-								// std::cout << mesg->response << std::endl;
-								// print_error << mesg->message << std::endl;
-								// std::cerr << mesg->message.size() << std::endl;
-								// print_error << "object send to ayman " <<mesg->_connections.first << " " <<mesg->_connections.second << std::endl;
 							}
 						}
 						int sender_fd = ser.fd_s[i].fd;
@@ -365,112 +391,14 @@ public:
 							ser._connections.erase(ser.fd_s[i].fd);
 							ser.fd_s.pop_back();
 						}
-						// else
-						// {
-						// 	Mesage *mesg;
-						// 	ssize_t s;
-						// 	std::cerr << "pop" << std::endl;
-						// 	if (!messages.empty())
-						// 	{
-						// 		mesg = messages.front();
-						// 		// std::cout << mesg->message << std::endl;
-						// 		// std::ofstream file("testVid.mp4", std::ios::out);
-						// 		// std::stringstream ss(mesg->response);
-
-						// 		// file << mesg->response;
-						// 		// file.close();
-						// 		// std::cout << mesg->response << std::endl
-						// 		// size_t	size_bod = mesg->response.length();
-								
-						// 		s = send(mesg->_connections.first, mesg->response.c_str(), 2000, 0);
-
-						// 		mesg->response.erase(0, 2000);
-						// 		// if (s != static_cast<ssize_t>(mesg->response.length()))
-						// 		// {
-						// 		// 	std::cerr << "FLAWLESS " << std::endl;
-						// 		// 	std:: cerr << mesg->_connections.first << std::endl;
-						// 		// 	ser._connections[ser.fd_s[i].fd].send_done = false;
-						// 		// }
-						// 		ser._connections[ser.fd_s[i].fd].send_size += s;
-						// 		// else
-						// 		// {
-						// 		// 	std::cerr << "sure done" <<std::endl;
-						// 		// 	ser._connections[ser.fd_s[i].fd].send_done = true;
-						// 		// 	close(mesg->_connections.first);
-						// 		// }
-						// 		std::cerr << s  << '\t' << mesg->response.length() << std::endl;
-						// 		if( s <= 0 )
-						// 		{
-						// 			std::cerr << "sure done" <<std::endl;
-						// 			ser._connections[ser.fd_s[i].fd].send_size = 0;
-						// 			ser._connections[ser.fd_s[i].fd].send_done = true;
-						// 			messages.pop_front();
-
-						// 			close(mesg->_connections.first);
-						// 		}
-								
-
-						// 	continue;
-						// 	}
-						// 	// print_error <<" "<< pair_found.first << std::endl;
-						// 	// this part gonna send back the response to a client
-						// 	// close(pair_found.first);
-						// }
 					}
 				}
 				else if (ser.fd_s[i].revents & POLLOUT)
 				{
-					// Mesage *mesg;
-					std::cerr << mesg.size() << std::endl;
-					ssize_t s;
-					std::cerr << "pop" << std::endl;
-						if (ser._connections[ser.fd_s[i].fd].response.size())
-						{
-						
-							// std::cout << mesg->message << std::endl;
-							// std::ofstream file("testVid.mp4", std::ios::out);
-							// std::stringstream ss(mesg->response);
-
-							// file << mesg->response;
-							// file.close();
-							// std::cout << mesg->response << std::endl
-							// size_t	size_bod = mesg->response.length();
-
-							s = send(ser.fd_s[i].fd,ser._connections[ser.fd_s[i].fd].response.c_str(), 1200, 0);
-							if (s < 0)
-							{
-								// getchar();
-								perror("send");
-							}
-							if (s > 0)
-							{
-								ser._connections[ser.fd_s[i].fd].response.erase(0, 1200);
-							}
-							// if (s != static_cast<ssize_t>(mesg->response.length()))
-							// {
-							// 	std::cerr << "FLAWLESS " << std::endl;
-							// 	std:: cerr << mesg->_connections.first << std::endl;
-							// 	ser._connections[ser.fd_s[i].fd].send_done = false;
-							// }
-							// ser._connections[ser.fd_s[i].fd].send_size += s;
-							// else
-							// {
-							// 	std::cerr << "sure done" <<std::endl;
-							// 	ser._connections[ser.fd_s[i].fd].send_done = true;
-							// 	close(mesg->_connections.first);
-							// }
-							std::cerr << s  << '\t' << ser._connections[ser.fd_s[i].fd].response.length() << std::endl;
-							if(ser._connections[ser.fd_s[i].fd].response.size() == 0)
-							{
-								// getchar();
-								std::cerr << "sure done" <<std::endl;
-								ser._connections[ser.fd_s[i].fd].send_size = 0;
-								ser._connections[ser.fd_s[i].fd].send_done = true;
-								messages.pop_front();
-								close(ser.fd_s[i].fd);
-							}
-						}
-						
+					ssize_t 	s;
+					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
+					if (s < 0)
+						continue;
 				}
 			}		
 		}

@@ -29,7 +29,26 @@ class Client {
 			// this->_header_done = false;
 		}
 
-
+		void	clear()
+		{
+			this->is_it_chunked_ = false;
+			this->send_done = true;
+			if (_buffer != NULL)
+			{
+				delete _buffer;
+				_buffer = new std::stringstream();
+			}
+			else
+			{
+				_buffer = new std::stringstream();
+			}
+			this->_size = 0;
+			this->current_size = 0;
+			this->_done = false;
+			this->_header_done = false;
+			this->header_size = 0;
+			this->send_size = 0;
+		}
 		void AppendData(const std::string& data)
 		{
 			(*_buffer) << data; // Use the * operator to dereference the pointer and append data
