@@ -35,26 +35,22 @@ public:
 
 		//std::cerr << "BUFFEr" << my_client.get_buffer() << std::endl;
 		size_t n = _body.size();
-		std::cerr << "body size : "<<_body.size() << std::endl;
 		for (size_t i = 0; i < n; i++)
         {
-			
+
             if (read_chunk_size)
             {
                 if (_body[i] == '\r' && _body[i + 1] == '\n')
                 {
 					if (chunk_size_str.size() == 0)
 						continue;
-					for(size_t k= 0 ; k < chunk_size_str.size(); k++)
-					{
-						std::cerr << (int) chunk_size_str[k] << std::endl;
-					}
 					// chunk_size = 0;
 					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
 					if (chunk_size_str == "0\r\n\r\n")
 					{
 						break ;
 					}
+					std::cerr << chunk_size << std::endl;
                     chunk_size_str.clear();
                     read_chunk_size = false;
 					i++; // Skip '\n'
@@ -67,12 +63,11 @@ public:
             }
             else
             {
-                chunk_size--;
-                _clean_body.write(&_body[i], 1);
-                if (chunk_size == 0)
-                {
-                    read_chunk_size = true;
-                }
+                // chunk_size--;
+                _clean_body.write(&_body[i], chunk_size);
+                read_chunk_size = true;
+                i += chunk_size;
+				i--;
             }
 		}
 		// _string	_clen(_clean_body.str());
@@ -98,7 +93,6 @@ public:
 			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
 				my_client._done = true;
 			// std::cerr << "finished" << std::endl;
-			std::cerr << temp.size() << " " <<my_client.get_buffer().size() << "checiking size ok " << std::endl;
 		}
 		if (my_client._done)
 		{
