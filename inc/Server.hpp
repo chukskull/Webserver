@@ -38,6 +38,7 @@ public:
 		std::cerr << "body size : "<<_body.size() << std::endl;
 		for (size_t i = 0; i < n; i++)
         {
+			
             if (read_chunk_size)
             {
                 if (_body[i] == '\r' && _body[i + 1] == '\n')
