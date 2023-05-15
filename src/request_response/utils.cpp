@@ -170,8 +170,11 @@ bool check_for_end_boundary(string &body, string &boundary)
 	// if (body.find("--" + boundary) != string::npos)
 	// print(boundary);
 	// print(body.substr(body.size() - 200));
+	// if(body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 6)))
+	// 	std::cout << "true\n";
 	// print(body + body.find("--" + boundary + "--"));
-	if (body.find("--" + boundary) != string::npos && (body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 5))) )
+	// print(body.substr(body.size() - (boundary.size() + 6)));
+	if (body.find("--" + boundary) != string::npos && (body.find("--" + boundary + "--") == (body.size() - (boundary.size() + 6))) )
 		return true;
 	return false;
 }
@@ -180,8 +183,8 @@ bool find_boundary(std::stringstream &body_stream, string &boundary)
 {
 	string line;
 
-	std::getline(body_stream, line, '\r');
-	if ("--" + boundary == line)
+	std::getline(body_stream, line, '\n');
+	if ("--" + boundary + "\r" == line)
 	{
 		return true;
 	}
@@ -191,15 +194,22 @@ bool find_boundary(std::stringstream &body_stream, string &boundary)
 bool handle_content_disposition(std::stringstream &body_stream, form_part &part, string &boundary)
 {
 	string line;
+	string trash;
 	std::stringstream _stream;
 	size_t pos;
 	bool ret = false;
 
-	while (std::getline(body_stream, line, '\r') and line != string(""))
+	// std::cout << body_stream.str() << "\n";
+	// print(body_stream.str());
+	// std::cout << std::getline(body_stream, line, '\n') << "\n";
+	while ((std::getline(body_stream, line, '\r') && std::getline(body_stream, trash, '\n'))and line != string(""))
 	{
-
+		// std::cout << "entery:";
+		// print(line);
 		_stream.str(line);
-		std::cout << "line:" << line << "\n";
+		// getline(_stream, line, '\r');
+		// _stream.str(line);
+		// std::cout << "line:" << line << "\n";
 
 		if (line == "--" + boundary)
 		{
@@ -207,10 +217,15 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 			break;
 		}
 		std::getline(_stream, line, ':');
+		// std::cout << "line1:";
+		// print(line);
+		// break;
 		if (_to_lower(line) == "content-disposition")
 		{
+			// std::cout << "is content-disposition\n";
 			ret = true;
 			std::getline(_stream, line, ';');
+			// std::cout << "line:" << line << "\n";
 			if (line.find("form-data") == line.npos)
 			{
 				std::cout << "form-data not found\n";
@@ -219,10 +234,11 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 			while (1)
 			{
 				std::getline(_stream, line, ';');
+				// std::cout << "line2:" << line << "\n";
 				if ((pos= line.find("filename=")) != line.npos)
 				{
 					part.filename = line.substr(pos + 10, line.rfind("\"") - 11);
-					cout << "0000" << part.filename << "0000" << std::endl;
+					// cout << "0000" << part.filename << "0000" << std::endl;
 				}
 				else if ((pos = line.find("name=")) != line.npos)
 				{
@@ -232,23 +248,27 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 				if (_stream.eof())
 				{
 
-					std::cout << "function was broken here 2\n";
+					// std::cout << "function was broken here 2\n";
 					break;
 				}
 			}
+			// break;
 		}
-		else if(_to_lower(line) == "Content-Type")
-		{
-			std::getline(_stream, line, '\r');
-			part.content_type = line;
-		}
+		// // else if(_to_lower(line) == "Content-Type")
+		// // {
+		// // 	std::getline(_stream, line, '\r');
+		// // 	part.content_type = line;
+		// }
 		if (body_stream.eof())
 		{
-
-			std::cout << "function was broken here 3\n";
+			std::cout << "eof\n";
+			// std::cout << "function was broken here 3\n";
 			break;
 		}
 	}
+	// std::cout << "----";
+	// print(line);
+	// std::cout << std::endl;
 	if (line != "")
 	{
 		std::cout << "line is not \\r\n";
@@ -263,14 +283,18 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 	string boundary = "--" + b;
 	char c;
 	size_t pos;
-
+	// std::cout << "got here100\n";
+	// std::ofstream file("tmp.txt", std::ios::in | std::ios::out | std::ios::trunc);
+	// file.write(body_stream.str().substr(body_stream.str().size() - 500).c_str() , body_stream.str().size());
 	while (1)// check also for max_read_size
 	{
 		// cout << "got here2\n";
 		// print(p);
 		body_stream.get(c);
 		p.append(1, c);
-		pos = p.rfind(boundary + "\r");
+		// std::cout << "P: " << p << "\n";
+		pos = p.find(boundary);
+		// std::cout << "--" << pos << "=" << p.npos << "\n";
 		// cout << p << std::endl;
 		if ((pos != p.npos))
 		{
@@ -278,12 +302,17 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			part.content.swap(p);
 			return (true);
 		}
-		pos = p.rfind(boundary + "--\r");
+		pos = p.rfind(boundary + "--");
 		if ((pos != p.npos))
 		{
 			p.erase(pos);
 			part.content.swap(p);
 			return (false);
+		}
+		if (body_stream.eof())
+		{
+			std::cout << "function was broken here 4\n";
+			return false;
 		}
 	}
 }
@@ -295,13 +324,13 @@ bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 
 	form_part part;
 
+	
 	if (find_boundary(body_stream, boundary) == false)
 	{
 		return false;
 	}
 	while (1)
 	{
-
 		if (handle_content_disposition(body_stream, part, boundary) == false)
 		{
 			std::cout << "handle_content_disposition failed\n";
