@@ -35,23 +35,28 @@ public:
 
 		//std::cerr << "BUFFEr" << my_client.get_buffer() << std::endl;
 		size_t n = _body.size();
+		std::cerr << "body size : "<<_body.size() << std::endl;
 		for (size_t i = 0; i < n; i++)
         {
             if (read_chunk_size)
             {
                 if (_body[i] == '\r' && _body[i + 1] == '\n')
                 {
-					// //std::cerr << chunk_size_str << std::endl;
-					std::stringstream(chunk_size_str) >> std::hex >> chunk_size;
-                    // chunk_size = std::stoi(chunk_size_str, nullptr, 16);
-                    if (chunk_size == 0)
-                    {
-                        // End of chunks
-                        break;
-                    }
+					if (chunk_size_str.size() == 0)
+						continue;
+					for(size_t k= 0 ; k < chunk_size_str.size(); k++)
+					{
+						std::cerr << (int) chunk_size_str[k] << std::endl;
+					}
+					// chunk_size = 0;
+					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
+					if (chunk_size_str == "0\r\n\r\n")
+					{
+						break ;
+					}
                     chunk_size_str.clear();
                     read_chunk_size = false;
-                    i++; // Skip '\n'
+					i++; // Skip '\n'
                 }
                 else
                 {
@@ -61,18 +66,25 @@ public:
             }
             else
             {
-                _clean_body.write(&_body[i], 1);
-				// //std::cerr << _body[i] << std::endl;
                 chunk_size--;
+                _clean_body.write(&_body[i], 1);
+				// std::cerr << chunk_size << std::endl;
                 if (chunk_size == 0)
                 {
-                    // End of current chunk
+					// chunk_size = 0;
+					// getchar();
+                    // End of current chun k
                     read_chunk_size = true;
                 }
             }
 		}
+		// _string	_clen(_clean_body.str());
 		
+		// std::cerr << _clean_body.str() << std::endl;
+		// std::cerr << _header << std::endl;
+		// std::cerr <<"clean" <<_clean_body.str().size() << " " <<_clen.substr(0,200)<< " <---- head" << std::endl;
 		(*my_client._buffer).write((_header + _clean_body.str()).c_str(), (_header + _clean_body.str()).size());
+		// std::cerr << (*my_client._buffer).str() << std::endl;
 		return 1;
 	}
 	static void    handle_chunked(Client &my_client)
@@ -83,9 +95,13 @@ public:
 		// int chunkSize = 0;
 		bool	error;
 		_string	temp(my_client.get_buffer());
-		if (temp.find("0\r\n\r\n") != _string::npos)
+		size_t	test_temp;
+		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
 		{
-			my_client._done = true;
+			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
+				my_client._done = true;
+			// std::cerr << "finished" << std::endl;
+			std::cerr << temp.size() << " " <<my_client.get_buffer().size() << "checiking size ok " << std::endl;
 		}
 		if (my_client._done)
 		{
@@ -114,12 +130,13 @@ public:
 			bzero(buff, BUFFER_SIZE);
 
 			_gl_recv_return = read(fd, buff, BUFFER_SIZE);
-			
+			// std::cerr << buff << " " << strlen(buff) << std::endl;
+			// getchar();
 			if(_gl_recv_return > 0)
 			{
 				// sure.append(buff);
 				
-				buff[_gl_recv_return + 1] = '\0';
+				// buff[_gl_recv_return + 1] = '\0';
 				// //std::cerr << buff << std::endl;
 				//std::cerr << _string(buff).size() << std::endl;
 				(*_my_client._buffer).write(buff, _gl_recv_return);
@@ -373,7 +390,7 @@ public:
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
 								// //std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								// std::cout << ":::" << mesg->message.size() << std::endl;
+								std::cout << ":::" << mesg->message.size() << std::endl;
 								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
 								// std::cout << ":-:" << mesg->message.substr(0, 400) << std::endl;
 								handl_request.handle(*mesg);
