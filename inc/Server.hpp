@@ -44,10 +44,10 @@ public:
                 {
 					if (chunk_size_str.size() == 0)
 						continue;
-					for(size_t k= 0 ; k < chunk_size_str.size(); k++)
-					{
-						std::cerr << (int) chunk_size_str[k] << std::endl;
-					}
+					// for(size_t k= 0 ; k < chunk_size_str.size(); k++)
+					// {
+					// 	std::cerr << (int) chunk_size_str[k] << std::endl;
+					// }
 					// chunk_size = 0;
 					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
 					if (chunk_size_str == "0\r\n\r\n")
@@ -67,6 +67,7 @@ public:
             else
             {
                 chunk_size--;
+				std::cerr << chunk_size << std::endl;
                 _clean_body.write(&_body[i], 1);
                 if (chunk_size == 0)
                 {
@@ -92,6 +93,7 @@ public:
 		bool	error;
 		_string	temp(my_client.get_buffer());
 		size_t	test_temp;
+		std::cerr << "here  " << temp.size() << std::endl;
 		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
 		{
 			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
@@ -102,6 +104,7 @@ public:
 		if (my_client._done)
 		{
 			error = decoding_chunked(my_client, temp);
+			std::cerr << "here okey " << std::endl;
 		}
 		// my_client._buffer->str("");
 		// while (std::getline(temp, line))
