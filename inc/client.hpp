@@ -43,6 +43,7 @@ class Client {
 			this->_done = false;
 			this->_header_done = false;
 			this->header_size = 0;
+			this->_header.clear();
 			this->send_size = 0;
 		}
 		void AppendData(const std::string& data)
@@ -73,6 +74,9 @@ class Client {
 		bool						send_done;
 		bool  						_header_done;
 		_string						response;
+		_string						_header;
+		//aka this is for chunked only chunked !!;
+		std::string			_clean_body;
 };
 
 

@@ -24,23 +24,30 @@ public:
 	static bool		decoding_chunked(Client &my_client, _string	&temp)
 	{
 		std::string chunk_size_str;
+		std::stringstream	temp_body;
     	int chunk_size = 0;
+		std::string line;
+		bool end = false;
     	bool read_chunk_size = true;
-		_string	_header = temp.substr(0, my_client.header_size);
-		_string _body = temp.substr(my_client.header_size);
-		std::stringstream _clean_body;
+		
+		std::cerr << temp.size() << std::endl;
+		std::stringstream ss(temp);
+		// std::stringstream _clean_body;
+		getline(ss, line);
 		// //std::cerr << _body << std::endl;
+		std::cerr << line << std::endl;
+		getchar();
 		(*my_client._buffer).str("");
 		(*my_client._buffer).clear();
 
 		//std::cerr << "BUFFEr" << my_client.get_buffer() << std::endl;
-		size_t n = _body.size();
-		std::cerr << "body size : "<<_body.size() << std::endl;
+		size_t n = temp.size();
+		std::cerr <<"l n " <<n << std::endl;
 		for (size_t i = 0; i < n; i++)
         {
             if (read_chunk_size)
             {
-                if (_body[i] == '\r' && _body[i + 1] == '\n')
+                if (temp[i] == '\r' && temp[i + 1] == '\n')
                 {
 					if (chunk_size_str.size() == 0)
 						continue;
@@ -50,8 +57,10 @@ public:
 					// }
 					// chunk_size = 0;
 					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
-					if (chunk_size_str == "0\r\n\r\n")
+					std::cerr << "xunki size"<<chunk_size << std::endl;
+					if (chunk_size == 0)
 					{
+						end = true;
 						break ;
 					}
                     chunk_size_str.clear();
@@ -60,15 +69,14 @@ public:
                 }
                 else
                 {
-                    chunk_size_str += _body[i];
+                    chunk_size_str += temp[i];
                 }
 				
             }
             else
             {
                 chunk_size--;
-				std::cerr << chunk_size << std::endl;
-                _clean_body.write(&_body[i], 1);
+               temp_body.write(&temp[i], 1);
                 if (chunk_size == 0)
                 {
                     read_chunk_size = true;
@@ -80,32 +88,33 @@ public:
 		// std::cerr << _clean_body.str() << std::endl;
 		// std::cerr << _header << std::endl;
 		// std::cerr <<"clean" <<_clean_body.str().size() << " " <<_clen.substr(0,200)<< " <---- head" << std::endl;
-		(*my_client._buffer).write((_header + _clean_body.str()).c_str(), (_header + _clean_body.str()).size());
+		if (end)
+		{
+			(*my_client._buffer).write((my_client._header + temp_body.str()).c_str(), (my_client._header + temp_body.str()).size());
+			return 1;
+		}
 		// std::cerr << (*my_client._buffer).str() << std::endl;
-		return 1;
+		return 0;
 	}
 	static void    handle_chunked(Client &my_client)
 	{
-		// std::string line;
-		// std::string fusil("");
-		// std::string	replace;
-		// int chunkSize = 0;
+
 		bool	error;
-		_string	temp(my_client.get_buffer());
-		size_t	test_temp;
-		std::cerr << "here  " << temp.size() << std::endl;
-		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
-		{
-			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
-				my_client._done = true;
-			// std::cerr << "finished" << std::endl;
-			std::cerr << temp.size() << " " <<my_client.get_buffer().size() << "checiking size ok " << std::endl;
-		}
-		if (my_client._done)
-		{
-			error = decoding_chunked(my_client, temp);
-			std::cerr << "here okey " << std::endl;
-		}
+			
+		// size_t	test_temp;
+		// if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
+		// {
+		// 	if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
+		// 		my_client._done = true;
+		// 	// std::cerr << "finished" << std::endl;
+		// 	std::cerr << temp.size() << " " <<my_client.get_buffer().size() << "checiking size ok " << std::endl;
+		// }
+		// if (my_client._done)
+		// {
+			error = decoding_chunked(my_client, my_client._clean_body);
+		// }
+		if (error)
+			my_client._done = true;
 		// my_client._buffer->str("");
 		// while (std::getline(temp, line))
 		// {
@@ -142,7 +151,14 @@ public:
 				_my_client.current_size += _gl_recv_return;
 				//std::cerr << "buffer of my clinet \t" << _my_client.get_buffer().size() <<'\t' <<_my_client.current_size<< "return "<< _gl_recv_return << std::endl;
 				if(_my_client._header_done)
+				{
+					if (_my_client.is_it_chunked_)
+					{
+						_my_client._clean_body.clear();
+						_my_client._clean_body += _my_client.get_buffer();
+					}
 					return 0;
+				}
 				_string	line;
 				std::istringstream	obj(buff);
 				while (getline(obj, line))
@@ -155,6 +171,8 @@ public:
 						if (j == 0)
 						{
 							_my_client._header_done = true;
+							_my_client._header = (*_my_client._buffer).str().substr(0, _my_client.header_size);
+							_my_client._clean_body = (*_my_client._buffer).str().substr(_my_client.header_size);
 							return 1;
 						}
 					}
