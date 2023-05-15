@@ -68,12 +68,8 @@ public:
             {
                 chunk_size--;
                 _clean_body.write(&_body[i], 1);
-				// std::cerr << chunk_size << std::endl;
                 if (chunk_size == 0)
                 {
-					// chunk_size = 0;
-					// getchar();
-                    // End of current chun k
                     read_chunk_size = true;
                 }
             }
