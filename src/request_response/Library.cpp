@@ -29,7 +29,7 @@
 
 				// loc.__file = "index2.html";
 
-				std::cout << "file:" << loc.__file << std::endl;
+				std::cout << "file-:" << loc.__file << std::endl;
 	            info.file_path = loc.__root + path.substr(loc.__path.length()) + loc.__file;
 			}
 			else

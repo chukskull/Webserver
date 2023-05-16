@@ -381,9 +381,9 @@ public:
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
 								// //std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								std::cout << ":::" << mesg->message.size() << std::endl;
+								// std::cout << ":::" << mesg->message.size() << std::endl;
 								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
-								// std::cout << ":-:" << mesg->message.substr(0, 1500) << std::endl;
+								// std::cout << ":-:" << mesg->message.substr(0, 1000) << std::endl;
 								// std::cout << mesg->message << std::endl;
 								handl_request.handle(*mesg);
 								

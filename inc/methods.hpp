@@ -56,7 +56,6 @@ public:
 				response.connection = KEEP_ALIVE;
 				response.connection = "Keep-alive";
 			}
-
 		}
 		if (file._allowMeth[con_GET])
 		{

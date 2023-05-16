@@ -56,7 +56,10 @@ void print(string s)
     while (i < s.size())
     {
         if (s[i] == '\n')
+		{
             std::cout << "\\n";
+    		std::cout << std::endl;
+		}
         else if (s[i] == '\r')
             std::cout << "\\r";
         else
@@ -64,7 +67,6 @@ void print(string s)
         // cout << s[i];
         i++;
     }
-    std::cout << std::endl;
 }
 
 bool valid_http(string http_ver)
@@ -202,10 +204,19 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 	// std::cout << body_stream.str() << "\n";
 	// print(body_stream.str());
 	// std::cout << std::getline(body_stream, line, '\n') << "\n";
+	// std::cout << "==========\n";
+	// std::ofstream ofs("test.txt");
+	// print(body_stream.str());
+	// ofs << body_stream.str() ;
 	while ((std::getline(body_stream, line, '\r') && std::getline(body_stream, trash, '\n'))and line != string(""))
 	{
 		// std::cout << "entery:";
-		// print(line);
+		if (trash != string(""))
+			std::cout << "the trash is not empty\n";
+		// std::cout << "================\n";
+		// print("line:" + line + "++");
+		// std::cout << "line:" << line << "\n";
+		// print(trash);
 		_stream.str(line);
 		// getline(_stream, line, '\r');
 		// _stream.str(line);
@@ -222,6 +233,7 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 		// break;
 		if (_to_lower(line) == "content-disposition")
 		{
+			// print("content-disposition: " + line);
 			// std::cout << "is content-disposition\n";
 			ret = true;
 			std::getline(_stream, line, ';');
@@ -247,7 +259,7 @@ bool handle_content_disposition(std::stringstream &body_stream, form_part &part,
 				}
 				if (_stream.eof())
 				{
-
+					std::cout << "eof\n";
 					// std::cout << "function was broken here 2\n";
 					break;
 				}
@@ -293,7 +305,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 		body_stream.get(c);
 		p.append(1, c);
 		// std::cout << "P: " << p << "\n";
-		pos = p.find(boundary);
+		pos = p.find(boundary + CRLF);
 		// std::cout << "--" << pos << "=" << p.npos << "\n";
 		// cout << p << std::endl;
 		if ((pos != p.npos))
@@ -302,7 +314,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			part.content.swap(p);
 			return (true);
 		}
-		pos = p.rfind(boundary + "--");
+		pos = p.rfind(boundary + "--" + CRLF);
 		if ((pos != p.npos))
 		{
 			p.erase(pos);
@@ -312,6 +324,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 		if (body_stream.eof())
 		{
 			std::cout << "function was broken here 4\n";
+			// part.content.swap(p);
 			return false;
 		}
 	}
@@ -321,10 +334,8 @@ bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 {
 	std::stringstream body_stream(body);
 	string line;
-
 	form_part part;
 
-	
 	if (find_boundary(body_stream, boundary) == false)
 	{
 		return false;
@@ -339,9 +350,12 @@ bool get_parts(string &body, string &boundary, deque<form_part> &parts)
 		}
 		if (read_part(body_stream, boundary, part) == false)
 		{
+			std::cout << "part was pushed\n";
+			// std::cout << "part.content: " << part.content << "\n";
 			parts.push_back(part);
 			break;
 		}
+		std::cout << "part was readed\n";
 		parts.push_back(part);
 		part = form_part();
 	}
@@ -428,6 +442,7 @@ void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &reques
 		string tmp_file;
 		MIME_types MIME;
 
+	// std::cout << "handeling parts\n";
 		if (it->filename != "")
 		{
 			tmp_file = file.file_path + it->filename;
@@ -441,6 +456,7 @@ void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &reques
 			{
 				out_file << it->content;
 				it->success = FILE_SUCCESS;
+				out_file.close();
 			}
 			else
 			{
