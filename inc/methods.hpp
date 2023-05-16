@@ -14,7 +14,6 @@ void print_meth(MethAllow meth)
 }
 void print_locations(ReqLoc &vec)
 {
-
 	// std::cout << "locs== \n";
 	// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
 	// {
@@ -180,10 +179,10 @@ public:
 			{
 				if (file.file_exists)
 				{
-					if (file.is_file)
-						update_file(file, request_info, response);
-					else if (file.is_dir)
-					{
+					// if (file.is_file)
+						// update_file(file, request_info, response);
+					// else if (file.is_dir)
+					// {
 						// std::cout << request_info.content_type.first << std::endl;
 						if (request_info.content_type.first == "multipart/form-data")
 						{
@@ -209,9 +208,11 @@ public:
 								response.set_status(400, "Bad Request2");
 							}
 						}
-					}
-					else
-						generate_error(response, 800, "no idea on why i have this condition here");
+						else
+							update_file(file, request_info, response);
+					// }
+					// else
+						// generate_error(response, 800, "no idea on why i have this condition here");
 				}
 				else
 				{
