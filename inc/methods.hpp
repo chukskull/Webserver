@@ -14,7 +14,6 @@ void print_meth(MethAllow meth)
 }
 void print_locations(ReqLoc &vec)
 {
-
 	// std::cout << "locs== \n";
 	// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
 	// {
@@ -42,7 +41,6 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		// std::cout << "----------> " << msg._connections.second << std::endl;
 		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
@@ -122,7 +120,13 @@ private:
 			// max_size = set_max_size(host) ;
 
 			buff = new char[max_size];
-			// buffer.resize(max_size);
+			// file.seekg(0, std::ios::end);
+   			// size_t file_size = file.tellg();
+			// file.seekg(0, std::ios::beg);
+			// file_content.resize(file_size);
+			// file.read(&file_content[0], file_size);
+
+			buffer.resize(max_size);
 			while (1)
 			{
 				file.read(buff , max_size);
@@ -130,22 +134,25 @@ private:
 				{
 					// std::cout << "gcount: " << file.gcount() << std::endl;
 					file_content.append(buff, file.gcount());
+					// std::cout << "------>" << file_content.length() << std::endl;
 				}
 				catch (...)
 				{
 					response.set_status(503, "Service Unavailable");
 					response.body += "We're sorry, but the server is currently unable to handle your request due to high load. Please try again later.";
 				}
-				if (file_content.size() > max_size)
-				{
-					response.set_status(413, "Request Entity Too Large");
-					response.body += "The request entity is too large.";
-				}
+				// if (file_content.size() > max_size)
+				// {
+				// 	response.set_status(413, "Request Entity Too Large");
+				// 	response.body += "The request entity is too large.";
+				// }
 				if (file.eof())
 					break;
 			}
 			file.close();
-			response.content_length = std::to_string(file_content.size());
+
+			// response.body.swap(ostrm.str());
+			response.content_length = std::to_string(file_content.length());
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -172,10 +179,10 @@ public:
 			{
 				if (file.file_exists)
 				{
-					if (file.is_file)
-						update_file(file, request_info, response);
-					else if (file.is_dir)
-					{
+					// if (file.is_file)
+						// update_file(file, request_info, response);
+					// else if (file.is_dir)
+					// {
 						// std::cout << request_info.content_type.first << std::endl;
 						if (request_info.content_type.first == "multipart/form-data")
 						{
@@ -201,9 +208,11 @@ public:
 								response.set_status(400, "Bad Request2");
 							}
 						}
-					}
-					else
-						generate_error(response, 800, "no idea on why i have this condition here");
+						else
+							update_file(file, request_info, response);
+					// }
+					// else
+						// generate_error(response, 800, "no idea on why i have this condition here");
 				}
 				else
 				{
@@ -300,16 +309,17 @@ class handler
 		res.append(std::to_string(req.response.status_code) + " ");
 		res.append(req.response.status_text);
 		res.append(CRLF);
+
 		if (req.response.content_length != "")
 		{ res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
 		if (req.response.content_type != "")
-		{ res.append("content_type: "); res.append(req.response.content_type); res.append(CRLF);}
+		{ res.append("Content-Type: "); res.append(req.response.content_type); res.append(CRLF);}
 		
 		if (req.response.location != "")
 		{ res.append("Location: "); res.append(req.response.location); res.append(CRLF);}
 		
-		if (req.response.connection != "")
+		if (req.response.connection == "meeeeem")
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);

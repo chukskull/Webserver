@@ -57,7 +57,7 @@
 					{
 						info.is_dir = true;
 						// check if autoindex is allowed
-						std::cout << "the file is a directory\n";
+						// std::cout << "the file is a directory\n";
 
 						if (loc._autoindex)
 						{

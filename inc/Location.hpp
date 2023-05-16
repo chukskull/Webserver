@@ -7,11 +7,12 @@ class Location
 {
 	private:
 		_string							__path;
-		_string                       __autoindex;
-		_string                       __place;
-		_string                       __root;
-		_methods                      __methods;
-		std::pair<bool, std::string>  __redirect;
+		_string							__autoindex;
+		_string							__place;
+		_string							__root;
+		_string							__name;
+		_methods						__methods;
+		std::pair<bool, std::string>	__redirect;
 	public:
 		Location(_string path, _string autoindex, _string place_index, _string root, _methods const &meth, std::pair<bool, std::string> redre): __autoindex(autoindex),__methods(meth)
 		{

@@ -47,10 +47,8 @@ void request::parse(string req)
     if (tmp_str != "\r")
         std::cout << "err msg\n";
     while (std::getline(s_request, tmp_str))
-        body.append(tmp_str);
+        {body.append(tmp_str).append("\n");}
 
-
-    
     request_checkpoint();
 }
 
