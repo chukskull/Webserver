@@ -421,8 +421,7 @@ public:
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
-					
-					if ( s == 0)
+					if (s == 0)
 					{
 						ser.fd_s[i] = ser.fd_s.back();
 						ser.fd_s.pop_back();
