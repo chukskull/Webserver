@@ -229,7 +229,7 @@ public:
 				freeaddrinfo(ai);
 				if (point == NULL)
 						throw std::string("there's no ip available in this host");
-				if (listen(server_fd, 100000) == -1)
+				if (listen(server_fd, 1000000) == -1)
 					throw std::string("problem with listen");
 				else
 					print_error << server_fd << std::endl;
@@ -279,7 +279,10 @@ public:
 				{
 					s = send(fd, my_client.response.c_str(), my_client.response.length(), 0);
 					if (s > 0)
+					{
 						my_client.response.clear();
+						// return 0 ;
+					}
 
 					else
 						return -1;
@@ -318,6 +321,7 @@ public:
 			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
 			if (ser.rc < 0)
 			{
+				std::cerr << ser.fd_s.size() << std::endl;
 				perror("poll() failed");
 				break ;
 			}
@@ -416,6 +420,13 @@ public:
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
+					
+					if ( s == 0)
+					{
+						ser.fd_s[i] = ser.fd_s.back();
+						ser.fd_s.pop_back();
+					}
+					
 				}
 			}		
 		}
