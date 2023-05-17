@@ -56,7 +56,6 @@ public:
 				response.connection = KEEP_ALIVE;
 				response.connection = "Keep-alive";
 			}
-
 		}
 		if (file._allowMeth[con_GET])
 		{
@@ -153,6 +152,7 @@ private:
 
 			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
+			std::cout << "===" << response.content_length << std::endl;
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -192,6 +192,7 @@ public:
 							{
 								if(get_parts(request_info.body, request_info.content_type.second, parts))
 								{
+									std::cout << "we got to handle parts\n";
 									//print parts
 
 									handle_parts(file, parts, request_info, response);
@@ -311,7 +312,7 @@ class handler
 		res.append(CRLF);
 
 		if (req.response.content_length != "")
-		{ res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
+		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
 		if (req.response.content_type != "")
 		{ res.append("Content-Type: "); res.append(req.response.content_type); res.append(CRLF);}

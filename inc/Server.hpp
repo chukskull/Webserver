@@ -385,9 +385,9 @@ public:
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
 								// //std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								std::cout << ":::" << mesg->message.size() << std::endl;
+								// std::cout << ":::" << mesg->message.size() << std::endl;
 								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
-								// std::cout << ":-:" << mesg->message.substr(0, 1500) << std::endl;
+								// std::cout << ":-:" << mesg->message.substr(0, 1000) << std::endl;
 								// std::cout << mesg->message << std::endl;
 								handl_request.handle(*mesg);
 								
@@ -396,9 +396,9 @@ public:
 							}
 						}
 						int sender_fd = ser.fd_s[i].fd;
-						//std::cerr << "here client" << std::endl;
 						if (_gl_recv_return <= 0)
 						{
+						std::cerr << "here client" << std::endl;
 							//std::cerr << "pretty sure " << std::endl;
 							if (_gl_recv_return == 0) 
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
