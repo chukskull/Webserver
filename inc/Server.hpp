@@ -396,9 +396,9 @@ public:
 							}
 						}
 						int sender_fd = ser.fd_s[i].fd;
-						//std::cerr << "here client" << std::endl;
 						if (_gl_recv_return <= 0)
 						{
+						std::cerr << "here client" << std::endl;
 							//std::cerr << "pretty sure " << std::endl;
 							if (_gl_recv_return == 0) 
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
