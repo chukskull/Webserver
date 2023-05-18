@@ -59,12 +59,15 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
-			if (file.file_exists)
-			{
 				if (file.is_redirect)
 				{
+                    std::cout << "::" << file.is_redirect << std::endl;
+                    response.set_status(301, "Moved Permanently");
+                    response.location = file.location.__redirect.second;
 				}
-				else if (file.is_dir)
+			else if (file.file_exists)
+			{
+				if (file.is_dir)
 				{
 					if (file.is_autoindex || 1)
 					{
@@ -172,8 +175,10 @@ public:
 		{	
 			if (file.is_redirect)
 			{
-				std::cout << "waa nwaa3\n";
-				exit(0);
+                response.set_status(301, "Moved Permanently");
+                response.location = file.location.__redirect.second;
+				// std::cout << "waa nwaa3\n";
+				// exit(0);
 			}
 			else
 			{
