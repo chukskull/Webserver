@@ -229,7 +229,7 @@ public:
 				freeaddrinfo(ai);
 				if (point == NULL)
 						throw std::string("there's no ip available in this host");
-				if (listen(server_fd, 1000000) == -1)
+				if (listen(server_fd, SOMAXCONN) == -1)
 					throw std::string("problem with listen");
 				else
 					print_error << server_fd << std::endl;
@@ -242,7 +242,9 @@ public:
 			}
 		}
 	}
-	~Server() {}
+	~Server() {
+		this->fd_s.clear();
+	}
 
 	// static void print_locations(std::vector<ReqLoc> &vec)
 	// {
@@ -292,8 +294,10 @@ public:
 				if(my_client.response.size() == 0)
 				{
 					// getchar();
+					
 					my_client.clear();
 					close(fd);
+					return 2;
 				}
 			}
 			return 0;		
@@ -318,7 +322,7 @@ public:
 
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), ser.timeout);
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
@@ -417,14 +421,18 @@ public:
 				}
 				else if (ser.fd_s[i].revents & POLLOUT)
 				{
+					// if (i > 10230)
+					// {
+					// 	ser.fd_s.erase(ser.fd_s.begin() + i);
+					// }
 					ssize_t 	s;
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
-					if (s == 0)
+					if (s == 2)
 					{
-						ser.fd_s[i] = ser.fd_s.back();
-						ser.fd_s.pop_back();
+						
+						ser.fd_s.erase(ser.fd_s.begin() + i);
 					}
 					
 				}
