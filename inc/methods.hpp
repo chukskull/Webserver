@@ -152,7 +152,7 @@ private:
 
 			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
-			std::cout << "===" << response.content_length << std::endl;
+			// std::cout << "===" << response.content_length << std::endl;
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -300,6 +300,7 @@ class handler
 				DELETE_.handle(req.request_info, req.response, msg);
 
 			fill_response(req, msg.response);
+			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
 		}
 

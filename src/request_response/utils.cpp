@@ -136,9 +136,10 @@ void generate_autoindex(file_info file, HTTP_response &response)
 	}
 	html += "</pre><hr></body></html>";
 	// MIME type
+	// std::cout << "body::" << response.body << std::endl;
 	response.body += html;
 	response.content_type = "text/html";
-	// response.content_length = std::to_string(html.length());
+	response.content_length = std::to_string(html.length());
 }
 
 void fill_content_type(HTTP_request &req, string &content_type)
