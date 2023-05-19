@@ -44,3 +44,6 @@ bool delete_file(string file_path, HTTP_response &response);
 void delete_dir(file_info file, HTTP_response &response);
 
 string get_exten(string file);
+
+void print(string s);
+string trim_white_spaces(string str);

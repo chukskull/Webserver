@@ -69,7 +69,7 @@ public:
 			{
 				if (file.is_dir)
 				{
-					if (file.is_autoindex || 1)
+					if (file.is_autoindex)
 					{
 						std::cout << "got into autoindex\n";
 						generate_autoindex(file, response);
@@ -297,13 +297,23 @@ class handler
 			request req(msg.message);
 
 			// req.request_checkpoint();
-			if (req.request_info.method == GET)
-				GET_.handle(req.request_info, req.response, msg);
-			else if (req.request_info.method == POST)
-				POST_.handle(req.request_info, req.response, msg);
-			else if (req.request_info.method == DELETE)
-				DELETE_.handle(req.request_info, req.response, msg);
-
+			// std::cout << "host:" << req.request_info.host << std::endl;
+			// print("host:" + req.request_info.host);
+			std::cout << "i got to handle\n";
+			if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
+			{
+				std::cout << "i got to handle inside\n";
+				if (req.request_info.method == GET)
+					GET_.handle(req.request_info, req.response, msg);
+				else if (req.request_info.method == POST)
+					POST_.handle(req.request_info, req.response, msg);
+				else if (req.request_info.method == DELETE)
+					DELETE_.handle(req.request_info, req.response, msg);
+			}
+			else
+			{
+				req.response.set_status(400, "Bad Request it is not for this server");
+			}
 			fill_response(req, msg.response);
 			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();

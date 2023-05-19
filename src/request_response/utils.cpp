@@ -583,7 +583,17 @@ void delete_dir(file_info file, HTTP_response &response)
 	}
 }
 
+string trim_white_spaces(string str)
+{
+	size_t start = 0;
+	size_t end = str.length() - 1;
 
+	while (str[start] == ' ' || str[start] == '\t' || str[start] == '\r')
+		start++;
+	while (str[end] == ' ' || str[end] == '\t' || str[end] == '\r')
+		end--;
+	return str.substr(start, end - start + 1);
+}
 
 
 

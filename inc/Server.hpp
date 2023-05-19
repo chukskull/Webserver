@@ -322,7 +322,7 @@ public:
 
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), ser.timeout);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
