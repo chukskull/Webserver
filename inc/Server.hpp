@@ -421,20 +421,12 @@ public:
 				}
 				else if (ser.fd_s[i].revents & POLLOUT)
 				{
-					// if (i > 10230)
-					// {
-					// 	ser.fd_s.erase(ser.fd_s.begin() + i);
-					// }
 					ssize_t 	s;
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
 					if (s == 2)
-					{
-						
 						ser.fd_s.erase(ser.fd_s.begin() + i);
-					}
-					
 				}
 			}		
 		}
