@@ -38,9 +38,10 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 		for (; it_2 != loc.end(); it_2++)
 		{
 			ReqLoc req_loc;
-			if(it_2->get_auto_index().compare("false"))
+
+			if(it_2->get_auto_index().compare("false") == 0)
 				req_loc._autoindex = false;
-			else if (it_2->get_auto_index().compare("true"))
+			else if (it_2->get_auto_index().compare("true") == 0)
 				req_loc._autoindex = true;
 			else
 				return -1;
