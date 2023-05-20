@@ -8,3 +8,4 @@ problems.txt
 data/
 TODO
 *.vscode/
+.DS_Store
