@@ -13,8 +13,10 @@ struct ReqLoc
 	_string						__file;
 	_string                     __root;
 	MethAllow                   _AllowMeth;
+	bool						_cgi;
+	_string						__cgi_path;
+	_string						__cgi_ext;
 	std::pair<bool, std::string> __redirect;
-
 
 	//constructor for RecLoc that sets all the values to empty strings
 
