@@ -18,6 +18,7 @@ void request::request_checkpoint()
 {
     validate_start_line();
     fill_req();
+    fill_query(start_line[SOURCE], request_info);
 }
 
 void request::parse(string req)
@@ -144,6 +145,7 @@ void request::validate_start_line()
         if (valid_http(start_line[PROTOCOL]) == false)
         {
             response.set_status(505, "HTTP Version Not Supported");
+            std::cout << "HTTP Version Not Supported" << std::endl;
             return ;
         }
 

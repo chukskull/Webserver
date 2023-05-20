@@ -47,6 +47,7 @@ struct HTTP_request
 	long long content_length;
 	string connection;
 	string body;
+	string query_string;
 	//construsctor for request empty strings and -1 in numbers
 	HTTP_request() : method(-1), requested_file(""), host(""), content_type(std::make_pair("", "")), content_length(-1), connection(""), body("") {}
 	// multimap<float, string> accept;

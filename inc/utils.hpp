@@ -47,3 +47,4 @@ string get_exten(string file);
 
 void print(string s);
 string trim_white_spaces(string str);
+void fill_query(string full_path, HTTP_request &request);
