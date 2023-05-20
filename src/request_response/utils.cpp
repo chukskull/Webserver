@@ -77,12 +77,13 @@ bool valid_http(string http_ver)
 	return false;
 }
 
-void fill_query(string full_path, HTTP_request &request)
+void fill_query(string &full_path, HTTP_request &request)
 {
 	size_t pos = full_path.find("?");
 	if (pos == string::npos)
 		return;
 	request.query_string = full_path.substr(pos + 1);
+	full_path = full_path.substr(0, pos);
 }
 
 bool is_dir(string path)
