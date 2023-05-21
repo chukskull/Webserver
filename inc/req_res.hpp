@@ -129,3 +129,9 @@ public:
 	void print(string s);
 	
 };
+
+struct _cgi_info
+{
+	string cgi_path;
+	string cgi_name;
+};

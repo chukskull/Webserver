@@ -59,12 +59,12 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
-				if (file.is_redirect)
-				{
-                    std::cout << "::" << file.is_redirect << std::endl;
-                    response.set_status(301, "Moved Permanently");
-                    response.location = file.location.__redirect.second;
-				}
+			if (file.is_redirect)
+			{
+				// std::cout << "::" << file.is_redirect << std::endl;
+				response.set_status(301, "Moved Permanently");
+				response.location = file.location.__redirect.second;
+			}
 			else if (file.file_exists)
 			{
 				if (file.is_dir)
@@ -84,9 +84,27 @@ public:
 				}
 				else if (file.is_file)
 				{
-						response.set_status(200, "OK");
+					response.set_status(200, "OK");
+					if (file.location._cgi)
+					{
+						if (file_extention(file.file_path) == file.location.__cgi_ext)
+						{
+							std::cout << "run cgi\n";
+							_cgi_info cgi_info;
+							cgi_info.cgi_name = file.file_path;
+							cgi_info.cgi_path = file.location.__cgi_path;
+							// cgi(cgi_info , request_info, response);
+						}
+						else
+						{
+							response.set_status(403, "Forbidden extention for cgi");
+						}
+					}
+					else
+					{
 						response.content_type = file.content_type;
 						read_file(file.file_path, response);
+					}
 				}
 			}
 			else
@@ -189,7 +207,25 @@ public:
 					// else if (file.is_dir)
 					// {
 						// std::cout << request_info.content_type.first << std::endl;
-						if (request_info.content_type.first == "multipart/form-data")
+
+						//handling cgi
+						if (file.location._cgi)
+						{
+							if (file_extention(file.file_path) == file.location.__cgi_ext)
+							{
+								std::cout << "run cgi\n";
+								_cgi_info cgi_info;
+								cgi_info.cgi_name = file.file_path;
+								cgi_info.cgi_path = file.location.__cgi_path;
+								// cgi(cgi_info , request_info, response);
+							}
+							else
+							{
+								response.set_status(403, "Forbidden extention for cgi");
+							}
+						}
+						
+						else if (request_info.content_type.first == "multipart/form-data")
 						{
 							deque<form_part> parts;
 							// std::cout << "++++++>>>> " << request_info.content_type.second << "\n";
