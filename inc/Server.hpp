@@ -260,6 +260,7 @@ public:
 			}
 		}
 	}
+
 	~Server() {
 		this->fd_s.clear();
 	}
