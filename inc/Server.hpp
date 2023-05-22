@@ -4,6 +4,7 @@
 #include "headers.hpp"
 #include "methods.hpp"
 #include <map>
+#include <set>
 
 int 	_gl_recv_return;
 
@@ -81,10 +82,6 @@ public:
 	}
 	static void    handle_chunked(Client &my_client)
 	{
-		// std::string line;
-		// std::string fusil("");
-		// std::string	replace;
-		// int chunkSize = 0;
 		bool	error;
 		_string	temp(my_client.get_buffer());
 		size_t	test_temp;
@@ -98,19 +95,6 @@ public:
 		{
 			error = decoding_chunked(my_client, temp);
 		}
-		// my_client._buffer->str("");
-		// while (std::getline(temp, line))
-		// {
-		// 	line.push_back('\n');
-		// if (isHexadecimal(line))
-		// 	{
-		// 		std::stringstream ss(line);
-		// 		//std::cerr << line << std::endl;
-		// 		ss >> std::hex >> chunkSize;
-		// 		if (chunkSize == 0)
-		// 			my_client._done = true;
-		// 	}
-		// }
 	}
 
 	static int	receiving(int fd, Client &_my_client, char *buff2)
@@ -191,20 +175,53 @@ public:
 			perror("request header is not set corretely");
 	}
 
+
+	static std::vector<ForBind>		for_binding_servers(std::vector<DataConf> &data)
+	{
+		std::vector<ForBind>	vec;
+		std::map<string, std::vector<string> >		sure;
+		std::vector<string>		ko;
+		
+
+		for (size_t i  = 0; i < data.size(); i++)
+		{
+			for(size_t j = 0;j < data[i].__port.size(); j++)
+			{
+				ko.push_back(data[i].__port[j]);
+				sure[data[i].__host] = ko;
+			}
+		}
+		std::map<string, std::vector<string> >::iterator	it = sure.begin();
+		for(;it != sure.end(); it++)
+		{
+			ForBind	ip_port;
+			ip_port.server = it->first;
+			for(size_t	i = 0; i < it->second.size(); i++)
+			{
+				if (std::find(ip_port._Port.begin(), ip_port._Port.end(), it->second[i]) == ip_port._Port.end())
+					ip_port._Port.push_back(it->second[i]);
+			}
+			vec.push_back(ip_port);
+		}
+		return vec;
+	}
 	void	initial_server(std::vector<DataConf> &data)
 	{
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
-
-		for(size_t  i = 0; i < data.size(); i++)
+		std::vector<ForBind>	_for_bind;
+	
+		_for_bind = for_binding_servers(data);
+		
+		for(size_t  i = 0; i < _for_bind.size(); i++)
 		{
-			for(size_t j = 0; j < data[i].__port.size(); j++)
+			for(size_t j = 0; j < _for_bind[i]._Port.size(); j++)
 			{
 				int server_fd;
-				print_error << data[i].__port[j].c_str() << std::endl;
-				if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
+				print_error << _for_bind[i]._Port[j].c_str() << std::endl;
+				if ((rcv = getaddrinfo(_for_bind[i].server.c_str() , _for_bind[i]._Port[j].c_str(), &hints, &ai)) != 0) {
 					throw std::string("error in getaddrinfo");
 				}
 				for (point = ai; point != NULL; point = point->ai_next)
@@ -229,7 +246,7 @@ public:
 				freeaddrinfo(ai);
 				if (point == NULL)
 						throw std::string("there's no ip available in this host");
-				if (listen(server_fd, 1000000) == -1)
+				if (listen(server_fd, SOMAXCONN) == -1)
 					throw std::string("problem with listen");
 				else
 					print_error << server_fd << std::endl;
@@ -239,10 +256,14 @@ public:
 				fd_s.push_back(temp);
 				timeout = (2 * 60 * 1000);
 				fd_counts = 1;
+				std::cerr << "came here" << std::endl;
 			}
 		}
 	}
-	~Server() {}
+
+	~Server() {
+		this->fd_s.clear();
+	}
 
 	// static void print_locations(std::vector<ReqLoc> &vec)
 	// {
@@ -292,8 +313,10 @@ public:
 				if(my_client.response.size() == 0)
 				{
 					// getchar();
+					
 					my_client.clear();
 					close(fd);
+					return 2;
 				}
 			}
 			return 0;		
@@ -312,13 +335,13 @@ public:
 		}
 		catch(const std::string e)
 		{
-			//std::cerr << e << '\n';
+			std::cerr << e << '\n';
 			exit(1);
 		}
 
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), 5000);
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
@@ -327,8 +350,9 @@ public:
 			}
 			if (ser.rc == 0)
 			{
+				// close(ser.)
 				//std::cerr << "poll() timed out , End program\n" << std::endl;
-				break ;
+				continue; ;
 			}
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{
@@ -421,12 +445,8 @@ public:
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
-					if (s == 0)
-					{
-						ser.fd_s[i] = ser.fd_s.back();
-						ser.fd_s.pop_back();
-					}
-					
+					if (s == 2)
+						ser.fd_s.erase(ser.fd_s.begin() + i);
 				}
 			}		
 		}

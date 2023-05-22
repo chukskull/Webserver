@@ -18,6 +18,7 @@ void request::request_checkpoint()
 {
     validate_start_line();
     fill_req();
+    fill_query(start_line[SOURCE], request_info);
 }
 
 void request::parse(string req)
@@ -40,7 +41,7 @@ void request::parse(string req)
     while (std::getline(s_request, tmp_str, '\n') and tmp_str != string("\r"))
     {
         size_t pos = tmp_str.find(":");
-        headers.push_back(std::make_pair(string(tmp_str.substr(0, pos)), string(tmp_str.substr(pos + 1))));
+        headers.push_back(std::make_pair(string(tmp_str.substr(0, pos)), trim_white_spaces(tmp_str.substr(pos + 1))));
         // std::cout << headers.back()->fist;
     }
 
@@ -115,6 +116,7 @@ int request::fill_req()
                 return 1;
             }
             request_info.connection = it->second;
+            std::cout << "connection:" << request_info.connection << std::endl;
         }
         // if (_to_lower(it->first) == "accept")
         // {
@@ -143,6 +145,7 @@ void request::validate_start_line()
         if (valid_http(start_line[PROTOCOL]) == false)
         {
             response.set_status(505, "HTTP Version Not Supported");
+            std::cout << "HTTP Version Not Supported" << std::endl;
             return ;
         }
 

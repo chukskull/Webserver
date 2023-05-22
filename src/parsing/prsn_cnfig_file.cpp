@@ -49,7 +49,7 @@ int parsing_config_file(_string file, _server_config &servers)
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
 				{
-						_string	path, autoindex, root, index;
+						_string	path, autoindex, root, index ,cgi_path, cgi_extension;
 						path = erase_some_charc(line.substr(line.find("location") + 9));
 						std::vector<_string> 		methods;
 						std::pair<bool, _string>	redirec;
@@ -75,6 +75,10 @@ int parsing_config_file(_string file, _server_config &servers)
 						else if ((j = line.find("redirect")) != _string::npos && catch_elem(line, j))
 							redirec = std::make_pair(true, erase_some_charc(line.substr(line.find("redirect") + 9)));
 
+						else if ((j = line.find("cgi_path")) != _string::npos && catch_elem(line, j))
+							cgi_path = erase_some_charc(line.substr(line.find("cgi_path") + 9));
+						else if ((j = line.find("cgi_extension")) != _string::npos && catch_elem(line, j))
+							cgi_extension = erase_some_charc(line.substr(line.find("cgi_extension") + 14));
 						else
 						{
 							line = erase_some_charc(line);
@@ -87,7 +91,17 @@ int parsing_config_file(_string file, _server_config &servers)
 						}	
 
 					}
-					locations.push_back(Location(path, autoindex, index, root, methods, redirec));
+					if(cgi_extension.size() && cgi_path.size())
+						locations.push_back(Location(path, autoindex, index, root, methods,true, cgi_path, cgi_extension, redirec));
+					else if (cgi_extension.size() || cgi_path.size())
+					{
+						print_error << "error config file" << std::endl;
+						return -1;
+					}
+					else
+					{
+						locations.push_back(Location(path, autoindex, index, root, methods, false,cgi_path, cgi_extension, redirec));
+					}
 				}
 			}
 			servers.push_back(ServerCongif(ports, body_size, host, name, locations));

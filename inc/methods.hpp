@@ -59,14 +59,17 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
-			if (file.file_exists)
+			if (file.is_redirect)
 			{
-				if (file.is_redirect)
+				// std::cout << "::" << file.is_redirect << std::endl;
+				response.set_status(301, "Moved Permanently");
+				response.location = file.location.__redirect.second;
+			}
+			else if (file.file_exists)
+			{
+				if (file.is_dir)
 				{
-				}
-				else if (file.is_dir)
-				{
-					if (file.is_autoindex || 1)
+					if (file.is_autoindex)
 					{
 						std::cout << "got into autoindex\n";
 						generate_autoindex(file, response);
@@ -81,9 +84,31 @@ public:
 				}
 				else if (file.is_file)
 				{
-						response.set_status(200, "OK");
+					response.set_status(200, "OK");
+					std::cout << "cgi on: " << file.location._cgi << std::endl;
+					if (file.location._cgi || 1)
+					{
+						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
+						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
+						// std::cout << "the loca: " << file.location.__path << std::endl;
+						if (file_extention(file.file_path) == file.location.__cgi_ext)
+						{
+							std::cout << "run cgi\n";
+							_cgi_info cgi_info;
+							cgi_info.cgi_name = file.file_path;
+							cgi_info.cgi_path = file.location.__cgi_path;
+							// cgi(cgi_info , request_info, response);
+						}
+						else
+						{
+							response.set_status(403, "Forbidden extention for cgi");
+						}
+					}
+					else
+					{
 						response.content_type = file.content_type;
 						read_file(file.file_path, response);
+					}
 				}
 			}
 			else
@@ -152,7 +177,7 @@ private:
 
 			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
-			std::cout << "===" << response.content_length << std::endl;
+			// std::cout << "===" << response.content_length << std::endl;
 			response.body.swap(file_content);
 			// response.content_type = ;
 		}
@@ -172,8 +197,10 @@ public:
 		{	
 			if (file.is_redirect)
 			{
-				std::cout << "waa nwaa3\n";
-				exit(0);
+                response.set_status(301, "Moved Permanently");
+                response.location = file.location.__redirect.second;
+				// std::cout << "waa nwaa3\n";
+				// exit(0);
 			}
 			else
 			{
@@ -184,7 +211,25 @@ public:
 					// else if (file.is_dir)
 					// {
 						// std::cout << request_info.content_type.first << std::endl;
-						if (request_info.content_type.first == "multipart/form-data")
+
+						//handling cgi
+						if (file.location._cgi)
+						{
+							if (file_extention(file.file_path) == file.location.__cgi_ext)
+							{
+								std::cout << "run cgi\n";
+								_cgi_info cgi_info;
+								cgi_info.cgi_name = file.file_path;
+								cgi_info.cgi_path = file.location.__cgi_path;
+								// cgi(cgi_info , request_info, response);
+							}
+							else
+							{
+								response.set_status(403, "Forbidden extention for cgi");
+							}
+						}
+						
+						else if (request_info.content_type.first == "multipart/form-data")
 						{
 							deque<form_part> parts;
 							// std::cout << "++++++>>>> " << request_info.content_type.second << "\n";
@@ -292,14 +337,25 @@ class handler
 			request req(msg.message);
 
 			// req.request_checkpoint();
-			if (req.request_info.method == GET)
-				GET_.handle(req.request_info, req.response, msg);
-			else if (req.request_info.method == POST)
-				POST_.handle(req.request_info, req.response, msg);
-			else if (req.request_info.method == DELETE)
-				DELETE_.handle(req.request_info, req.response, msg);
-
+			// std::cout << "host:" << req.request_info.host << std::endl;
+			// print("host:" + req.request_info.host);
+			std::cout << "i got to handle\n";
+			if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
+			{
+				std::cout << "i got to handle inside\n";
+				if (req.request_info.method == GET)
+					GET_.handle(req.request_info, req.response, msg);
+				else if (req.request_info.method == POST)
+					POST_.handle(req.request_info, req.response, msg);
+				else if (req.request_info.method == DELETE)
+					DELETE_.handle(req.request_info, req.response, msg);
+			}
+			else
+			{
+				req.response.set_status(400, "Bad Request it is not for this server");
+			}
 			fill_response(req, msg.response);
+			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
 		}
 
