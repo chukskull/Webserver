@@ -4,6 +4,7 @@
 #include "headers.hpp"
 #include "methods.hpp"
 #include <map>
+#include <set>
 
 int 	_gl_recv_return;
 
@@ -174,20 +175,53 @@ public:
 			perror("request header is not set corretely");
 	}
 
+
+	static std::vector<ForBind>		for_binding_servers(std::vector<DataConf> &data)
+	{
+		std::vector<ForBind>	vec;
+		std::map<string, std::vector<string> >		sure;
+		std::vector<string>		ko;
+		
+
+		for (size_t i  = 0; i < data.size(); i++)
+		{
+			for(size_t j = 0;j < data[i].__port.size(); j++)
+			{
+				ko.push_back(data[i].__port[j]);
+				sure[data[i].__host] = ko;
+			}
+		}
+		std::map<string, std::vector<string> >::iterator	it = sure.begin();
+		for(;it != sure.end(); it++)
+		{
+			ForBind	ip_port;
+			ip_port.server = it->first;
+			for(size_t	i = 0; i < it->second.size(); i++)
+			{
+				if (std::find(ip_port._Port.begin(), ip_port._Port.end(), it->second[i]) == ip_port._Port.end())
+					ip_port._Port.push_back(it->second[i]);
+			}
+			vec.push_back(ip_port);
+		}
+		return vec;
+	}
 	void	initial_server(std::vector<DataConf> &data)
 	{
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
-
-		for(size_t  i = 0; i < data.size(); i++)
+		std::vector<ForBind>	_for_bind;
+	
+		_for_bind = for_binding_servers(data);
+		
+		for(size_t  i = 0; i < _for_bind.size(); i++)
 		{
-			for(size_t j = 0; j < data[i].__port.size(); j++)
+			for(size_t j = 0; j < _for_bind[i]._Port.size(); j++)
 			{
 				int server_fd;
-				print_error << data[i].__port[j].c_str() << std::endl;
-				if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
+				print_error << _for_bind[i]._Port[j].c_str() << std::endl;
+				if ((rcv = getaddrinfo(_for_bind[i].server.c_str() , _for_bind[i]._Port[j].c_str(), &hints, &ai)) != 0) {
 					throw std::string("error in getaddrinfo");
 				}
 				for (point = ai; point != NULL; point = point->ai_next)
@@ -211,10 +245,7 @@ public:
 				}
 				freeaddrinfo(ai);
 				if (point == NULL)
-				{
 						throw std::string("there's no ip available in this host");
-						std::cerr << "sure " << std::endl;
-				}
 				if (listen(server_fd, SOMAXCONN) == -1)
 					throw std::string("problem with listen");
 				else
