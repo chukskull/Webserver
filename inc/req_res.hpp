@@ -134,4 +134,6 @@ struct _cgi_info
 {
 	string cgi_path;
 	string cgi_name;
+	string cgi_ext;
+	bool __cgi_on;
 };

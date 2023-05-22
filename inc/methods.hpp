@@ -85,8 +85,12 @@ public:
 				else if (file.is_file)
 				{
 					response.set_status(200, "OK");
-					if (file.location._cgi)
+					std::cout << "cgi on: " << file.location._cgi << std::endl;
+					if (file.location._cgi || 1)
 					{
+						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
+						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
+						// std::cout << "the loca: " << file.location.__path << std::endl;
 						if (file_extention(file.file_path) == file.location.__cgi_ext)
 						{
 							std::cout << "run cgi\n";

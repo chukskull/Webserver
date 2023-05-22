@@ -144,7 +144,8 @@ void generate_autoindex(file_info file, HTTP_response &response)
 		std::cout << "file path: " << file.file_path << std::endl;
 		std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
 		std::cout << "location : " << file.location.__path << std::endl;
-		html += "<a href=\"" + file.location.__path + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
+		// find a better way to do this
+		html += "<a href=\"" + file.location.__path.substr(0, file.location.__path.length() - 1) + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
 	}
 	html += "</pre><hr></body></html>";
 	// MIME type
