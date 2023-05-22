@@ -81,10 +81,6 @@ public:
 	}
 	static void    handle_chunked(Client &my_client)
 	{
-		// std::string line;
-		// std::string fusil("");
-		// std::string	replace;
-		// int chunkSize = 0;
 		bool	error;
 		_string	temp(my_client.get_buffer());
 		size_t	test_temp;
@@ -98,19 +94,6 @@ public:
 		{
 			error = decoding_chunked(my_client, temp);
 		}
-		// my_client._buffer->str("");
-		// while (std::getline(temp, line))
-		// {
-		// 	line.push_back('\n');
-		// if (isHexadecimal(line))
-		// 	{
-		// 		std::stringstream ss(line);
-		// 		//std::cerr << line << std::endl;
-		// 		ss >> std::hex >> chunkSize;
-		// 		if (chunkSize == 0)
-		// 			my_client._done = true;
-		// 	}
-		// }
 	}
 
 	static int	receiving(int fd, Client &_my_client, char *buff2)
@@ -228,7 +211,10 @@ public:
 				}
 				freeaddrinfo(ai);
 				if (point == NULL)
+				{
 						throw std::string("there's no ip available in this host");
+						std::cerr << "sure " << std::endl;
+				}
 				if (listen(server_fd, SOMAXCONN) == -1)
 					throw std::string("problem with listen");
 				else
@@ -239,6 +225,7 @@ public:
 				fd_s.push_back(temp);
 				timeout = (2 * 60 * 1000);
 				fd_counts = 1;
+				std::cerr << "came here" << std::endl;
 			}
 		}
 	}
@@ -316,13 +303,13 @@ public:
 		}
 		catch(const std::string e)
 		{
-			//std::cerr << e << '\n';
+			std::cerr << e << '\n';
 			exit(1);
 		}
 
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), 5000);
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
@@ -331,8 +318,9 @@ public:
 			}
 			if (ser.rc == 0)
 			{
+				// close(ser.)
 				//std::cerr << "poll() timed out , End program\n" << std::endl;
-				break ;
+				continue; ;
 			}
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{

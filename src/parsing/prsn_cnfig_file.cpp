@@ -78,7 +78,7 @@ int parsing_config_file(_string file, _server_config &servers)
 						else if ((j = line.find("cgi_path")) != _string::npos && catch_elem(line, j))
 							cgi_path = erase_some_charc(line.substr(line.find("cgi_path") + 9));
 						else if ((j = line.find("cgi_extension")) != _string::npos && catch_elem(line, j))
-							cgi_extension = erase_some_charc(line.substr(line.find("cgi_path") + 14));
+							cgi_extension = erase_some_charc(line.substr(line.find("cgi_extension") + 14));
 						else
 						{
 							line = erase_some_charc(line);
