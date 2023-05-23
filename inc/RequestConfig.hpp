@@ -51,7 +51,7 @@ struct DataConf
 {
 	size_t					__body_size;
 	_string					__host;
-	std::vector<_string>	__names;
+	std::vector<_string>	__name;
 	std::vector<_string>	__port;
 	std::vector<ReqLoc>		__locations;
 };
