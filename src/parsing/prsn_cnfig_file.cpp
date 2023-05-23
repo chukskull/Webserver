@@ -27,7 +27,8 @@ int parsing_config_file(_string file, _server_config &servers)
 		if(line.find("server {") != _string::npos)
 		{
 			std::vector<_string> ports;
-			_string	host, body_size, name;
+			std::vector<_string> names;
+			_string	host, body_size;
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
@@ -56,7 +57,7 @@ int parsing_config_file(_string file, _server_config &servers)
 				else if ((j = line.find("name")) != _string::npos && catch_elem(line, j))
 				{
 					check = true;
-					name = erase_some_charc(line.substr(line.find("name") + 5));
+					names.push_back(erase_some_charc(line.substr(line.find("name") + 5)));
 				}
 
 				//location part			
@@ -128,7 +129,7 @@ int parsing_config_file(_string file, _server_config &servers)
 					}
 				}
 			}
-			servers.push_back(ServerCongif(ports, body_size, host, name, locations));
+			servers.push_back(ServerCongif(ports, body_size, host, names, locations));
 		}
 		else
 		{
