@@ -17,11 +17,11 @@ void print_locations(ReqLoc &vec)
 	// std::cout << "locs== \n";
 	// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
 	// {
-		std::cout << "loc== ";
-		std::cout << "file: " << vec.__file;
-		std::cout << " path: " << vec.__path;
-		std::cout << " root: " << vec.__root << std::endl;
-		print_meth(vec._AllowMeth);
+	std::cout << "loc== ";
+	std::cout << "file: " << vec.__file;
+	std::cout << " path: " << vec.__path;
+	std::cout << " root: " << vec.__root << std::endl;
+	print_meth(vec._AllowMeth);
 	// }
 }
 
@@ -41,7 +41,9 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
+		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
+		DataConf _server_ = lib.get_server_index(request_info, msg);
+		file = lib.get_requested_file(request_info, _server_);
 		print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
@@ -67,6 +69,7 @@ public:
 			}
 			else if (file.file_exists)
 			{
+				std::cout << "::" << file.location.__file << std::endl;
 				if (file.is_dir)
 				{
 					if (file.is_autoindex)
@@ -77,6 +80,7 @@ public:
 						// serve autoindex
 						// create the html page
 					}
+
 					else
 					{
 						response.set_status(403, "Forbidden");
@@ -86,7 +90,7 @@ public:
 				{
 					response.set_status(200, "OK");
 					std::cout << "cgi on: " << file.location._cgi << std::endl;
-					if (file.location._cgi || 1)
+					if (file.location._cgi)
 					{
 						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
 						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
@@ -191,7 +195,10 @@ public:
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
+		DataConf _server_ = lib.get_server_index(request_info, msg);
+		file = lib.get_requested_file(request_info, _server_);
+		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
+		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
@@ -254,6 +261,10 @@ public:
 								response.set_status(400, "Bad Request2");
 							}
 						}
+						else if (file.is_dir)
+						{
+							response.set_status(400, "Bad Request path");
+						}
 						else
 							update_file(file, request_info, response);
 					// }
@@ -280,7 +291,10 @@ public:
 	{
 		file_info file;
 
-		file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
+		DataConf _server_ = lib.get_server_index(request_info, msg);
+		file = lib.get_requested_file(request_info, _server_);
+		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
+		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		if (file._allowMeth[con_DELETE])
 		{
 			if (file.is_redirect)
@@ -340,8 +354,8 @@ class handler
 			// std::cout << "host:" << req.request_info.host << std::endl;
 			// print("host:" + req.request_info.host);
 			std::cout << "i got to handle\n";
-			if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
-			{
+			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
+			// {
 				std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
@@ -349,11 +363,11 @@ class handler
 					POST_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
-			}
-			else
-			{
-				req.response.set_status(400, "Bad Request it is not for this server");
-			}
+			// }
+			// else
+			// {
+				// req.response.set_status(400, "Bad Request it is not for this server");
+			// }
 			fill_response(req, msg.response);
 			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();

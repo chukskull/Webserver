@@ -1,9 +1,50 @@
-#create an html index file
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Index</title>
-    #add some text
-    <p>Index</p>
+  <title>404 Error - Page Not Found</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #f1f1f1; /* Off-white text color */
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    a {
+      color: #cbe5f6;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
+<body>
+  <div class="container">
+    <h1>404 Error - Page Not Found</h1>
+    
+    <p>Please check the URL or <a href="javascript:history.back()">go back</a> to the previous page.</p>
+  </div>
+</body>
 </html>

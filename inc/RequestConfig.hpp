@@ -28,7 +28,7 @@ struct ReqLoc
 	{
 		this->_autoindex = other._autoindex;
 		this->__path = other.__path;
-		// this->__files = other.__files;
+		this->__file = other.__file;
 		this->__root = other.__root;
 		this->__redirect = other.__redirect;
 		this->_cgi = other._cgi;
@@ -51,7 +51,7 @@ struct DataConf
 {
 	size_t					__body_size;
 	_string					__host;
-	_string					__name;
+	std::vector<_string>	__names;
 	std::vector<_string>	__port;
 	std::vector<ReqLoc>		__locations;
 };

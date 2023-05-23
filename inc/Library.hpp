@@ -32,9 +32,14 @@ struct file_info
 
 class servers_library 
 {
-    public:
+    private:
     vector<DataConf> _servers;
     string _path;
+    bool matched_host(DataConf &to_check, size_t index);
+    bool matched_port(DataConf &to_check, Mesage &msg);
+    // void fill_matched_servers();
+    void fill_matched_servers(Mesage &msg, std::vector<DataConf> &m_servers);
+    DataConf &find_best_server_match(HTTP_request &request_info, Mesage &msg, std::vector<DataConf> &m_servers);
 	// static std::ofstream fake_db;
 
 public:
@@ -42,7 +47,11 @@ public:
     servers_library() {}
     servers_library(vector<DataConf> servers) : _servers(servers){}
 
-    file_info get_requested_file(string path, size_t s_index);
+    DataConf &get_server_index(HTTP_request &request_info, Mesage &msg);
+    // file_info get_requested_file(string path, size_t s_index);
+    // file_info get_requested_file(HTTP_request &request_info, Mesage &msg);
+    file_info get_requested_file(HTTP_request &request_info, DataConf &_server);
+    // file_info get_requested_file(string path, size_t s_index, short &method);
     void set(vector<DataConf> &servers);
 };
 
