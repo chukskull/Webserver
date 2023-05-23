@@ -31,20 +31,33 @@ int parsing_config_file(_string file, _server_config &servers)
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
+				bool			check = false;
 				// std::cerr << line << " " << std::endl;
 				if(line.find("}") != std::string::npos)
 					break ;
 				if ((j = line.find("listen")) != _string::npos && catch_elem(line, j))
+				{
+					check = true;
 					ports.push_back(erase_some_charc(line.substr(line.find("listen") + 7)));
+				}
 
 				else if((j = line.find("host")) != _string::npos && catch_elem(line, j))
+				{
+					check = true;
 					host = erase_some_charc(line.substr(line.find("host") + 5));
+				}
 
 				else if ((j = line.find("body_size")) != _string::npos && catch_elem(line, j))
+				{
+					check = true;
 					body_size = erase_some_charc(line.substr(line.find("body_size") + 10));
+				}
 
 				else if ((j = line.find("name")) != _string::npos && catch_elem(line, j))
+				{
+					check = true;
 					name = erase_some_charc(line.substr(line.find("name") + 5));
+				}
 
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
@@ -57,11 +70,13 @@ int parsing_config_file(_string file, _server_config &servers)
 						redirec = std::make_pair(false, nothing);
 					while (std::getline(input_file, line))
 					{
-
 						if (line.find("]") != _string::npos)
 							break;
 						if ( (j = line.find("autoindex")) != std::string::npos && catch_elem(line, j))
+						{
+							check = true;
                 		    autoindex = erase_some_charc(line.substr(line.find("autoindex") + 9));
+						}
 
                 		else if ((j = line.find("root")) != std::string::npos && catch_elem(line, j))
                 		    root = erase_some_charc(line.substr(line.find("root") + 5));
@@ -83,13 +98,13 @@ int parsing_config_file(_string file, _server_config &servers)
 						{
 							line = erase_some_charc(line);
 							// print_error << line << std::endl;
-							if (line.compare("[") != 0)
+							
+							if (line.compare("[") != 0 && line.size() != 0)
 							{
 								print_error << "error configfile" << std::endl;
 								return -1;
 							}
 						}	
-
 					}
 					if(cgi_extension.size() && cgi_path.size())
 						locations.push_back(Location(path, autoindex, index, root, methods,true, cgi_path, cgi_extension, redirec));
@@ -103,8 +118,26 @@ int parsing_config_file(_string file, _server_config &servers)
 						locations.push_back(Location(path, autoindex, index, root, methods, false,cgi_path, cgi_extension, redirec));
 					}
 				}
+				if (check == false)
+				{
+					line = erase_some_charc(line);
+					if (line.size() > 0)
+					{
+						print_error << "error config file" << std::endl;
+						return -1;
+					}
+				}
 			}
 			servers.push_back(ServerCongif(ports, body_size, host, name, locations));
+		}
+		else
+		{
+			line = erase_some_charc(line);
+			if (line.size() > 0)
+			{
+				print_error << "error config file" << std::endl;
+				return -1;
+			}
 		}
 	}
 	return 0;

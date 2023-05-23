@@ -18,7 +18,7 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 	allow_methods.push_back("DELETE");
 	_server_config::iterator it = vec.begin();
 	std::vector<bool>	methods;
-	for(; it != vec.end(); it++)
+	for(;it != vec.end(); it++)
 	{
 		DataConf _data;
 		std::stringstream	lol(it->get_body_size());
@@ -66,7 +66,8 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 				{
 					return -1;
 				}
-				else{
+				else
+				{
 					size_t index = t_1 - allow_methods.begin();
 					_allows[index] = true;
 				}
