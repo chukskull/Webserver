@@ -48,6 +48,7 @@ struct HTTP_request
 	string connection;
 	string body;
 	string query_string;
+	string cookies;
 	//construsctor for request empty strings and -1 in numbers
 	HTTP_request() : method(-1), requested_file(""), host(""), content_type(std::make_pair("", "")), content_length(-1), connection(""), body("") {}
 	// multimap<float, string> accept;
@@ -66,6 +67,7 @@ struct HTTP_response
 	bool close_connection;
 
 	string body;
+	string cookies;
 
 	bool stop;
 
@@ -141,3 +143,7 @@ struct _cgi_info
 // };
 //-----------------///CGI///----------------//
 int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response);
+
+
+//-----------------///cookies///----------------//
+std::string set_cookies(std::string name, std::string value);

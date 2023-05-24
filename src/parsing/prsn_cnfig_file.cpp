@@ -140,7 +140,7 @@ int parsing_config_file(_string file, _server_config &servers)
 								print_error << "error configfile" << std::endl;
 								return -1;
 							}
-						}	
+						}
 					}
 					if(cgi_extension.size() && cgi_path.size())
 						locations.push_back(Location(path, autoindex, index, root, methods,true, cgi_path, cgi_extension, redirec));
