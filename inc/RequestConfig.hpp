@@ -54,7 +54,7 @@ struct DataConf
 	std::vector<_string>	__name;
 	std::vector<_string>	__port;
 	std::vector<ReqLoc>		__locations;
-	std::pair<int, _string>	__error;
+	std::map<int, _string>	__error;
 };
 
 #endif

@@ -10,9 +10,9 @@ private:
 	_string         				__host;
 	std::vector<_string>   			__names;
 	_locations						__location;
-	std::pair<int, _string>			__error;
+	std::map<int, _string>			__error;
 public:
-	ServerCongif(std::vector<_string> port,_string body_size, _string host, std::vector<_string> name, _locations const &locations, std::pair<int, _string> _error ): __body_size(body_size),__port(port), __host(host), __names(name), __location(locations), __error(_error)
+	ServerCongif(std::vector<_string> port,_string body_size, _string host, std::vector<_string> name, _locations const &locations, std::map<int, _string> _error ): __body_size(body_size),__port(port), __host(host), __names(name), __location(locations), __error(_error)
 	{
 
 	}
@@ -32,7 +32,7 @@ public:
 	_locations	get_locations()const{
 		return __location;
 	}
-	std::pair<int, _string>		get_error()const{
+	std::map<int, _string>		get_error()const{
 		return	__error;
 	}
 	~ServerCongif(){};

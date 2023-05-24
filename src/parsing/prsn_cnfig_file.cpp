@@ -28,7 +28,7 @@ int parsing_config_file(_string file, _server_config &servers)
 			std::vector<_string> 		ports;
 			std::vector<_string> 		names;
 			_string						host, body_size;
-			std::pair<int, _string>	error;
+			std::map<int, _string>		error;
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
@@ -64,6 +64,7 @@ int parsing_config_file(_string file, _server_config &servers)
 					check = true;
 					_string		status;
 					_string		str;
+					int			status_2;
 					bool		for_str = false;
 					bool 		is_it_last = false;
 					for(size_t i = j + 5; i < line.size(); i++)
@@ -77,7 +78,6 @@ int parsing_config_file(_string file, _server_config &servers)
 						else if (for_str)
 						{
 							str += line[i];
-							error.second = erase_some_charc(str);
 							is_it_last = true;
 						}
 						else
@@ -87,13 +87,13 @@ int parsing_config_file(_string file, _server_config &servers)
 							{
 								for_str = true;
 								if (is_digit(status))
-									error.first = atoi(status.c_str());
+									status_2 = atoi(status.c_str());
 								else
 									return -1;
 							}
 						}
 					}
-					std::cerr << error.first << " // " << error.second << std::endl;;
+					error.insert(std::make_pair(status_2,erase_some_charc(str)));
 				}
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
