@@ -247,7 +247,10 @@ public:
 							{
 								std::cout << "run cgi\n";
 								// cgi_info.cgi_name = file.file_path;
+								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
+								cgi_info.lang_path = file.location.__cgi_path;
+								cgi_info.cgi_ext = file.location.__cgi_ext ;
 								// cgi_info.lang_path = "/usr/local/bin/python3";
 								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
 								// cgi_info.cgi_ext = ".py";
