@@ -10,7 +10,7 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 	for (std::vector<ReqLoc>::iterator it = _server.__locations.begin(); it != _server.__locations.end(); it++)
 	{
 		pos = request_info.requested_file.find(it->__path);
-		std::cout << "file::" << it->__file << std::endl;
+		// std::cout << "file::" << it->__file << std::endl;
 		// std::cout << "! get lucky\n";
 		if (pos != request_info.requested_file.npos && pos == 0) // possibly check that the npos is zero
 		{
@@ -115,8 +115,8 @@ DataConf &servers_library::find_best_server_match(HTTP_request &request_info, st
 		{
 			for(std::vector<string>::iterator it_port = it->__port.begin(); it_port != it->__port.end(); it_port++)
 			{
-				std::cout << "===>" << request_info.host;
-				std::cout << "===>" << *it_names << std::endl;
+				// std::cout << "===>" << request_info.host;
+				// std::cout << "===>" << *it_names << std::endl;
 				if (*it_names + ":" + *it_port == request_info.host)
 				{
 					return *it;

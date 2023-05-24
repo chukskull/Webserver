@@ -100,28 +100,28 @@ public:
 					// std::cout << "cgi ext:" << file.location.__cgi_ext << std::endl;
 					// std::cout << "file ext:" << file_extention(file.file_path) << std::endl;
 					// std::cout << "cgi path:" << file.location.__cgi_path << std::endl;
-					if (file.location._cgi)
+					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
 						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
 						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
 						// std::cout << "the loca: " << file.location.__path << std::endl;
-						print("cgi  ext:" + file.location.__cgi_ext);
-						std::cout << std::endl;
-						print("file ext:" + file_extention(file.file_path));
-						std::cout << std::endl;
-						if (file_extention(file.file_path) == file.location.__cgi_ext)
-						{
+						// print("cgi  ext:" + file.location.__cgi_ext);
+						// std::cout << std::endl;
+						// print("file ext:" + file_extention(file.file_path));
+						// std::cout << std::endl;
+						// if (file_extention(file.file_path) == file.location.__cgi_ext)
+						// {
 							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
-						}
-						else
-						{
-							response.set_status(403, "Forbidden extention for cgi");
-						}
+						// }
+						// else
+						// {
+							// response.set_status(403, "Forbidden extention for cgi");
+						// }
 					}
 					else
 					{
@@ -240,9 +240,9 @@ public:
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
 							_cgi_info cgi_info;
-							std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
-							std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
-							std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
+							// std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
+							// std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
+							// std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
 								std::cout << "run cgi\n";
