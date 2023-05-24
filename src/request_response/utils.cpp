@@ -613,7 +613,7 @@ string file_extention(string file)
 	size_t pos = file.find_last_of('.');
 	if (pos == string::npos)
 		return "";
-	return file.substr(pos + 1);
+	return file.substr(pos);
 }
 
 
