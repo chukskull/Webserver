@@ -105,7 +105,8 @@ public:
 							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
-							cgi_info.cgi_path = file.location.__cgi_path;
+							cgi_info.lang_path = file.location.__cgi_path;
+							std::cout << "im heeere============\n";
 							// cgi(cgi_info , request_info, response);
 						}
 						else
@@ -122,7 +123,7 @@ public:
 			}
 			else
 			{
-				response.set_status(404, "File Not Found");
+				response.set_status(404, "File Not Found 444");
 			}
 
 		}
@@ -225,15 +226,20 @@ public:
 						// std::cout << request_info.content_type.first << std::endl;
 
 						//handling cgi
-						if (file.location._cgi)
+						std::cout << file.location._cgi << std::endl;
+						if (file.location._cgi || 1)
 						{
-							if (file_extention(file.file_path) == file.location.__cgi_ext)
+							// std::cout << "loc:" << file.location.__path << std::endl;
+								_cgi_info cgi_info;
+							if (file_extention(file.file_path) == file.location.__cgi_ext || 1)
 							{
 								std::cout << "run cgi\n";
-								_cgi_info cgi_info;
+								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
-								cgi_info.cgi_path = file.location.__cgi_path;
-								// cgi(cgi_info , request_info, response);
+								cgi_info.lang_path = "/usr/local/bin/python3";
+								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
+								cgi_info.cgi_ext = ".py";
+								cgi(cgi_info , request_info, response);
 							}
 							else
 							{

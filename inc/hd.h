@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <iostream>
 
-int cgi(std::string text);
 std::string set_cookies(std::string name, std::string value);
 
 
