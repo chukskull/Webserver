@@ -32,6 +32,7 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			_data.__name = it->get_name();
 		if(it->get_port().size())
 			_data.__port = it->get_port();
+		_data.__error = it->get_error();
 		// _data.__body_size = it->get_body_size().a;
 		_locations	loc = it->get_locations();
 		_locations::iterator	it_2 = loc.begin();

@@ -11,7 +11,6 @@ bool	catch_elem(_string _confg, size_t j)
 	return false;
 }
 
-
 int parsing_config_file(_string file, _server_config &servers)
 {
 	std::ifstream	input_file;
@@ -26,9 +25,10 @@ int parsing_config_file(_string file, _server_config &servers)
 		size_t j = 0;
 		if(line.find("server {") != _string::npos)
 		{
-			std::vector<_string> ports;
-			std::vector<_string> names;
-			_string	host, body_size;
+			std::vector<_string> 		ports;
+			std::vector<_string> 		names;
+			_string						host, body_size;
+			std::pair<int, _string>	error;
 			_locations	locations;
 			while(std::getline(input_file, line))
 			{
@@ -59,7 +59,42 @@ int parsing_config_file(_string file, _server_config &servers)
 					check = true;
 					names.push_back(erase_some_charc(line.substr(line.find("name") + 5)));
 				}
-
+				else if ((j = line.find("error")) != _string::npos && catch_elem(line, j))
+				{
+					check = true;
+					_string		status;
+					_string		str;
+					bool		for_str = false;
+					bool 		is_it_last = false;
+					for(size_t i = j + 5; i < line.size(); i++)
+					{
+						if(isspace(line[i]))
+						{
+							if (is_it_last)
+								return - 1;
+							;
+						}
+						else if (for_str)
+						{
+							str += line[i];
+							error.second = erase_some_charc(str);
+							is_it_last = true;
+						}
+						else
+						{
+							status += line[i];
+							if (isspace(line[i + 1]))
+							{
+								for_str = true;
+								if (is_digit(status))
+									error.first = atoi(status.c_str());
+								else
+									return -1;
+							}
+						}
+					}
+					std::cerr << error.first << " // " << error.second << std::endl;;
+				}
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
 				{
@@ -129,7 +164,7 @@ int parsing_config_file(_string file, _server_config &servers)
 					}
 				}
 			}
-			servers.push_back(ServerCongif(ports, body_size, host, names, locations));
+			servers.push_back(ServerCongif(ports, body_size, host, names, locations, error));
 		}
 		else
 		{

@@ -13,15 +13,6 @@ class Server {
 public:
 	Server(std::vector<DataConf> &data):_containers(data) {
 	}
-		static bool isHexadecimal(const std::string& str)
-		{
-    	for (size_t i = 0; i < str.length() - 2; ++i)
-		{
-    	    if (!isxdigit(str[i]))
-    	        return false;
-    	}
-   	 	return true;
-	}
 	static bool		decoding_chunked(Client &my_client, _string	&temp)
 	{
 		std::string chunk_size_str;
@@ -71,13 +62,7 @@ public:
 				i--;
             }
 		}
-		// _string	_clen(_clean_body.str());
-		
-		// std::cerr << _clean_body.str() << std::endl;
-		// std::cerr << _header << std::endl;
-		// std::cerr <<"clean" <<_clean_body.str().size() << " " <<_clen.substr(0,200)<< " <---- head" << std::endl;
 		(*my_client._buffer).write((_header + _clean_body.str()).c_str(), (_header + _clean_body.str()).size());
-		// std::cerr << (*my_client._buffer).str() << std::endl;
 		return 1;
 	}
 	static void    handle_chunked(Client &my_client)
@@ -172,7 +157,10 @@ public:
 			_my_client._done = true;
 		}
 		else
+		{
+			//400;
 			perror("request header is not set corretely");
+		}
 	}
 
 
@@ -294,7 +282,7 @@ public:
 					if (s < 0)
 						return -1;
 					if (s > 0)
-						my_client.response.erase(0, 1200);
+						my_client.response.erase(0, BUFFER_SEND);
 				}
 				else
 				{
@@ -345,7 +333,7 @@ public:
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
-				perror("poll() failed");
+				perror("poll() failed"); //503
 				break ;
 			}
 			if (ser.rc == 0)
@@ -364,7 +352,10 @@ public:
 						ser.addrlen = sizeof ser.remoteaddr;
 						int newfd = accept(ser.fd_s[i].fd, (struct sockaddr *) &ser.remoteaddr, &ser.addrlen);
 						if (newfd == -1)
-							perror("accept");
+						{
+							perror("accept");//500
+
+						}
 						else
 						{
 							//std::cerr << ser.fd_s[i].fd << std::endl;
@@ -398,6 +389,7 @@ public:
 							// if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd]._size) > ser._containers[server_infos.first].__body_size)
 							// {
 							// 	perror("length size so big");
+							//400
 							// }
 							
 							if (ser._connections[ser.fd_s[i].fd]._done)
@@ -428,7 +420,7 @@ public:
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
 							else
 							{
-								//ayman needs to send the client 404 bad request in this
+								//ayman needs to send the client 500 bad request in this
 								
 								perror("recv");
 							}

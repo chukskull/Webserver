@@ -16,6 +16,16 @@ size_t	escape_white_space(_string my_string)
 	return k;
 }
 
+bool	is_digit(_string my_string)
+{
+	for(size_t i = 0; i < my_string.size();i++)
+	{
+		if (!isdigit(my_string[i]))
+			return false;
+	}
+	return true;
+}
+
 _string		erase_some_charc(_string my_string)
 {
 	std::vector<char> sure;
