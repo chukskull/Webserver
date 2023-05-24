@@ -132,6 +132,9 @@ public:
 
 struct _cgi_info
 {
-	string cgi_path;
+	string lang_path;
 	string cgi_name;
+	string cgi_extention;
 };
+//-----------------///CGI///----------------//
+int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response);
