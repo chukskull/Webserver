@@ -1,6 +1,7 @@
 // #include "typedefs.hpp"
 #pragma once
 #include "req_res.hpp"
+struct HTTP_request;
 
 struct file_info
 {
@@ -39,7 +40,7 @@ class servers_library
     bool matched_port(DataConf &to_check, Mesage &msg);
     // void fill_matched_servers();
     void fill_matched_servers(Mesage &msg, std::vector<DataConf> &m_servers);
-    DataConf &find_best_server_match(HTTP_request &request_info, Mesage &msg, std::vector<DataConf> &m_servers);
+    DataConf &find_best_server_match(HTTP_request &request_info, std::vector<DataConf> &m_servers);
 	// static std::ofstream fake_db;
 
 public:
@@ -47,7 +48,7 @@ public:
     servers_library() {}
     servers_library(vector<DataConf> servers) : _servers(servers){}
 
-    DataConf &get_server_index(HTTP_request &request_info, Mesage &msg);
+    DataConf get_server_index(HTTP_request &request_info, Mesage &msg);
     // file_info get_requested_file(string path, size_t s_index);
     // file_info get_requested_file(HTTP_request &request_info, Mesage &msg);
     file_info get_requested_file(HTTP_request &request_info, DataConf &_server);
