@@ -93,7 +93,7 @@ int parsing_config_file(_string file, _server_config &servers)
 							}
 						}
 					}
-					std::cerr << error.first << " // " << error.second << std::endl;
+					std::cerr << error.first << " // " << error.second << std::endl;;
 				}
 				//location part			
 				if ((j = line.find("location")) != _string::npos && catch_elem(line, j))
