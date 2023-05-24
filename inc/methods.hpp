@@ -227,18 +227,20 @@ public:
 
 						//handling cgi
 						std::cout << file.location._cgi << std::endl;
-						if (file.location._cgi || 1)
+						if (file.location._cgi)
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
 								_cgi_info cgi_info;
-							if (file_extention(file.file_path) == file.location.__cgi_ext || 1)
+							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
 								std::cout << "run cgi\n";
 								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
-								cgi_info.lang_path = "/usr/local/bin/python3";
+								std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
+								std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
+								// cgi_info.lang_path = "/usr/local/bin/python3";
 								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
-								cgi_info.cgi_ext = ".py";
+								// cgi_info.cgi_ext = ".py";
 								cgi(cgi_info , request_info, response);
 							}
 							else
