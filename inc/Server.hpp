@@ -122,18 +122,19 @@ public:
 					}
 				}
 		}
-		else if (_gl_recv_return == 0)
-		{
-			close(fd);
-		}
+		// else if (_gl_recv_return == 0)
+		// {
+		// 	close(fd);
+		// }
 		return 0;
 	}
-	static void	_pars_request(Client &_my_client)
+	static int pars_request(Client &_my_client)
 	{
 		size_t							index = 0;
 		std::string					header_check;
 		_string						str;
 		size_t						endindex;
+		handler						header;
 
 		header_check  = _my_client._buffer->str();
 		if ((index = header_check.find("Content-Length: ")) != _string::npos)
@@ -163,9 +164,10 @@ public:
 		}
 		else
 		{
-			//400;
-			perror("request header is not set corretely");
+			header.manage_server_errors(400, _my_client.response);
+			return -1;
 		}
+		return 0;
 	}
 
 
@@ -338,8 +340,7 @@ public:
 			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), ser.timeout);
 			if (ser.rc < 0)
 			{
-				std::cerr << ser.fd_s.size() << std::endl;
-				perror("poll() failed"); //503
+				perror("poll() failed");
 				break ;
 			}
 			if (ser.rc == 0)
@@ -369,8 +370,7 @@ public:
 						int newfd = accept(ser.fd_s[i].fd, (struct sockaddr *) &ser.remoteaddr, &ser.addrlen);
 						if (newfd == -1)
 						{
-							perror("accept");//500
-
+							perror("accept");
 						}
 						else
 						{
@@ -388,6 +388,7 @@ public:
 						ser._connections[ser.fd_s[i].fd].time_flag = true;
 						// std:: cerr << "client phase " <<ser.fd_s[i].fd << std::endl;
 						std::pair<int, int> server_infos;
+						int			error_header;
 						server_infos = get_server_infos(ser.server_fds, ser.fd_s[i].fd, ser._connections);
 						string res;
 
@@ -395,7 +396,11 @@ public:
 						if(_gl_recv_return > 0)
 						{
 							if (_pars_req)
-								_pars_request(ser._connections[ser.fd_s[i].fd]);
+							{
+								error_header = pars_request(ser._connections[ser.fd_s[i].fd]);
+								if (error_header == -1)
+									ser.fd_s[i].events = POLLOUT;
+							}
 
 							if (ser._connections[ser.fd_s[i].fd].is_it_chunked_)
 								handle_chunked(ser._connections[ser.fd_s[i].fd]);
@@ -403,25 +408,19 @@ public:
 							else if (ser._connections[ser.fd_s[i].fd]._size == (ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size))
 								ser._connections[ser.fd_s[i].fd]._done = true;
 
-							// if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd]._size) > ser._containers[server_infos.first].__body_size)
-							// {
-							// 	perror("length size so big");
-							//400
-							// }
+							if(static_cast<size_t>(ser._connections[ser.fd_s[i].fd]._size) > ser._containers[server_infos.first].__body_size)
+							{
+								handl_request.manage_server_errors(413, ser._connections[ser.fd_s[i].fd].response);
+								ser._connections[ser.fd_s[i].fd].time_ = true;
+								ser.fd_s[i].events = POLLOUT;
+							}
 							
 							if (ser._connections[ser.fd_s[i].fd]._done)
 							{
 								Mesage  *mesg = new Mesage();
-								//std::cerr <<  ser._connections[ser.fd_s[i].fd].get_buffer().size() << '\t' <<ser._connections[ser.fd_s[i].fd]._size << '\t' <<  (ser._connections[ser.fd_s[i].fd].current_size - ser._connections[ser.fd_s[i].fd].header_size) << std::endl;
 								mesg->message = ser._connections[ser.fd_s[i].fd].get_buffer();
-								// std::cerr << mesg->message.size() -  ser._connections[ser.fd_s[i].fd].header_size<< "PURITY" << std::endl;
 								ser._connections[ser.fd_s[i].fd].clear_buffer();
 								mesg->_connections = std::make_pair(ser.fd_s[i].fd, server_infos);
-								// //std::cerr << "server : " << server_infos.first << " port : " << server_infos.second << '\t' <<server_infos.first <<std::endl;
-								// std::cout << ":::" << mesg->message.size() << std::endl;
-								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
-								// std::cout << ":-:" << mesg->message.substr(0, 1000) << std::endl;
-								// std::cout << mesg->message << std::endl;
 								handl_request.handle(*mesg);
 								ser._connections[ser.fd_s[i].fd].response.swap(mesg->response);
 								ser.fd_s[i].events = POLLOUT;
@@ -438,7 +437,8 @@ public:
 							{
 								//ayman needs to send the client 500 bad request in this
 								
-								perror("recv");
+								// perror("recv");
+								handl_request.manage_server_errors(500, ser._connections[ser.fd_s[i].fd].response);
 							}
 							close(ser.fd_s[i].fd);
 							ser.fd_s[i] = ser.fd_s.back();
@@ -452,10 +452,11 @@ public:
 					ssize_t 	s;
 					ser._connections[ser.fd_s[i].fd].time_flag = false;
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
-					if (s < 0)
-						continue;
+					
 					if (s == 2)
 						ser.fd_s.erase(ser.fd_s.begin() + i);
+					if (s < 0)
+						continue;
 				}
 			}		
 
@@ -469,10 +470,14 @@ public:
         	        if (currentTime - ser._connections[ser.fd_s[i].fd].lastActiveTime > 10 && ser.server_fds.find(ser.fd_s[i].fd) == ser.server_fds.end())
         	        {
 						time(&ser._connections[ser.fd_s[i].fd].lastActiveTime);
-        	            std::cout << "Client " << ser.fd_s[i].fd << " is hanging. Closing connection." << std::endl;
-        	            close(ser.fd_s[i].fd);
-						ser.fd_s.back() = ser.fd_s[i];
-						ser.fd_s.pop_back();
+						handl_request.manage_server_errors(408, ser._connections[ser.fd_s[i].fd].response);
+						ser._connections[ser.fd_s[i].fd].time_ = true;
+
+						ser.fd_s[i].events = POLLOUT;
+        	            // std::cout << "Client " << ser.fd_s[i].fd << " is hanging. Closing connection." << std::endl;
+        	            // close(ser.fd_s[i].fd);
+						// ser.fd_s.back() = ser.fd_s[i];
+						// ser.fd_s.pop_back();
         	        }
 				}
         	}
