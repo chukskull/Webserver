@@ -31,7 +31,6 @@ public:
 		size_t n = _body.size();
 		for (size_t i = 0; i < n; i++)
         {
-
             if (read_chunk_size)
             {
                 if (_body[i] == '\r' && _body[i + 1] == '\n')
@@ -69,7 +68,6 @@ public:
 		{
 			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
 				my_client._done = true;
-			
 		}
 		if (my_client._done)
 			error = decoding_chunked(my_client, temp);
@@ -291,7 +289,7 @@ public:
 		}
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), -1);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), 5000);
 			if (ser.rc < 0)
 			{
 				perror("poll() failed");
@@ -362,8 +360,6 @@ public:
 						int sender_fd = ClienTsoCKet;
 						if (_gl_recv_return <= 0)
 						{
-						std::cerr << "here client" << std::endl;
-							//std::cerr << "pretty sure " << std::endl;
 							if (_gl_recv_return == 0)
 							{
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
@@ -377,7 +373,6 @@ public:
 								handl_request.manage_server_errors(500, MyClienT.response);
 								ser.fd_s[i].events = POLLOUT;
 							}
-							
 						}
 					}
 				}
@@ -386,7 +381,6 @@ public:
 					ssize_t 	s;
 					MyClienT.time_flag = false;
 					s = send_response(MyClienT, ClienTsoCKet);
-					
 					if (s == 2)
 						ser.fd_s.erase(ser.fd_s.begin() + i);
 					if (s < 0)
@@ -402,7 +396,6 @@ public:
         			time(&currentTime);
         	        if (currentTime - MyClienT.lastActiveTime > 10 && ser.server_fds.find(ClienTsoCKet) == ser.server_fds.end())
         	        {
-						time(&MyClienT.lastActiveTime);
 						handl_request.manage_server_errors(408, MyClienT.response);
 						MyClienT.time_ = true;
 						ser.fd_s[i].events = POLLOUT;
