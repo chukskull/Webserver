@@ -10,7 +10,6 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 	std::string subtracted_body = request_info.body;
 	subtracted_body.erase(0, 5);
 	const char* body = subtracted_body.c_str();
-	
 	char *av[] = {(char *) lang_path, (char *) cgi_name, (char *) body, nullptr};
 	FILE *fp = tmpfile();
 	int fd = fileno(fp);

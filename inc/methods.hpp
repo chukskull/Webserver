@@ -42,6 +42,7 @@ public:
 	{
 		file_info file;
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
+		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
@@ -100,28 +101,28 @@ public:
 					// std::cout << "cgi ext:" << file.location.__cgi_ext << std::endl;
 					// std::cout << "file ext:" << file_extention(file.file_path) << std::endl;
 					// std::cout << "cgi path:" << file.location.__cgi_path << std::endl;
-					if (file.location._cgi)
+					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
 						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
 						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
 						// std::cout << "the loca: " << file.location.__path << std::endl;
-						print("cgi  ext:" + file.location.__cgi_ext);
-						std::cout << std::endl;
-						print("file ext:" + file_extention(file.file_path));
-						std::cout << std::endl;
-						if (file_extention(file.file_path) == file.location.__cgi_ext)
-						{
+						// print("cgi  ext:" + file.location.__cgi_ext);
+						// std::cout << std::endl;
+						// print("file ext:" + file_extention(file.file_path));
+						// std::cout << std::endl;
+						// if (file_extention(file.file_path) == file.location.__cgi_ext)
+						// {
 							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
-						}
-						else
-						{
-							response.set_status(403, "Forbidden extention for cgi");
-						}
+						// }
+						// else
+						// {
+							// response.set_status(403, "Forbidden extention for cgi");
+						// }
 					}
 					else
 					{
@@ -240,14 +241,17 @@ public:
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
 							_cgi_info cgi_info;
-							std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
-							std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
-							std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
+							// std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
+							// std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
+							// std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
 								std::cout << "run cgi\n";
 								// cgi_info.cgi_name = file.file_path;
+								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
+								cgi_info.lang_path = file.location.__cgi_path;
+								cgi_info.cgi_ext = file.location.__cgi_ext ;
 								// cgi_info.lang_path = "/usr/local/bin/python3";
 								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
 								// cgi_info.cgi_ext = ".py";
@@ -396,6 +400,26 @@ class handler
 			// 	handle_delete();
 		}
 
+		void manage_server_errors(short status_code, string &response, string status_text = "")
+		{
+			string error_page;
+
+			if (status_text == "")
+				status_text = lib.get_status_text(status_code);
+
+			error_page = lib.get_error_page(status_code, status_text);
+			response.append("HTTP/1.1 ");
+			response.append(std::to_string(status_code) + " ");
+			response.append(status_text);
+			response.append(CRLF);
+
+			response += "Content-Type: Text/html" ; response.append(CRLF);
+			response += "Content-length: " + std::to_string(error_page.size()); response.append(CRLF);
+			response.append(CRLF);
+
+			response.append(error_page);
+		}
+
 	private:
 	void fill_response(request &req, string &res)
 	{
@@ -415,6 +439,9 @@ class handler
 		
 		if (req.response.connection == "meeeeem")
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
+
+		if (req.response.cookies != "")
+		{ res.append("cookies: "); res.append(req.response.cookies); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);
 	}

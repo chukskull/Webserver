@@ -118,6 +118,15 @@ int request::fill_req()
             request_info.connection = it->second;
             std::cout << "connection:" << request_info.connection << std::endl;
         }
+        if (_to_lower(it->first) == "cookie")
+        {
+            if (request_info.cookies != "")
+            {
+                response.set_status(400, "bad request3");
+                return 1;
+            }
+            request_info.cookies = it->second;
+        }
         // if (_to_lower(it->first) == "accept")
         // {
         //     fill_accept(*it);

@@ -423,7 +423,6 @@ public:
 								// std::cout << ":-:" << mesg->message.substr(0, 1000) << std::endl;
 								// std::cout << mesg->message << std::endl;
 								handl_request.handle(*mesg);
-								
 								ser._connections[ser.fd_s[i].fd].response.swap(mesg->response);
 								ser.fd_s[i].events = POLLOUT;
 							}
