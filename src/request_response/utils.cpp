@@ -141,11 +141,19 @@ void generate_autoindex(file_info file, HTTP_response &response)
 		// std::cout << "========= " << i << '\n';
 		if (dir_content[i] == "." || dir_content[i] == "..")
 			continue;
-		std::cout << "file path: " << file.file_path << std::endl;
-		std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
-		std::cout << "location : " << file.location.__path << std::endl;
+		// std::cout << "==================================================================\n";
+		// std::cout << "file path: " << file.file_path << std::endl;
+		// std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
+		// std::cout << "location a: " << file.location.__path.substr(0, file.location.__path.length()) << std::endl;
+		// std::cout << "location n: " << file.location.__path << std::endl;
+		// std::cout << "==================================================================\n";
 		// find a better way to do this
-		html += "<a href=\"" + file.location.__path.substr(0, file.location.__path.length() - 1) + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
+		html += "<a href=\"" + file.location.__path.substr(0, file.location.__path.length());
+		if (file.file_path.substr(file.location.__root.length()) != "")
+			html += file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
+		else
+			html += dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
+		// html += "<a href=\"" + file.location.__path.substr(0, file.location.__path.length()) + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
 	}
 	html += "</pre><hr></body></html>";
 	// MIME type
@@ -613,7 +621,72 @@ string file_extention(string file)
 	size_t pos = file.find_last_of('.');
 	if (pos == string::npos)
 		return "";
-	return file.substr(pos + 1);
+	return file.substr(pos);
 }
 
 
+void add_to_env(string key, string val,HTTP_request &request_info)
+{
+	string tmp;
+
+	tmp = key + "=" + val;
+	tmp.append(1, '\0');
+	std::cout << "tmp::" << tmp << std::endl;
+	request_info.env_v.push_back(tmp);
+}
+
+string get_method(short method)
+{
+	if (method == GET)
+		return "GET";
+	if (method == POST)
+		return "POST";
+	if (method == DELETE)
+		return "DELETE";
+	return "NOT SUPORTED";
+}
+
+void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file)
+{
+	string tmp;
+	add_to_env("SERVER_SOFTWARE", "to be done", request_info);
+	add_to_env("SERVER_NAME", _server_.__host, request_info);
+	add_to_env("GATEWAY_INTERFACE", "CGI/1.1", request_info);
+	add_to_env("SERVER_PROTOCOL", "HTTP/1.1", request_info);
+	add_to_env("REQUEST_METHOD", get_method(request_info.method), request_info);
+	add_to_env("SCRIPT_NAME", file.file_path, request_info);
+	add_to_env("QUERY_STRING", request_info.query_string, request_info);
+	if (request_info.content_length != -1)
+		add_to_env("CONTENT_LENGTH", std::to_string(request_info.content_length), request_info);
+	if (request_info.content_type.first != "")
+		add_to_env("CONTENT_TYPE", request_info.content_type.first, request_info);
+}
+
+void env_v_to_c(char **env, vector<string> &env_v)
+{
+	for (size_t i = 0; i < env_v.size(); i++)
+	{
+		// allocates memory for the string using new
+		env[i] = new char[env_v[i].size() + 1];
+		// copies the contents of the string to the allocated memory
+		std::strcpy(env[i], env_v[i].c_str());
+	}
+	env[env_v.size()] = NULL;
+}
+
+void free_env(char **env, size_t size)
+{
+	for (size_t i = 0; i < size; i++)
+	{
+		delete[] env[i];
+	}
+	delete[] env;
+}
+
+void print_env(char **env, size_t size)
+{
+	for (size_t i = 0; i < size; i++)
+	{
+		std::cout << "env[" <<i << "]" << env[i] << std::endl;
+	}
+}

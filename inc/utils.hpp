@@ -14,6 +14,7 @@ struct form_part;
 struct file_info;
 struct HTTP_request;
 struct HTTP_response;
+struct DataConf;
 
 
 size_t write_to_file(string &file_path, string &content);
@@ -21,6 +22,7 @@ void update_file(file_info file, HTTP_request &request_info, HTTP_response &resp
 void generate_error(HTTP_response &response, int status_code, string status_message);
 void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &request_info, HTTP_response &response);
 string generat_response(deque<form_part> &parts, HTTP_response &response);
+
 
 void creat_file(file_info file, HTTP_request &request_info, HTTP_response &response);
 
@@ -49,4 +51,8 @@ void print(string s);
 string trim_white_spaces(string str);
 void fill_query(string &full_path, HTTP_request &request);
 
-string file_extention(string file);
+string  file_extention(string file);
+void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file);
+void    free_env(char **env, size_t size);
+void	print_env(char **env, size_t size);
+void    env_v_to_c(char **env, vector<string> &env_v);

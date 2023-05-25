@@ -18,7 +18,7 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 	allow_methods.push_back("DELETE");
 	_server_config::iterator it = vec.begin();
 	std::vector<bool>	methods;
-	for(; it != vec.end(); it++)
+	for(;it != vec.end(); it++)
 	{
 		DataConf _data;
 		std::stringstream	lol(it->get_body_size());
@@ -32,6 +32,9 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			_data.__name = it->get_name();
 		if(it->get_port().size())
 			_data.__port = it->get_port();
+		if (it->get_error().size())
+			_data.__error = it->get_error();
+		// std::cerr <<" here hh bzf" << _data.__error[403] << std::endl;
 		// _data.__body_size = it->get_body_size().a;
 		_locations	loc = it->get_locations();
 		_locations::iterator	it_2 = loc.begin();
@@ -46,6 +49,8 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			else
 				return -1;
 			req_loc.__path = it_2->get_path();
+			if (req_loc.__path.back() != '/')
+				req_loc.__path += '/';
 			req_loc.__file = it_2->get_place();
 			req_loc.__root = it_2->get_root();
 			req_loc.__redirect = it_2->get_redirect();
@@ -66,7 +71,8 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 				{
 					return -1;
 				}
-				else{
+				else
+				{
 					size_t index = t_1 - allow_methods.begin();
 					_allows[index] = true;
 				}
