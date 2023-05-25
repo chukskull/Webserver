@@ -400,9 +400,24 @@ class handler
 			// 	handle_delete();
 		}
 
-		void manage_server_errors(short status)
+		void manage_server_errors(short status_code, string &response, string status_text = "")
 		{
-			
+			string error_page;
+
+			if (status_text == "")
+				status_text = lib.get_status_text(status_code);
+
+			error_page = lib.get_error_page(status_code, status_text);
+			response.append("HTTP/1.1 ");
+			response.append(std::to_string(status_code) + " ");
+			response.append(status_text);
+			response.append(CRLF);
+
+			response += "Content-Type: Text/html" ; response.append(CRLF);
+			response += "Content-length: " + std::to_string(error_page.size()); response.append(CRLF);
+			response.append(CRLF);
+
+			response.append(error_page);
 		}
 
 	private:

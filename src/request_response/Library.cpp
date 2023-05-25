@@ -83,6 +83,7 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 void servers_library::set(vector<DataConf> &srvrs)
 {
 	_servers = srvrs;
+	create_status_map();
 }
 
 DataConf servers_library::get_server_index(HTTP_request &request_info, Mesage &msg)
@@ -187,26 +188,26 @@ string servers_library::generate_error_page(int status_code, string status_messa
     return oss.str();
 }
 
-void servers_library::create_status_map(map<int, string> &status_map) {
+void servers_library::create_status_map() {
 
-    status_map[200] = "OK";
-    status_map[201] = "Created";
-    status_map[202] = "Accepted";
-    status_map[301] = "Moved Permanently";
-    status_map[400] = "Bad Request";
-    status_map[403] = "Forbidden";
-    status_map[404] = "Not Found";
-    status_map[405] = "Method Not Allowed";
-    status_map[408] = "Request Timeout";
-    status_map[411] = "Length Required";
-    status_map[412] = "Precondition Failed";
-    status_map[413] = "Request Entity Too Large";
-    status_map[415] = "Unsupported Media Type";
-    status_map[500] = "Internal Server Error";
-    status_map[501] = "Not Implemented";
-    status_map[502] = "Bad Gateway";
-    status_map[504] = "Gateway Timeout";
-    status_map[505] = "HTTP Version Not Supported";
+    status[200] = "OK";
+    status[201] = "Created";
+    status[202] = "Accepted";
+    status[301] = "Moved Permanently";
+    status[400] = "Bad Request";
+    status[403] = "Forbidden";
+    status[404] = "Not Found";
+    status[405] = "Method Not Allowed";
+    status[408] = "Request Timeout";
+    status[411] = "Length Required";
+    status[412] = "Precondition Failed";
+    status[413] = "Request Entity Too Large";
+    status[415] = "Unsupported Media Type";
+    status[500] = "Internal Server Error";
+    status[501] = "Not Implemented";
+    status[502] = "Bad Gateway";
+    status[504] = "Gateway Timeout";
+    status[505] = "HTTP Version Not Supported";
 }
 
 void servers_library::set_error_pages(const std::map<short, std::string>& error_pages) {
@@ -235,7 +236,7 @@ void servers_library::set_error_pages(const std::map<short, std::string>& error_
 	}
 }
 
-string servers_library::get_error_page(short status_code)
+string servers_library::get_error_page(short status_code, string status_text)
 {
 	map<short, string>::iterator it;
 
@@ -243,10 +244,29 @@ string servers_library::get_error_page(short status_code)
 	if (it != html_error_pages.end())
 		return it->second;
 	else
-		return generate_error_page(status_code, status.find(status_code)->second);
+	{
+		if (status_text == "")
+			return generate_error_page(status_code, status.find(status_code)->second);
+		else
+			return generate_error_page(status_code, status_text);
+	}
 }
 
+string servers_library::get_status_text(short status_code)
+{
+	map<short, string>::iterator it;
 
+	std::cout << "status code::"<< status_code << std::endl;
+	std::cout << status.size() << std::endl;
+	it = status.find(status_code);
+	std::cout << "second::" << it->second << std::endl;
+	if (it != status.end())
+		return it->second;
+	else
+		return "not suported status";
+}
+
+servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 
 
 
