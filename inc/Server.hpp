@@ -405,14 +405,8 @@ public:
 								// std::cout << ser._connections[ser.fd_s[i].fd]._size << std::endl;
 								// std::cout << ":-:" << mesg->message.substr(0, 1000) << std::endl;
 								// std::cout << mesg->message << std::endl;
-								handler tmp_handl;
-								if (1)
-									tmp_handl.manage_server_errors(400, ser._connections[ser.fd_s[i].fd].response);
-								else
-								{
-									handl_request.handle(*mesg);
-									ser._connections[ser.fd_s[i].fd].response.swap(mesg->response);
-								}
+								handl_request.handle(*mesg);
+								ser._connections[ser.fd_s[i].fd].response.swap(mesg->response);
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}
