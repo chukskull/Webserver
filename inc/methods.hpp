@@ -42,6 +42,7 @@ public:
 	{
 		file_info file;
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
+		std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
@@ -418,6 +419,9 @@ class handler
 		
 		if (req.response.connection == "meeeeem")
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
+
+		if (req.response.cookies != "")
+		{ res.append("cookies: "); res.append(req.response.cookies); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);
 	}
