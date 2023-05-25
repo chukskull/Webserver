@@ -17,6 +17,8 @@ class Client {
 			this->_header_done = false;
 			this->header_size = 0;
 			this->send_size = 0;
+			this->lastActiveTime = -1;
+			time(&lastActiveTime);
 			
 		}
 		Client()
@@ -44,6 +46,7 @@ class Client {
 			this->_header_done = false;
 			this->header_size = 0;
 			this->send_size = 0;
+			this->time_flag = true;
 		}
 		void AppendData(const std::string& data)
 		{
@@ -65,6 +68,7 @@ class Client {
 		int							server_file;
 		std::pair<int, int>			host_src;
 		bool	 					is_it_chunked_;
+		bool						time_flag;
 		size_t						_size;
 		size_t						current_size;
 		size_t						header_size;
@@ -73,6 +77,7 @@ class Client {
 		bool						send_done;
 		bool  						_header_done;
 		_string						response;
+		time_t 						lastActiveTime;
 };
 
 

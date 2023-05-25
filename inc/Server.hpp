@@ -94,6 +94,7 @@ public:
 			// getchar();
 			if(_gl_recv_return > 0)
 			{
+				time(&_my_client.lastActiveTime);
 				// sure.append(buff);
 				
 				// buff[_gl_recv_return + 1] = '\0';
@@ -120,6 +121,10 @@ public:
 						}
 					}
 				}
+		}
+		else if (_gl_recv_return == 0)
+		{
+			close(fd);
 		}
 		return 0;
 	}
@@ -242,9 +247,10 @@ public:
 				temp.fd = server_fd;
 				temp.events = POLLIN;
 				fd_s.push_back(temp);
-				timeout = (2 * 60 * 1000);
-				fd_counts = 1;
+				timeout = 5000;
+				
 				std::cerr << "came here" << std::endl;
+				fd_counts += 1;
 			}
 		}
 	}
@@ -329,7 +335,7 @@ public:
 
 		while (true)
 		{
-			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), 5000);
+			ser.rc = poll(&ser.fd_s[0], ser.fd_s.size(), ser.timeout);
 			if (ser.rc < 0)
 			{
 				std::cerr << ser.fd_s.size() << std::endl;
@@ -340,7 +346,17 @@ public:
 			{
 				// close(ser.)
 				//std::cerr << "poll() timed out , End program\n" << std::endl;
-				continue; ;
+			// 	std::cerr << ser.fd_s.size() << std::endl;
+			// for (size_t i = 0; i < ser.fd_s.size(); ++i)
+           	// {
+           	//     if (ser.fd_s[i].fd != -1 && ser.server_fds.find(ser.fd_s[i].fd) == ser.server_fds.end())
+           	//     {
+			// 			std::cerr << "here" << std::endl;
+			// 			send(ser.fd_s[i].fd, "GHYRHA ", 8, 0);
+           	//         close(ser.fd_s[i].fd);
+           	//         // clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), fds[i].fd), clientSockets.end());
+           	//     }
+           	// }
 			}
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{
@@ -369,6 +385,7 @@ public:
 					}
 					else
 					{
+						ser._connections[ser.fd_s[i].fd].time_flag = true;
 						// std:: cerr << "client phase " <<ser.fd_s[i].fd << std::endl;
 						std::pair<int, int> server_infos;
 						server_infos = get_server_infos(ser.server_fds, ser.fd_s[i].fd, ser._connections);
@@ -434,6 +451,7 @@ public:
 				else if (ser.fd_s[i].revents & POLLOUT)
 				{
 					ssize_t 	s;
+					ser._connections[ser.fd_s[i].fd].time_flag = false;
 					s = send_response(ser._connections[ser.fd_s[i].fd], ser.fd_s[i].fd);
 					if (s < 0)
 						continue;
@@ -441,6 +459,24 @@ public:
 						ser.fd_s.erase(ser.fd_s.begin() + i);
 				}
 			}		
+
+        	for (size_t i = 0; i < ser.fd_s.size(); ++i)
+        	{
+				if(ser._connections[ser.fd_s[i].fd].time_flag)
+				{
+					time_t currentTime;
+					
+        			time(&currentTime);
+        	        if (currentTime - ser._connections[ser.fd_s[i].fd].lastActiveTime > 10 && ser.server_fds.find(ser.fd_s[i].fd) == ser.server_fds.end())
+        	        {
+						time(&ser._connections[ser.fd_s[i].fd].lastActiveTime);
+        	            std::cout << "Client " << ser.fd_s[i].fd << " is hanging. Closing connection." << std::endl;
+        	            close(ser.fd_s[i].fd);
+						ser.fd_s.back() = ser.fd_s[i];
+						ser.fd_s.pop_back();
+        	        }
+				}
+        	}
 		}
 	}
 		std::map<int, std::pair<int, int> >		server_fds;
