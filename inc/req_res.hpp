@@ -49,6 +49,8 @@ struct HTTP_request
 	string body;
 	string query_string;
 	string cookies;
+	vector<string> env_v;
+	char ** env_c;
 	//construsctor for request empty strings and -1 in numbers
 	HTTP_request() : method(-1), requested_file(""), host(""), content_type(std::make_pair("", "")), content_length(-1), connection(""), body("") {}
 	// multimap<float, string> accept;

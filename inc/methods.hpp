@@ -96,28 +96,22 @@ public:
 				{
 					response.set_status(200, "OK");
 					// _cgi_info cgi_info;
-					// std::cout << "requested path:" << file.requested_path << std::endl;
-					// std::cout << "cgi on: " << file.location._cgi << std::endl;
-					// std::cout << "cgi ext:" << file.location.__cgi_ext << std::endl;
-					// std::cout << "file ext:" << file_extention(file.file_path) << std::endl;
-					// std::cout << "cgi path:" << file.location.__cgi_path << std::endl;
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
-						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
-						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
-						// std::cout << "the loca: " << file.location.__path << std::endl;
-						// print("cgi  ext:" + file.location.__cgi_ext);
-						// std::cout << std::endl;
-						// print("file ext:" + file_extention(file.file_path));
-						// std::cout << std::endl;
-						// if (file_extention(file.file_path) == file.location.__cgi_ext)
-						// {
+						create_env_(request_info, _server_, file);
+
+						request_info.env_c = new char*[request_info.env_v.size() + 1];
+						env_v_to_c(request_info.env_c, request_info.env_v);
+						// print_env(request_info.env_c, request_info.env_v.size());
+
 							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
+
+							// free_env(request_info.env_c, request_info.env_v.size());
 						// }
 						// else
 						// {
@@ -218,6 +212,7 @@ public:
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
+
 			if (file.is_redirect)
 			{
                 response.set_status(301, "Moved Permanently");
@@ -241,9 +236,11 @@ public:
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
 							_cgi_info cgi_info;
-							// std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
-							// std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
-							// std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
+							create_env_(request_info, _server_, file);
+							request_info.env_c = new char*[request_info.env_v.size() + 1];
+							env_v_to_c(request_info.env_c, request_info.env_v);
+							print_env(request_info.env_c, request_info.env_v.size());
+
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
 								std::cout << "run cgi\n";
@@ -261,6 +258,7 @@ public:
 							{
 								response.set_status(403, "Forbidden extention for cgi");
 							}
+							free_env(request_info.env_c, request_info.env_v.size());
 						}
 						
 						else if (request_info.content_type.first == "multipart/form-data")
