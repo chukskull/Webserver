@@ -145,8 +145,106 @@ bool servers_library::matched_port(DataConf &to_check, Mesage &msg)
 }
 
 
+string servers_library::generate_error_page(int status_code, string status_message)
+{
+    std::ostringstream oss;
+    oss << "<!DOCTYPE html>\n"
+        << "<html>\n"
+        << "<head>\n"
+        << "    <title>Error " << status_code << "</title>\n"
+        << "    <style>\n"
+        << "        body {\n"
+        << "            font-family: Arial, sans-serif;\n"
+        << "            background-color: #f4f4f4;\n"
+        << "            margin: 0;\n"
+        << "            padding: 0;\n"
+        << "        }\n"
+        << "        .container {\n"
+        << "            max-width: 600px;\n"
+        << "            margin: 50px auto;\n"
+        << "            padding: 20px;\n"
+        << "            background-color: #fff;\n"
+        << "            border: 1px solid #ccc;\n"
+        << "            border-radius: 5px;\n"
+        << "            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n"
+        << "        }\n"
+        << "        h1 {\n"
+        << "            color: #333;\n"
+        << "        }\n"
+        << "        p {\n"
+        << "            color: #777;\n"
+        << "        }\n"
+        << "    </style>\n"
+        << "</head>\n"
+        << "<body>\n"
+        << "    <div class=\"container\">\n"
+        << "        <h1>Error " << status_code << "</h1>\n"
+        << "        <p>" << status_message << "</p>\n"
+        << "    </div>\n"
+        << "</body>\n"
+        << "</html>";
 
+    return oss.str();
+}
 
+void servers_library::create_status_map(map<int, string> &status_map) {
+
+    status_map[200] = "OK";
+    status_map[201] = "Created";
+    status_map[202] = "Accepted";
+    status_map[301] = "Moved Permanently";
+    status_map[400] = "Bad Request";
+    status_map[403] = "Forbidden";
+    status_map[404] = "Not Found";
+    status_map[405] = "Method Not Allowed";
+    status_map[408] = "Request Timeout";
+    status_map[411] = "Length Required";
+    status_map[412] = "Precondition Failed";
+    status_map[413] = "Request Entity Too Large";
+    status_map[415] = "Unsupported Media Type";
+    status_map[500] = "Internal Server Error";
+    status_map[501] = "Not Implemented";
+    status_map[502] = "Bad Gateway";
+    status_map[504] = "Gateway Timeout";
+    status_map[505] = "HTTP Version Not Supported";
+}
+
+void servers_library::set_error_pages(const std::map<short, std::string>& error_pages) {
+	html_error_pages.clear(); // Clear existing error pages
+	
+	// Iterate over the error_pages map
+	for (std::map<short, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
+		short status_code = it->first;
+		const std::string& file_name = it->second;
+
+		std::ifstream file(file_name.c_str());
+		if (file.is_open()) {
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string file_content = buffer.str();
+
+			html_error_pages[status_code] = file_content;
+
+			file.close();
+		} else {
+			if (status.find(status_code) != status.end())
+				html_error_pages[status_code] = generate_error_page(status_code, status.find(status_code)->second);
+			else
+				html_error_pages[status_code] = generate_error_page(status_code, "");
+		}
+	}
+}
+
+string servers_library::get_error_page(short status_code)
+{
+	map<short, string>::iterator it;
+
+	it = html_error_pages.find(status_code);
+	if (it != html_error_pages.end())
+		return it->second;
+	else
+		return generate_error_page(status_code, status.find(status_code)->second);
+}
 
 
 

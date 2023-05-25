@@ -400,6 +400,11 @@ class handler
 			// 	handle_delete();
 		}
 
+		void manage_server_errors(short status)
+		{
+			
+		}
+
 	private:
 	void fill_response(request &req, string &res)
 	{
