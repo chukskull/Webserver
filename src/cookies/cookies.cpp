@@ -8,7 +8,7 @@ void set_cookies(HTTP_request &request_info, HTTP_response &response)
     char buffer[80];
     std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&now));
 	std::cout << "buffer : " << buffer << std::endl;
-    if (request_info.cookies.empty())
+    // if (request_info.cookies.empty())
     
 
     // return std::string(buffer);

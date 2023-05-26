@@ -380,10 +380,10 @@ class handler
 			// req.request_checkpoint();
 			// std::cout << "host:" << req.request_info.host << std::endl;
 			// print("host:" + req.request_info.host);
-			std::cout << "i got to handle\n";
+			// std::cout << "i got to handle\n";
 			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
 			// {
-				std::cout << "i got to handle inside\n";
+				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
