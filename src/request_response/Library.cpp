@@ -96,6 +96,7 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 void servers_library::set(vector<DataConf> &srvrs)
 {
 	_servers = srvrs;
+	create_status_map();
 }
 
 DataConf servers_library::get_server_index(HTTP_request &request_info, Mesage &msg)
@@ -155,10 +156,127 @@ bool servers_library::matched_port(DataConf &to_check, Mesage &msg)
 }
 
 
+string servers_library::generate_error_page(int status_code, string status_message)
+{
+    std::ostringstream oss;
+    oss << "<!DOCTYPE html>\n"
+        << "<html>\n"
+        << "<head>\n"
+        << "    <title>Error " << status_code << "</title>\n"
+        << "    <style>\n"
+        << "        body {\n"
+        << "            font-family: Arial, sans-serif;\n"
+        << "            background-color: #f4f4f4;\n"
+        << "            margin: 0;\n"
+        << "            padding: 0;\n"
+        << "        }\n"
+        << "        .container {\n"
+        << "            max-width: 600px;\n"
+        << "            margin: 50px auto;\n"
+        << "            padding: 20px;\n"
+        << "            background-color: #fff;\n"
+        << "            border: 1px solid #ccc;\n"
+        << "            border-radius: 5px;\n"
+        << "            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n"
+        << "        }\n"
+        << "        h1 {\n"
+        << "            color: #333;\n"
+        << "        }\n"
+        << "        p {\n"
+        << "            color: #777;\n"
+        << "        }\n"
+        << "    </style>\n"
+        << "</head>\n"
+        << "<body>\n"
+        << "    <div class=\"container\">\n"
+        << "        <h1>Error " << status_code << "</h1>\n"
+        << "        <p>" << status_message << "</p>\n"
+        << "    </div>\n"
+        << "</body>\n"
+        << "</html>";
 
+    return oss.str();
+}
 
+void servers_library::create_status_map() {
 
+    status[200] = "OK";
+    status[201] = "Created";
+    status[202] = "Accepted";
+    status[301] = "Moved Permanently";
+    status[400] = "Bad Request";
+    status[403] = "Forbidden";
+    status[404] = "Not Found";
+    status[405] = "Method Not Allowed";
+    status[408] = "Request Timeout";
+    status[411] = "Length Required";
+    status[412] = "Precondition Failed";
+    status[413] = "Request Entity Too Large";
+    status[415] = "Unsupported Media Type";
+    status[500] = "Internal Server Error";
+    status[501] = "Not Implemented";
+    status[502] = "Bad Gateway";
+    status[504] = "Gateway Timeout";
+    status[505] = "HTTP Version Not Supported";
+}
 
+void servers_library::set_error_pages(const std::map<short, std::string>& error_pages) {
+	html_error_pages.clear(); // Clear existing error pages
+	
+	// Iterate over the error_pages map
+	for (std::map<short, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
+		short status_code = it->first;
+		const std::string& file_name = it->second;
+
+		std::ifstream file(file_name.c_str());
+		if (file.is_open()) {
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string file_content = buffer.str();
+
+			html_error_pages[status_code] = file_content;
+
+			file.close();
+		} else {
+			if (status.find(status_code) != status.end())
+				html_error_pages[status_code] = generate_error_page(status_code, status.find(status_code)->second);
+			else
+				html_error_pages[status_code] = generate_error_page(status_code, "");
+		}
+	}
+}
+
+string servers_library::get_error_page(short status_code, string status_text)
+{
+	map<short, string>::iterator it;
+
+	it = html_error_pages.find(status_code);
+	if (it != html_error_pages.end())
+		return it->second;
+	else
+	{
+		if (status_text == "")
+			return generate_error_page(status_code, status.find(status_code)->second);
+		else
+			return generate_error_page(status_code, status_text);
+	}
+}
+
+string servers_library::get_status_text(short status_code)
+{
+	map<short, string>::iterator it;
+
+	std::cout << "status code::"<< status_code << std::endl;
+	std::cout << status.size() << std::endl;
+	it = status.find(status_code);
+	std::cout << "second::" << it->second << std::endl;
+	if (it != status.end())
+		return it->second;
+	else
+		return "not suported status";
+}
+
+servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 
 
 

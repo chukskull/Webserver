@@ -49,6 +49,8 @@ int	phase_to_req_res(_server_config &vec, std::vector<DataConf> &_vec_data)
 			else
 				return -1;
 			req_loc.__path = it_2->get_path();
+			if (req_loc.__path.back() != '/')
+				req_loc.__path += '/';
 			req_loc.__file = it_2->get_place();
 			req_loc.__root = it_2->get_root();
 			req_loc.__redirect = it_2->get_redirect();
