@@ -428,6 +428,7 @@ class handler
 		res.append(req.response.status_text);
 		res.append(CRLF);
 
+		set_cookies(req.request_info, req.response);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
@@ -441,7 +442,7 @@ class handler
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 
 		if (req.response.cookies != "")
-		{ res.append("cookies: "); res.append(req.response.cookies); res.append(CRLF);}
+		{ res.append(req.response.cookies); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);
 	}
