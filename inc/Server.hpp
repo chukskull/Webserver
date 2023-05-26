@@ -17,7 +17,7 @@ public:
 	Server(std::vector<DataConf> &data):_containers(data) {
 	}
 
-	static bool		decoding_chunked(Client &my_client, _string	&temp)
+	static bool		decoding_chunked(Client &my_client, _string	&temp, size_t body_size)
 	{
 		std::string 		chunk_size_str;
 		std::stringstream 	_clean_body;
@@ -38,6 +38,8 @@ public:
 					if (chunk_size_str.size() == 0)
 						continue;
 					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
+					if (chunk_size > static_cast<int>(body_size))
+						return false;
 					if (chunk_size_str == "0\r\n\r\n")
 						break ;
                     chunk_size_str.clear();
@@ -59,18 +61,30 @@ public:
 		return 1;
 	}
 
-	static void    handle_chunked(Client &my_client)
+	static bool    handle_chunked(Client &my_client, size_t body_size)
 	{
 		bool	error;
+		handler						body;
 		_string	temp(my_client.get_buffer());
 		size_t	test_temp;
+		bool		done = false;
+
 		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
 		{
 			if (temp[test_temp - 1] == '\n' && temp[test_temp - 2] == '\r')
+				done = true;
+		}
+		if (done)
+		{
+			error = decoding_chunked(my_client, temp, body_size);
+			if (!error)
+			{
+				return false;
+			}
+			else
 				my_client._done = true;
 		}
-		if (my_client._done)
-			error = decoding_chunked(my_client, temp);
+		return true;
 	}
 
 	static int	receiving(int fd, Client &_my_client)
@@ -231,7 +245,7 @@ public:
 	}
 
 	~Server() {
-		this->fd_s.clear();
+		
 	}
 
 	static	std::pair<int , int>	get_server_infos(std::map<int, std::pair<int, int> > &servers, int fd, std::map<int, Client> &concts)
@@ -248,6 +262,7 @@ public:
 				if (my_client.response.size() > BUFFER_SEND)
 				{
 					s = send(fd ,my_client.response.c_str(), BUFFER_SEND, 0);
+					
 					if (s < 0)
 						return -1;
 					if (s > 0)
@@ -255,7 +270,7 @@ public:
 				}
 				else
 				{
-					s = send(fd, my_client.response.c_str(), my_client.response.length(), 0);
+					s = send(fd, my_client.response.c_str(), my_client.response.size(), 0);
 					if (s > 0)
 						my_client.response.clear();
 					else
@@ -265,6 +280,7 @@ public:
 				if(my_client.response.size() == 0)
 				{
 					my_client.clear();
+					usleep(200);
 					close(fd);
 					return 2;
 				}
@@ -334,7 +350,13 @@ public:
 							}
 
 							if (MyClienT.is_it_chunked_)
-								handle_chunked(MyClienT);
+							{
+								if (!handle_chunked(MyClienT, ser._containers[server_infos.first].__body_size))
+								{
+									handl_request.manage_server_errors(413, MyClienT.response);
+									ser.fd_s[i].events = POLLOUT;
+								}
+							}
 							
 							else if (MyClienT._size == (MyClienT.current_size - MyClienT.header_size))
 								MyClienT._done = true;
@@ -342,7 +364,7 @@ public:
 							if(static_cast<size_t>(MyClienT._size) > ser._containers[server_infos.first].__body_size)
 							{
 								handl_request.manage_server_errors(413, MyClienT.response);
-								MyClienT.time_ = true;
+								// MyClienT.time_ = true;
 								ser.fd_s[i].events = POLLOUT;
 							}
 							
