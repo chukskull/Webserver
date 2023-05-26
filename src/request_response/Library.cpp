@@ -266,15 +266,16 @@ string servers_library::get_status_text(short status_code)
 {
 	map<short, string>::iterator it;
 
-	std::cout << "status code::"<< status_code << std::endl;
+	// std::cout << "status code::"<< status_code << std::endl;
 	std::cout << status.size() << std::endl;
 	it = status.find(status_code);
-	std::cout << "second::" << it->second << std::endl;
+	// std::cout << "second::" << it->second << std::endl;
 	if (it != status.end())
 		return it->second;
 	else
 		return "not suported status";
 }
+
 
 servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 

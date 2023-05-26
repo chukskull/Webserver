@@ -67,8 +67,8 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
-			std::cout << "file is dir::::" << file.is_dir << std::endl;
-			std::cout << "file is file:::" << file.is_file << std::endl;
+			// std::cout << "file is dir::::" << file.is_dir << std::endl;
+			// std::cout << "file is file:::" << file.is_file << std::endl;
 			if (file.is_redirect)
 			{
 				// std::cout << "::" << file.is_redirect << std::endl;
@@ -429,6 +429,8 @@ class handler
 		res.append(CRLF);
 
 		set_cookies(req.request_info, req.response);
+		if (req.response.body.empty())
+			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
