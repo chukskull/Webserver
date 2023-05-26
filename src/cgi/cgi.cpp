@@ -5,8 +5,10 @@
 int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response)
 {
 	(void) request_info;
+	set_cookies(request_info, response);
 	const char* lang_path = cgi_info.lang_path.c_str();
 	const char* cgi_name = cgi_info.cgi_name.c_str();
+	std::cout << cgi_name << std::endl;
 	std::string subtracted_body = request_info.body;
 	subtracted_body.erase(0, 5);
 	const char* body = subtracted_body.c_str();

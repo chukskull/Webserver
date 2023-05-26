@@ -146,4 +146,4 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 
 
 //-----------------///cookies///----------------//
-std::string set_cookies(std::string name, std::string value);
+void set_cookies(HTTP_request &request_info, HTTP_response &response);
