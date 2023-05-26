@@ -444,7 +444,7 @@ size_t write_to_file(string &file_path, string &content)
 
 void update_file(file_info file, HTTP_request &request_info, HTTP_response &response)
 {
-	std::cout << "------------->updating_file\n" << std::endl;
+	// std::cout << "------------->updating_file\n" << std::endl;
 	if (write_to_file(file.file_path, request_info.body) >= 500)
 	{
 		response.set_status(500, "Internal Server Error");
@@ -460,7 +460,7 @@ void update_file(file_info file, HTTP_request &request_info, HTTP_response &resp
 
 void creat_file(file_info file, HTTP_request &request_info, HTTP_response &response)
 {
-	std::cout << "------------->creating_file\n" << std::endl;
+	// std::cout << "------------->creating_file\n" << std::endl;
 	if (write_to_file(file.file_path, request_info.body) >= 500)
 	{
 		response.set_status(500, "Internal Server Error");
@@ -688,5 +688,48 @@ void print_env(char **env, size_t size)
 	for (size_t i = 0; i < size; i++)
 	{
 		std::cout << "env[" <<i << "]" << env[i] << std::endl;
+	}
+}
+
+void fill_percent_incoding(map<string, string> &PercentEncoding)
+{
+	PercentEncoding.insert(std::make_pair("%3A",":"));
+    PercentEncoding.insert(std::make_pair("%2F","/"));
+    PercentEncoding.insert(std::make_pair("%3F","?"));
+    PercentEncoding.insert(std::make_pair("%23","#"));
+    PercentEncoding.insert(std::make_pair("%5B","["));
+    PercentEncoding.insert(std::make_pair("%5D","]"));
+    PercentEncoding.insert(std::make_pair("%40","@"));
+    PercentEncoding.insert(std::make_pair("%21","!"));
+    PercentEncoding.insert(std::make_pair("%24","$"));
+    PercentEncoding.insert(std::make_pair("%26","&"));
+    PercentEncoding.insert(std::make_pair("%27","'"));
+    PercentEncoding.insert(std::make_pair("%28","("));
+    PercentEncoding.insert(std::make_pair("%29",")"));
+    PercentEncoding.insert(std::make_pair("%2A","*"));
+    PercentEncoding.insert(std::make_pair("%2B","+"));
+    PercentEncoding.insert(std::make_pair("%2C",","));
+    PercentEncoding.insert(std::make_pair("%3B",";"));
+    PercentEncoding.insert(std::make_pair("%3D","="));
+    PercentEncoding.insert(std::make_pair("%25","%"));
+    PercentEncoding.insert(std::make_pair("%20"," "));
+	PercentEncoding.insert(std::make_pair("%22","\""));
+	PercentEncoding.insert(std::make_pair("%3C","<"));
+	PercentEncoding.insert(std::make_pair("%3E",">"));
+}
+
+void  percent_encoding(string &str)
+{
+	map<string, string> PercentEncoding;
+   	
+	fill_percent_incoding(PercentEncoding);
+	for (map<string, string>::iterator it = PercentEncoding.begin(); it != PercentEncoding.end(); it++)
+	{
+		size_t pos = 0;
+		while ((pos = str.find(it->first, pos)) != string::npos)
+		{
+			str.replace(pos, it->first.length(), it->second);
+			pos += it->second.length();
+		}
 	}
 }

@@ -22,6 +22,7 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 	}
 	if (loc.is_set())
 	{
+		std::cout << "the location is set: " << loc.__path << std::endl;
 		info.location = loc;
 		info._allowMeth = loc._AllowMeth;
 		info.requested_path = request_info.requested_file;

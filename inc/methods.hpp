@@ -44,13 +44,13 @@ public:
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		std::cout << "::" <<  _server_.__host << std::endl;
+		// std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		std::cout << "requested file:" << request_info.requested_file << std::endl;
+		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
 		std::cout << "------::file:" << file.file_path << std::endl;
 
-		print_file(file);
+		// print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
@@ -67,6 +67,8 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
+			std::cout << "file is dir::::" << file.is_dir << std::endl;
+			std::cout << "file is file:::" << file.is_file << std::endl;
 			if (file.is_redirect)
 			{
 				// std::cout << "::" << file.is_redirect << std::endl;
