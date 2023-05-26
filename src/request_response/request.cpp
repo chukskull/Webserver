@@ -17,6 +17,7 @@ request::request(string req)
 void request::request_checkpoint()
 {
     validate_start_line();
+    percent_encoding(start_line[SOURCE]);
     fill_req();
     fill_query(start_line[SOURCE], request_info);
 }

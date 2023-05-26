@@ -44,13 +44,13 @@ public:
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		std::cout << "::" <<  _server_.__host << std::endl;
+		// std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		std::cout << "requested file:" << request_info.requested_file << std::endl;
+		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
 		std::cout << "------::file:" << file.file_path << std::endl;
 
-		print_file(file);
+		// print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
@@ -67,6 +67,8 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
+			std::cout << "file is dir::::" << file.is_dir << std::endl;
+			std::cout << "file is file:::" << file.is_file << std::endl;
 			if (file.is_redirect)
 			{
 				// std::cout << "::" << file.is_redirect << std::endl;
@@ -96,28 +98,22 @@ public:
 				{
 					response.set_status(200, "OK");
 					// _cgi_info cgi_info;
-					// std::cout << "requested path:" << file.requested_path << std::endl;
-					// std::cout << "cgi on: " << file.location._cgi << std::endl;
-					// std::cout << "cgi ext:" << file.location.__cgi_ext << std::endl;
-					// std::cout << "file ext:" << file_extention(file.file_path) << std::endl;
-					// std::cout << "cgi path:" << file.location.__cgi_path << std::endl;
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
-						// std::cout << "cgi ext: " << file.location.__cgi_ext << std::endl;
-						// std::cout << "cgi path: " << file.location.__cgi_path << std::endl;
-						// std::cout << "the loca: " << file.location.__path << std::endl;
-						// print("cgi  ext:" + file.location.__cgi_ext);
-						// std::cout << std::endl;
-						// print("file ext:" + file_extention(file.file_path));
-						// std::cout << std::endl;
-						// if (file_extention(file.file_path) == file.location.__cgi_ext)
-						// {
+						create_env_(request_info, _server_, file);
+
+						request_info.env_c = new char*[request_info.env_v.size() + 1];
+						env_v_to_c(request_info.env_c, request_info.env_v);
+						// print_env(request_info.env_c, request_info.env_v.size());
+
 							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
+
+							// free_env(request_info.env_c, request_info.env_v.size());
 						// }
 						// else
 						// {
@@ -218,6 +214,7 @@ public:
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
+
 			if (file.is_redirect)
 			{
                 response.set_status(301, "Moved Permanently");
@@ -241,9 +238,11 @@ public:
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
 							_cgi_info cgi_info;
-							// std::cout << "cgi on: " << cgi_info.__cgi_on << std::endl;
-							// std::cout << "cgi ext:" << cgi_info.cgi_ext << std::endl;
-							// std::cout << "cgi path:" << cgi_info.lang_path << std::endl;
+							create_env_(request_info, _server_, file);
+							request_info.env_c = new char*[request_info.env_v.size() + 1];
+							env_v_to_c(request_info.env_c, request_info.env_v);
+							print_env(request_info.env_c, request_info.env_v.size());
+
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
 								std::cout << "run cgi\n";
@@ -261,6 +260,7 @@ public:
 							{
 								response.set_status(403, "Forbidden extention for cgi");
 							}
+							free_env(request_info.env_c, request_info.env_v.size());
 						}
 						
 						else if (request_info.content_type.first == "multipart/form-data")
@@ -398,6 +398,26 @@ class handler
 			fill_response(req, msg.response);
 			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
+		}
+
+		void manage_server_errors(short status_code, string &response, string status_text = "")
+		{
+			string error_page;
+
+			if (status_text == "")
+				status_text = lib.get_status_text(status_code);
+
+			error_page = lib.get_error_page(status_code, status_text);
+			response.append("HTTP/1.1 ");
+			response.append(std::to_string(status_code) + " ");
+			response.append(status_text);
+			response.append(CRLF);
+
+			response += "Content-Type: Text/html" ; response.append(CRLF);
+			response += "Content-length: " + std::to_string(error_page.size()); response.append(CRLF);
+			response.append(CRLF);
+
+			response.append(error_page);
 		}
 
 	private:
