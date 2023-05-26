@@ -9,23 +9,34 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 
 	for (std::vector<ReqLoc>::iterator it = _server.__locations.begin(); it != _server.__locations.end(); it++)
 	{
+		//remove the slash from the end of the path
+		if (it->__path[it->__path.length() - 1] == '/')
+			it->__path = it->__path.substr(0, it->__path.length() - 1);
 		pos = request_info.requested_file.find(it->__path);
 		// std::cout << "file::" << it->__file << std::endl;
 		// std::cout << "! get lucky\n";
 		if (pos != request_info.requested_file.npos && pos == 0) // possibly check that the npos is zero
 		{
+			std::cout << "-------------match found\n";
 			// std::cout << "++++++++++> got here\n";
-			if (loc.__path.length() < it->__path.length())
+			if (loc.__path.length() <= it->__path.length())
 				loc = *it;
 
 		}
 	}
 	if (loc.is_set())
 	{
+		std::cout << "=====================================> \n";
+		if (loc.__path[loc.__path.length() - 1] == '/')
+			loc.__path = loc.__path.substr(0, loc.__path.length() - 1);
+		if (request_info.requested_file[request_info.requested_file.length() - 1] == '/')
+			request_info.requested_file = request_info.requested_file.substr(0, request_info.requested_file.length() - 1);
+		std::cout << "the requested file: " << request_info.requested_file << std::endl;
+		std::cout << "the location: " << loc.__path << std::endl;
 		info.location = loc;
 		info._allowMeth = loc._AllowMeth;
 		info.requested_path = request_info.requested_file;
-		std::cout << "auto:" << loc._autoindex << " method:" << request_info.method << " GET:" << GET << std::endl;
+		// std::cout << "auto:" << loc._autoindex << " method:" << request_info.method << " GET:" << GET << std::endl;
 		if (loc.__path == request_info.requested_file && loc._autoindex == false && request_info.method == GET)
 		{
 			// this will be a problem in POST requests
@@ -76,6 +87,8 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 				}
 			}
 		}
+		// if (loc.__path[loc.__path.length() - 1] == '/')
+			// loc.__path.push_back('/');
 	}
 	return info;
 }
@@ -109,15 +122,12 @@ void servers_library::fill_matched_servers( Mesage &msg, std::vector<DataConf> &
 
 DataConf &servers_library::find_best_server_match(HTTP_request &request_info, std::vector<DataConf> &m_servers)
 {
-	// string look_for = request_info.host.substr(0, request_info.host.find(':'));
 	for (std::vector<DataConf>::iterator it = m_servers.begin(); it != m_servers.end(); it++)
 	{
 		for (std::vector<string>::iterator it_names = it->__name.begin(); it_names != it->__name.end(); it_names++)
 		{
 			for(std::vector<string>::iterator it_port = it->__port.begin(); it_port != it->__port.end(); it_port++)
 			{
-				// std::cout << "===>" << request_info.host;
-				// std::cout << "===>" << *it_names << std::endl;
 				if (*it_names + ":" + *it_port == request_info.host)
 				{
 					return *it;
@@ -256,15 +266,16 @@ string servers_library::get_status_text(short status_code)
 {
 	map<short, string>::iterator it;
 
-	std::cout << "status code::"<< status_code << std::endl;
+	// std::cout << "status code::"<< status_code << std::endl;
 	std::cout << status.size() << std::endl;
 	it = status.find(status_code);
-	std::cout << "second::" << it->second << std::endl;
+	// std::cout << "second::" << it->second << std::endl;
 	if (it != status.end())
 		return it->second;
 	else
 		return "not suported status";
 }
+
 
 servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 

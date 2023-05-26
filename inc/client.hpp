@@ -34,21 +34,19 @@ class Client {
 		void	clear()
 		{
 			this->is_it_chunked_ = false;
-			if (_buffer != NULL)
-			{
-				delete _buffer;
-				_buffer = new std::stringstream();
-			}
-			else
-				_buffer = new std::stringstream();
+			// if (_buffer != NULL)
+			// {
+			// 	delete _buffer;
+			// 	_buffer = new std::stringstream();
+			// }
+			// else
+			// 	_buffer = new std::stringstream();
 			this->_size = 0;
 			this->current_size = 0;
 			this->_done = false;
 			this->_header_done = false;
 			this->header_size = 0;
 			this->send_size = 0;
-			this->time_flag = true;
-			
 		}
 		void AppendData(const std::string& data)
 		{

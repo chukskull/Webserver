@@ -44,13 +44,13 @@ public:
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		std::cout << "::" <<  _server_.__host << std::endl;
+		// std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		std::cout << "requested file:" << request_info.requested_file << std::endl;
+		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
 		std::cout << "------::file:" << file.file_path << std::endl;
 
-		print_file(file);
+		// print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
@@ -67,6 +67,8 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
+			// std::cout << "file is dir::::" << file.is_dir << std::endl;
+			// std::cout << "file is file:::" << file.is_file << std::endl;
 			if (file.is_redirect)
 			{
 				// std::cout << "::" << file.is_redirect << std::endl;
@@ -378,10 +380,10 @@ class handler
 			// req.request_checkpoint();
 			// std::cout << "host:" << req.request_info.host << std::endl;
 			// print("host:" + req.request_info.host);
-			std::cout << "i got to handle\n";
+			// std::cout << "i got to handle\n";
 			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
 			// {
-				std::cout << "i got to handle inside\n";
+				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
@@ -426,6 +428,9 @@ class handler
 		res.append(req.response.status_text);
 		res.append(CRLF);
 
+		set_cookies(req.request_info, req.response);
+		if (req.response.body.empty())
+			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
@@ -439,7 +444,7 @@ class handler
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 
 		if (req.response.cookies != "")
-		{ res.append("cookies: "); res.append(req.response.cookies); res.append(CRLF);}
+		{ res.append(req.response.cookies); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);
 	}

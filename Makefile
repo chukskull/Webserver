@@ -9,7 +9,8 @@ PARSING=$(addprefix parsing/, prsn_cnfig_file.cpp prsn_req_res.cpp tools_for_par
 HEADER = $(addprefix inc/, headers.hpp  Location.hpp ServerCongif.hpp Server.hpp parsing.hpp mesage.hpp client.hpp methods.hpp)
 REC_RES=$(addprefix request_response/, utils.cpp request.cpp Library.cpp)
 CGI=$(addprefix cgi/, cgi.cpp)
-FILES= $(addprefix src/, $(SERVER) $(PARSING) $(REC_RES) $(CGI))
+COOKIES=$(addprefix cookies/, cookies.cpp)
+FILES= $(addprefix src/, $(SERVER) $(PARSING) $(REC_RES) $(CGI) $(COOKIES))
 OBJ= $(addprefix build/, $(FILES:.cpp=.o) $(MAIN:.cpp=.o))
 NAME= webserv
 

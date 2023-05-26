@@ -56,3 +56,5 @@ void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file
 void    free_env(char **env, size_t size);
 void	print_env(char **env, size_t size);
 void    env_v_to_c(char **env, vector<string> &env_v);
+
+void  percent_encoding(string &str);
