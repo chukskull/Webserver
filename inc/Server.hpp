@@ -162,84 +162,69 @@ public:
 		return 0;
 	}
 
-	static std::vector<ForBind>		for_binding_servers(std::vector<DataConf> &data)
+	bool	check_for_bind(vector<std::pair<string, string> > &check_bind, string host, string port)
 	{
-		std::vector<ForBind>	vec;
-		std::map<string, std::vector<string> >		sure;
-		std::vector<string>		ko;
-		
-
-		for (size_t i  = 0; i < data.size(); i++)
+		for(size_t i = 0; i < check_bind.size(); i++)
 		{
-			for(size_t j = 0;j < data[i].__port.size(); j++)
-			{
-				ko.push_back(data[i].__port[j]);
-				sure[data[i].__host] = ko;
-			}
+			if (check_bind[i].first == host && check_bind[i].second == port)
+				return false;
 		}
-		std::map<string, std::vector<string> >::iterator	it = sure.begin();
-		for(;it != sure.end(); it++)
-		{
-			ForBind	ip_port;
-			ip_port.server = it->first;
-			for(size_t	i = 0; i < it->second.size(); i++)
-			{
-				if (std::find(ip_port._Port.begin(), ip_port._Port.end(), it->second[i]) == ip_port._Port.end())
-					ip_port._Port.push_back(it->second[i]);
-			}
-			vec.push_back(ip_port);
-		}
-		return vec;
+		return true;
 	}
+
 	void	initial_server(std::vector<DataConf> &data)
 	{
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
-		std::vector<ForBind>	_for_bind;
-	
-		_for_bind = for_binding_servers(data);
+		vector<std::pair<string, string> > check_bind;
 		
-		for(size_t  i = 0; i < _for_bind.size(); i++)
+		for(size_t  i = 0; i < data.size(); i++)
 		{
-			for(size_t j = 0; j < _for_bind[i]._Port.size(); j++)
+			for(size_t j = 0; j < data[i].__port.size(); j++)
 			{
-				int server_fd;
-				print_error << _for_bind[i]._Port[j].c_str() << std::endl;
-				if ((rcv = getaddrinfo(_for_bind[i].server.c_str() , _for_bind[i]._Port[j].c_str(), &hints, &ai)) != 0) {
-					throw std::string("error in getaddrinfo");
-				}
-				for (point = ai; point != NULL; point = point->ai_next)
+				if (check_for_bind(check_bind, data[i].__host, data[i].__port[j]))
 				{
-					server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
-					if (server_fd < 0)
-						continue;
-					else
-						this->server_fds[server_fd] = std::make_pair(i, j);
-					this->on = 1;
-					rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
-					if (rc < 0)
-						throw std::string("error with setsocketopt");
-					if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
-						throw std::string("error fcntl");
-					if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
-						close(server_fd);
-						continue;
+					int server_fd;
+					print_error << data[i].__port[j].c_str() << std::endl;
+					if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
+						throw std::string("error in getaddrinfo");
 					}
-					break ;
+					for (point = ai; point != NULL; point = point->ai_next)
+					{
+						server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
+						if (server_fd < 0)
+							continue;
+						else
+						{
+							check_bind.push_back(std::make_pair(data[i].__host, data[i].__port[j]));
+							this->server_fds[server_fd] = std::make_pair(i, j);
+						}
+						this->on = 1;
+						rc = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
+						if (rc < 0)
+							throw std::string("error with setsocketopt");
+						if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
+							throw std::string("error fcntl");
+						if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
+							close(server_fd);
+							continue;
+						}
+						break ;
+					}
+					freeaddrinfo(ai);
+					if (point == NULL)
+							throw std::string("there's no ip available in this host");
+					if (listen(server_fd, SOMAXCONN) == -1)
+						throw std::string("problem with listen");
+					else
+						print_error << server_fd << std::endl;
+					pollfd  temp;
+					temp.fd = server_fd;
+					temp.events = POLLIN;
+					fd_s.push_back(temp);
 				}
-				freeaddrinfo(ai);
-				if (point == NULL)
-						throw std::string("there's no ip available in this host");
-				if (listen(server_fd, SOMAXCONN) == -1)
-					throw std::string("problem with listen");
-				else
-					print_error << server_fd << std::endl;
-				pollfd  temp;
-				temp.fd = server_fd;
-				temp.events = POLLIN;
-				fd_s.push_back(temp);
 			}
 		}
 	}
@@ -374,6 +359,7 @@ public:
 								mesg->message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
 								mesg->_connections = std::make_pair(ClienTsoCKet, server_infos);
+								std::cout << "got request from client " << std::endl;
 								handl_request.handle(*mesg);
 								MyClienT.response.swap(mesg->response);
 								ser.fd_s[i].events = POLLOUT;
