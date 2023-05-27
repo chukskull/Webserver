@@ -31,11 +31,11 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 			std::cerr << "error\n";
 			exit(500);
 		}
-		// if (dup2(fd, 1) == -1)
-		// {
-		// 	std::cerr << "dup error\n";
-		// 	exit(500);
-		// }
+		if (dup2(fd, 1) == -1)
+		{
+			std::cerr << "dup error\n";
+			exit(500);
+		}
 		execve(lang_path, av, NULL);
 		perror("execve"); // Print error message
 		close(fd);

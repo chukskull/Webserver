@@ -6,6 +6,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 # Get the first argument and remove newlines
+argument = sys.argv[1]
 length = len(argument)
 
 # Print the length of the argument
