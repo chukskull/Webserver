@@ -98,6 +98,7 @@ public:
 				{
 					response.set_status(200, "OK");
 					// _cgi_info cgi_info;
+					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
 						create_env_(request_info, _server_, file);
@@ -106,7 +107,6 @@ public:
 						env_v_to_c(request_info.env_c, request_info.env_v);
 						// print_env(request_info.env_c, request_info.env_v.size());
 
-							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;

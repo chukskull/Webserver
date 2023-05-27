@@ -4,6 +4,8 @@
 
 int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response)
 {
+	// time out 
+	std::cout << "data : " << request_info.body <<std::endl;
 	(void) request_info;
 	set_cookies(request_info, response);
 	const char* lang_path = cgi_info.lang_path.c_str();
