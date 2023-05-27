@@ -5,6 +5,8 @@
 // #include "typedefs.hpp"
 
 bool file_exist(string file_path);
+bool file_is_readable(string file_path);
+bool file_is_writable(string file_path);
 bool valid_http(string http_ver);
 string _to_lower(string str);
 bool is_dir(string path);
@@ -56,3 +58,5 @@ void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file
 void    free_env(char **env, size_t size);
 void	print_env(char **env, size_t size);
 void    env_v_to_c(char **env, vector<string> &env_v);
+
+void  percent_encoding(string &str);

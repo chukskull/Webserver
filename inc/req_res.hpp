@@ -118,14 +118,16 @@ public:
 
 	request();
 	request(string req);
-	void request_checkpoint();
-	void parse(string req);
+	// void request_checkpoint();
+	short request_checkpoint();
+	short parse(string req);
 
 private:
 
 	short method_num();
 	int fill_req();
-	void validate_start_line();
+	// void validate_start_line();
+	size_t validate_start_line();
 	
 public:
 	void print_req();
@@ -148,4 +150,4 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 
 
 //-----------------///cookies///----------------//
-std::string set_cookies(std::string name, std::string value);
+void set_cookies(HTTP_request &request_info, HTTP_response &response);

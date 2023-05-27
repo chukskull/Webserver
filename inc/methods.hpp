@@ -44,13 +44,15 @@ public:
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		std::cout << "::" <<  _server_.__host << std::endl;
+		// std::cout << "::" <<  _server_.__host << std::endl;
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		std::cout << "requested file:" << request_info.requested_file << std::endl;
+		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
+
+		// lib.set_error_pages(_server_.__error);
 		std::cout << "------::file:" << file.file_path << std::endl;
 
-		print_file(file);
+		// print_file(file);
 		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
@@ -69,22 +71,19 @@ public:
 		{
 			if (file.is_redirect)
 			{
-				// std::cout << "::" << file.is_redirect << std::endl;
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
 			else if (file.file_exists)
 			{
-				std::cout << "::" << file.location.__file << std::endl;
-				if (file.is_dir)
+				if (file.is_readable == false)
+					response.set_status(403, "Forbidden");
+				else if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
-						std::cout << "got into autoindex\n";
 						generate_autoindex(file, response);
 						response.set_status(200, "OK");
-						// serve autoindex
-						// create the html page
 					}
 
 					else
@@ -231,7 +230,8 @@ public:
 						// std::cout << request_info.content_type.first << std::endl;
 
 						//handling cgi
-						std::cout << file.location._cgi << std::endl;
+						// std::cout << file.location._cgi << std::endl;
+						std::cout << "the file is writable: " << file.is_writable << std::endl;
 						if (file.location._cgi)
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
@@ -243,7 +243,7 @@ public:
 
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
-								std::cout << "run cgi\n";
+								// std::cout << "run cgi\n";
 								// cgi_info.cgi_name = file.file_path;
 								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
@@ -373,21 +373,26 @@ class handler
 		// void handle(string re, string &res)
 		void handle(Mesage &msg)
 		{
-			request req(msg.message);
+			// request req(msg.message);
 
+			request req;
+
+			if (req.parse(msg.message) == 0)
+			{
 			// req.request_checkpoint();
 			// std::cout << "host:" << req.request_info.host << std::endl;
 			// print("host:" + req.request_info.host);
-			std::cout << "i got to handle\n";
+			// std::cout << "i got to handle\n";
 			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
 			// {
-				std::cout << "i got to handle inside\n";
+				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
 					POST_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
+			}
 			// }
 			// else
 			// {
@@ -426,6 +431,9 @@ class handler
 		res.append(req.response.status_text);
 		res.append(CRLF);
 
+		set_cookies(req.request_info, req.response);
+		if (req.response.body.empty())
+			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
@@ -439,7 +447,7 @@ class handler
 		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 
 		if (req.response.cookies != "")
-		{ res.append("cookies: "); res.append(req.response.cookies); res.append(CRLF);}
+		{ res.append(req.response.cookies); res.append(CRLF);}
 		res.append(CRLF);
 		res.append(req.response.body);
 	}

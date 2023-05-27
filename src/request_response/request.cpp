@@ -7,21 +7,28 @@ request::request()
     start_line.reserve(3);
     body = "";
 }
+
 request::request(string req)
 {
     start_line.reserve(3);
     body = "";
     parse(req);
+    // if (parse(req) == 1)
+    //     throw std::exception();
 }
 
-void request::request_checkpoint()
+short request::request_checkpoint()
 {
-    validate_start_line();
+    if (validate_start_line() == 1)
+        return 1;
+    percent_encoding(start_line[SOURCE]);
     fill_req();
     fill_query(start_line[SOURCE], request_info);
+    std::cout << "source: " << start_line[SOURCE] << std::endl;
+    return 0;
 }
 
-void request::parse(string req)
+short request::parse(string req)
 {
     std::stringstream s_request(req);
     string tmp_str;
@@ -32,8 +39,17 @@ void request::parse(string req)
     std::getline(s_request, line, '\n');
 
     short i = 0;
-    for (; i < 3 and std::getline(start_l_s, tmp_str, ' '); i++)
-        start_line.push_back(tmp_str);
+    for (; !start_l_s.eof() ;)
+    {
+        // std::cout << "i = " << i << std::endl;
+        std::getline(start_l_s, tmp_str, ' ');
+        if (tmp_str != "")
+        {
+            start_line.push_back(tmp_str);
+            i++;
+        }
+        // start_line.push_back(tmp_str);
+    }
 
     if (i != 3)
         std::cout << "err msg\n";
@@ -46,11 +62,15 @@ void request::parse(string req)
     }
 
     if (tmp_str != "\r")
-        std::cout << "err msg\n";
+    {
+        response.set_status(400, "bad request no empty line");
+        return 1;
+    }
+        // std::cout << "err msg\n";
     while (std::getline(s_request, tmp_str))
         {body.append(tmp_str).append("\n");}
 
-    request_checkpoint();
+    return (request_checkpoint());
 }
 
 short request::method_num()
@@ -136,9 +156,9 @@ int request::fill_req()
     return 0;
 }
 
-void request::validate_start_line()
+size_t request::validate_start_line()
 {
-    if (start_line.size() != 3){/*bad request*/}
+    if (start_line.size() != 3){response.set_status(400, "bad request line"); return 1;}
     if (start_line[METHOD] == "GET" || start_line[METHOD] == "POST" || start_line[METHOD] == "DELETE")
     {
         /*
@@ -154,8 +174,8 @@ void request::validate_start_line()
         if (valid_http(start_line[PROTOCOL]) == false)
         {
             response.set_status(505, "HTTP Version Not Supported");
-            std::cout << "HTTP Version Not Supported" << std::endl;
-            return ;
+            // std::cout << "HTTP Version Not Supported" << std::endl;
+            return 1;
         }
 
         // checking for source existence
@@ -167,7 +187,9 @@ void request::validate_start_line()
     else
     {
         response.set_status(501, "Not Implemented");
+        return 1;
     }
+    return 0;
 }
 
 void request::print_req()
