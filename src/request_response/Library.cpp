@@ -29,13 +29,13 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 	}
 	if (loc.is_set())
 	{
-		std::cout << "=====================================> \n";
+		// std::cout << "=====================================> \n";
 		if (loc.__path[loc.__path.length() - 1] == '/')
 			loc.__path = loc.__path.substr(0, loc.__path.length() - 1);
 		if (request_info.requested_file[request_info.requested_file.length() - 1] == '/')
 			request_info.requested_file = request_info.requested_file.substr(0, request_info.requested_file.length() - 1);
-		std::cout << "the requested file: " << request_info.requested_file << std::endl;
-		std::cout << "the location: " << loc.__path << std::endl;
+		// std::cout << "the requested file: " << request_info.requested_file << std::endl;
+		// std::cout << "the location: " << loc.__path << std::endl;
 		info.location = loc;
 		info._allowMeth = loc._AllowMeth;
 		info.requested_path = request_info.requested_file;
@@ -108,10 +108,7 @@ void servers_library::set(vector<DataConf> &srvrs)
 DataConf servers_library::get_server_index(HTTP_request &request_info, Mesage &msg)
 {
 	std::vector<DataConf> matched_servers;
-	std::cout << "the requested port: " << msg._connections.second.second << std::endl;
-	std::cout << "the port string: " << _servers[msg._connections.second.first].__port[msg._connections.second.second] << std::endl;
 	string look_for = _servers[msg._connections.second.first].__host + ":" + _servers[msg._connections.second.first].__port[msg._connections.second.second] ;
-	// std::cout << "===============++================\n";
 	fill_matched_servers(msg, matched_servers);
 	if (matched_servers.size() > 1)
 		return find_best_server_match(request_info, matched_servers);

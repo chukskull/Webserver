@@ -41,19 +41,9 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
-		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		// std::cout << "::" <<  _server_.__host << std::endl;
-		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
 
-		// lib.set_error_pages(_server_.__error);
-		std::cout << "------::file:" << file.file_path << std::endl;
-
-		// print_file(file);
-		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
 			if (request_info.connection == "close")
@@ -94,7 +84,6 @@ public:
 				else if (file.is_file)
 				{
 					response.set_status(200, "OK");
-					// _cgi_info cgi_info;
 					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
@@ -110,7 +99,7 @@ public:
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
 
-							// free_env(request_info.env_c, request_info.env_v.size());
+							free_env(request_info.env_c, request_info.env_v.size());
 						// }
 						// else
 						// {
@@ -228,10 +217,7 @@ public:
 					// else if (file.is_dir)
 					// {
 						// std::cout << request_info.content_type.first << std::endl;
-
-						//handling cgi
-						// std::cout << file.location._cgi << std::endl;
-						std::cout << "the file is writable: " << file.is_writable << std::endl;
+						// std::cout << "the file is writable: " << file.is_writable << std::endl;
 						if (file.location._cgi)
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
@@ -260,7 +246,10 @@ public:
 							}
 							free_env(request_info.env_c, request_info.env_v.size());
 						}
-						
+						else if (file.is_writable == false)
+						{
+							response.set_status(403, "Forbidden not writable");
+						}
 						else if (request_info.content_type.first == "multipart/form-data")
 						{
 							deque<form_part> parts;
@@ -324,8 +313,8 @@ public:
 		{
 			if (file.is_redirect)
 			{
-				std::cout << "waa nwaa3\n";
-				exit(0);
+				response.set_status(301, "Moved Permanently");
+                response.location = file.location.__redirect.second;
 			}
 			else
 			{
