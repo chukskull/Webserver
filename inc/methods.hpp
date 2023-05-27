@@ -48,6 +48,8 @@ public:
 		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
 		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
+
+		// lib.set_error_pages(_server_.__error);
 		std::cout << "------::file:" << file.file_path << std::endl;
 
 		// print_file(file);
@@ -67,31 +69,26 @@ public:
 		}
 		if (file._allowMeth[con_GET])
 		{
-			std::cout << "file is dir::::" << file.is_dir << std::endl;
-			std::cout << "file is file:::" << file.is_file << std::endl;
 			if (file.is_redirect)
 			{
-				// std::cout << "::" << file.is_redirect << std::endl;
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
 			else if (file.file_exists)
 			{
-				std::cout << "::" << file.location.__file << std::endl;
-				if (file.is_dir)
+				if (file.is_readable == false)
+					response.set_status(403, "Forbidden shit");
+				else if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
-						std::cout << "got into autoindex\n";
 						generate_autoindex(file, response);
 						response.set_status(200, "OK");
-						// serve autoindex
-						// create the html page
 					}
 
 					else
 					{
-						response.set_status(403, "Forbidden");
+						response.set_status(403, "Forbidden me");
 					}
 				}
 				else if (file.is_file)
@@ -233,7 +230,8 @@ public:
 						// std::cout << request_info.content_type.first << std::endl;
 
 						//handling cgi
-						std::cout << file.location._cgi << std::endl;
+						// std::cout << file.location._cgi << std::endl;
+						std::cout << "the file is writable: " << file.is_writable << std::endl;
 						if (file.location._cgi)
 						{
 							// std::cout << "loc:" << file.location.__path << std::endl;
@@ -241,11 +239,11 @@ public:
 							create_env_(request_info, _server_, file);
 							request_info.env_c = new char*[request_info.env_v.size() + 1];
 							env_v_to_c(request_info.env_c, request_info.env_v);
-							print_env(request_info.env_c, request_info.env_v.size());
+							// print_env(request_info.env_c, request_info.env_v.size());
 
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
-								std::cout << "run cgi\n";
+								// std::cout << "run cgi\n";
 								// cgi_info.cgi_name = file.file_path;
 								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
@@ -375,8 +373,12 @@ class handler
 		// void handle(string re, string &res)
 		void handle(Mesage &msg)
 		{
-			request req(msg.message);
+			// request req(msg.message);
 
+			request req;
+
+			if (req.parse(msg.message) == 0)
+			{
 			// req.request_checkpoint();
 			// std::cout << "host:" << req.request_info.host << std::endl;
 			// print("host:" + req.request_info.host);
@@ -390,6 +392,7 @@ class handler
 					POST_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
+			}
 			// }
 			// else
 			// {
@@ -429,6 +432,8 @@ class handler
 		res.append(CRLF);
 
 		set_cookies(req.request_info, req.response);
+		if (req.response.body.empty())
+			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 

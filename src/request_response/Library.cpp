@@ -17,10 +17,13 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 		// std::cout << "! get lucky\n";
 		if (pos != request_info.requested_file.npos && pos == 0) // possibly check that the npos is zero
 		{
-			std::cout << "-------------match found\n";
-			// std::cout << "++++++++++> got here\n";
 			if (loc.__path.length() <= it->__path.length())
-				loc = *it;
+			{
+				if ((it->__path.length() == request_info.requested_file.length()) || request_info.requested_file[it->__path.length()] == '/')
+					loc = *it;
+			}
+			// {
+			// }
 
 		}
 	}
@@ -68,16 +71,19 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 			{
 				info.file_exists = true;
 				info._allowMeth = loc._AllowMeth;
+				if (file_is_readable(info.file_path))
+					info.is_readable = true;
+				if (file_is_writable(info.file_path))
+					info.is_writable = true;
 				// check if it is a directory
 				if (is_dir(info.file_path))
 				{
 					info.is_dir = true;
 					// check if autoindex is allowed
 					// std::cout << "the file is a directory\n";
-
+					// std::cout << "-------------------> " << loc._autoindex << std::endl;
 					if (loc._autoindex)
 					{
-						std::cout << "autoindex is allowed\n";
 						info.is_autoindex = true;
 					}
 				}
@@ -102,7 +108,10 @@ void servers_library::set(vector<DataConf> &srvrs)
 DataConf servers_library::get_server_index(HTTP_request &request_info, Mesage &msg)
 {
 	std::vector<DataConf> matched_servers;
+	std::cout << "the requested port: " << msg._connections.second.second << std::endl;
+	std::cout << "the port string: " << _servers[msg._connections.second.first].__port[msg._connections.second.second] << std::endl;
 	string look_for = _servers[msg._connections.second.first].__host + ":" + _servers[msg._connections.second.first].__port[msg._connections.second.second] ;
+	// std::cout << "===============++================\n";
 	fill_matched_servers(msg, matched_servers);
 	if (matched_servers.size() > 1)
 		return find_best_server_match(request_info, matched_servers);
@@ -220,11 +229,13 @@ void servers_library::create_status_map() {
     status[505] = "HTTP Version Not Supported";
 }
 
-void servers_library::set_error_pages(const std::map<short, std::string>& error_pages) {
+void servers_library::set_error_pages(const std::map<int, std::string>& error_pages) {
 	html_error_pages.clear(); // Clear existing error pages
 	
 	// Iterate over the error_pages map
-	for (std::map<short, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
+	std::cout << "Setting error pages..." << std::endl;
+	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
+		std::cout << "Setting error page for status code " << it->first << " file paht: " << it->second << "..." << std::endl;
 		short status_code = it->first;
 		const std::string& file_name = it->second;
 
@@ -266,15 +277,16 @@ string servers_library::get_status_text(short status_code)
 {
 	map<short, string>::iterator it;
 
-	std::cout << "status code::"<< status_code << std::endl;
+	// std::cout << "status code::"<< status_code << std::endl;
 	std::cout << status.size() << std::endl;
 	it = status.find(status_code);
-	std::cout << "second::" << it->second << std::endl;
+	// std::cout << "second::" << it->second << std::endl;
 	if (it != status.end())
 		return it->second;
 	else
 		return "not suported status";
 }
+
 
 servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 
