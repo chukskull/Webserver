@@ -20,6 +20,19 @@ bool file_exist(string file_path)
 	}
 }
 
+bool file_is_readable(string file_path)
+{
+	if (access(file_path.c_str(), R_OK) == 0)
+		return (true);
+	return (false);
+}
+
+bool file_is_writable(string file_path)
+{
+	if (access(file_path.c_str(), W_OK) == 0)
+		return (true);
+	return (false);
+}
 // std::string str_toupper(char *str)
 // {
 //     std::string new_str = str;
@@ -71,6 +84,7 @@ void print(string s)
 
 bool valid_http(string http_ver)
 {
+	print(http_ver);
 	if (_to_lower(http_ver) == "http/1.1" || _to_lower(http_ver) == "http/1.0")
 		return true;
 	
@@ -84,6 +98,7 @@ void fill_query(string &full_path, HTTP_request &request)
 		return;
 	request.query_string = full_path.substr(pos + 1);
 	full_path = full_path.substr(0, pos);
+	std::cout << "full path: " << full_path << std::endl;;
 }
 
 bool is_dir(string path)
@@ -149,10 +164,10 @@ void generate_autoindex(file_info file, HTTP_response &response)
 		// std::cout << "==================================================================\n";
 		// find a better way to do this
 		html += "<a href=\"" + file.location.__path ;
-		std::cout << "file path: " << file.file_path << std::endl;
-		std::cout << "file root: " << file.location.__root << std::endl;
-		std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
-		std::cout << "dir content: " << dir_content[i] << std::endl;
+		// std::cout << "file path: " << file.file_path << std::endl;
+		// std::cout << "file root: " << file.location.__root << std::endl;
+		// std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
+		// std::cout << "dir content: " << dir_content[i] << std::endl;
 		if (file.file_path.substr(file.location.__root.length()) != "")
 			html += file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
 		else

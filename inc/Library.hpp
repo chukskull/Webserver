@@ -14,6 +14,8 @@ struct file_info
     bool is_autoindex;
     bool is_redirect;
     bool file_exists;
+    bool is_readable;
+    bool is_writable;
 	MethAllow _allowMeth;
     // bool is_allowed;
 
@@ -58,7 +60,8 @@ public:
     // file_info get_requested_file(string path, size_t s_index, short &method);
     void set(vector<DataConf> &servers);
     string get_error_page(short status_code, string status_text);
-    void set_error_pages(const std::map<short, std::string>& error_pages) ;
+    void set_error_pages(const std::map<int, std::string>& error_pages);
+    // void set_error_pages(const std::map<short, std::string>& error_pages) ;
     string generate_error_page(int status_code, string status_message);
     void create_status_map();
     string get_status_text(short status_code);

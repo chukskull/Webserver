@@ -5,6 +5,8 @@
 // #include "typedefs.hpp"
 
 bool file_exist(string file_path);
+bool file_is_readable(string file_path);
+bool file_is_writable(string file_path);
 bool valid_http(string http_ver);
 string _to_lower(string str);
 bool is_dir(string path);
