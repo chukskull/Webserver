@@ -21,7 +21,6 @@ void set_cookies(HTTP_request &request_info, HTTP_response &response)
     char buffer[80];
     std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&now));
     std::string time(buffer);
-    std::cout << "cookies : " << request_info.cookies << std::endl;
     if (request_info.cookies.empty())
     {
         std::srand(static_cast<unsigned>(std::time(0)));
@@ -32,5 +31,3 @@ void set_cookies(HTTP_request &request_info, HTTP_response &response)
         response.cookies = set_cookies + request_info.cookies + ";" + expires + time;
 
 }
-// TO DO
-// cgi in get

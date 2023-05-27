@@ -1,4 +1,12 @@
 import sys
 
-length = len(sys.argv[1])
-print("Length of the string is:", length - 1)
+# Check if an argument was provided
+if len(sys.argv) < 2:
+    print("No input found !")
+    sys.exit(1)
+
+# Get the first argument and remove newlines
+length = len(argument)
+
+# Print the length of the argument
+print("Length of the argument:", length)
