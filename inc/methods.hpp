@@ -12,6 +12,7 @@ void print_meth(MethAllow meth)
 	}
 	std::cout << std::endl;
 }
+
 void print_locations(ReqLoc &vec)
 {
 	// std::cout << "locs== \n";
@@ -41,19 +42,9 @@ public:
 	void handle(HTTP_request &request_info, HTTP_response &response, Mesage &msg)
 	{
 		file_info file;
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
-		// std::cout << "===========>:" << request_info.cookies << std::endl;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
-		// std::cout << "::" <<  _server_.__host << std::endl;
-		// std::cout << "::" <<  _server_.__locations[0].__path << std::endl;
-		// std::cout << "requested file:" << request_info.requested_file << std::endl;
 		file = lib.get_requested_file(request_info, _server_);
 
-		// lib.set_error_pages(_server_.__error);
-		std::cout << "------::file:" << file.file_path << std::endl;
-
-		// print_file(file);
-		// std::cout << "requested_path" << file.requested_path << std::endl;
 		if (request_info.connection != "")
 		{
 			if (request_info.connection == "close")
@@ -74,11 +65,14 @@ public:
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
+			else if (file.is_readable == false)
+			{
+				std::cout << "the file is not readable\n";
+				response.set_status(403, "Forbidden shit");
+			}
 			else if (file.file_exists)
 			{
-				if (file.is_readable == false)
-					response.set_status(403, "Forbidden");
-				else if (file.is_dir)
+				if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
@@ -88,13 +82,13 @@ public:
 
 					else
 					{
-						response.set_status(403, "Forbidden");
+						response.set_status(403, "Forbidden me");
 					}
 				}
 				else if (file.is_file)
 				{
 					response.set_status(200, "OK");
-					// _cgi_info cgi_info;
+					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
 						create_env_(request_info, _server_, file);
@@ -103,14 +97,13 @@ public:
 						env_v_to_c(request_info.env_c, request_info.env_v);
 						// print_env(request_info.env_c, request_info.env_v.size());
 
-							std::cout << "run cgi\n";
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
 							cgi_info.cgi_ext = file.location.__cgi_ext ;
 							cgi(cgi_info , request_info, response);
 
-							// free_env(request_info.env_c, request_info.env_v.size());
+							free_env(request_info.env_c, request_info.env_v.size());
 						// }
 						// else
 						// {
@@ -204,6 +197,9 @@ public:
 	{
 		file_info file;
 
+		// std::cout << "shit\n";
+		if (check_transfer(request_info, response) == false)
+			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
@@ -211,7 +207,6 @@ public:
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
-
 			if (file.is_redirect)
 			{
                 response.set_status(301, "Moved Permanently");
@@ -223,89 +218,67 @@ public:
 			{
 				if (file.file_exists)
 				{
-					// if (file.is_file)
-						// update_file(file, request_info, response);
-					// else if (file.is_dir)
-					// {
-						// std::cout << request_info.content_type.first << std::endl;
+					if (file.location._cgi)
+					{
+						_cgi_info cgi_info;
+						create_env_(request_info, _server_, file);
+						request_info.env_c = new char*[request_info.env_v.size() + 1];
+						env_v_to_c(request_info.env_c, request_info.env_v);
 
-						//handling cgi
-						// std::cout << file.location._cgi << std::endl;
-						std::cout << "the file is writable: " << file.is_writable << std::endl;
-						if (file.location._cgi)
+						if (file_extention(file.file_path) == file.location.__cgi_ext)
 						{
-							// std::cout << "loc:" << file.location.__path << std::endl;
-							_cgi_info cgi_info;
-							create_env_(request_info, _server_, file);
-							request_info.env_c = new char*[request_info.env_v.size() + 1];
-							env_v_to_c(request_info.env_c, request_info.env_v);
-							print_env(request_info.env_c, request_info.env_v.size());
-
-							if (file_extention(file.file_path) == file.location.__cgi_ext)
-							{
-								// std::cout << "run cgi\n";
-								// cgi_info.cgi_name = file.file_path;
-								// cgi_info.cgi_name = file.file_path;
-								cgi_info.cgi_name = file.file_path;
-								cgi_info.lang_path = file.location.__cgi_path;
-								cgi_info.cgi_ext = file.location.__cgi_ext ;
-								// cgi_info.lang_path = "/usr/local/bin/python3";
-								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
-								// cgi_info.cgi_ext = ".py";
-								cgi(cgi_info , request_info, response);
-							}
-							else
-							{
-								response.set_status(403, "Forbidden extention for cgi");
-							}
-							free_env(request_info.env_c, request_info.env_v.size());
-						}
-						
-						else if (request_info.content_type.first == "multipart/form-data")
-						{
-							deque<form_part> parts;
-							// std::cout << "++++++>>>> " << request_info.content_type.second << "\n";
-							if (check_for_end_boundary(request_info.body, request_info.content_type.second))
-							{
-								if(get_parts(request_info.body, request_info.content_type.second, parts))
-								{
-									std::cout << "we got to handle parts\n";
-									//print parts
-
-									handle_parts(file, parts, request_info, response);
-									generat_response(parts, response);
-								}
-								else
-								{
-									response.set_status(400, "Bad Request1");
-								}
-
-							}
-							else
-							{
-								response.set_status(400, "Bad Request2");
-							}
-						}
-						else if (file.is_dir)
-						{
-							response.set_status(400, "Bad Request path");
+							cgi_info.cgi_name = file.file_path;
+							cgi_info.lang_path = file.location.__cgi_path;
+							cgi_info.cgi_ext = file.location.__cgi_ext ;
+							cgi(cgi_info , request_info, response);
 						}
 						else
-							update_file(file, request_info, response);
-					// }
-					// else
-						// generate_error(response, 800, "no idea on why i have this condition here");
+						{
+							response.set_status(403, "Forbidden extention for cgi");
+						}
+						free_env(request_info.env_c, request_info.env_v.size());
+					}
+					else if (file.is_writable == false || file.file_dir_writable == false)
+						response.set_status(403, "Forbidden not writable");
+
+					else if (request_info.content_type.first == "multipart/form-data")
+					{
+						deque<form_part> parts;
+						if (check_for_end_boundary(request_info.body, request_info.content_type.second))
+						{
+							if(get_parts(request_info.body, request_info.content_type.second, parts))
+							{
+								handle_parts(file, parts, request_info, response);
+								generat_response(parts, response);
+							}
+							else
+								response.set_status(400, "Bad Request1");
+						}
+						else
+							response.set_status(400, "Bad Request2");
+					}
+					else if (file.is_dir)
+						response.set_status(400, "Bad Request path");
+					else
+						update_file(file, request_info, response);
 				}
 				else
 				{
-					creat_file(file, request_info, response);
+					if (file.file_dir_exists)
+					{
+						if (file.file_dir_writable == false)
+							response.set_status(403, "Forbidden not writable");
+						else
+							creat_file(file, request_info, response);
+					}
+					else
+						response.set_status(404, "File Not Found");
+					// std::cout << "well not quite\n";
 				}
 			}
 		}
 		else
-		{
 			response.set_status(405, "Method Not Allowed");
-		}
 	}
 };
 
@@ -318,23 +291,26 @@ public:
 
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
+
 		if (file._allowMeth[con_DELETE])
 		{
 			if (file.is_redirect)
 			{
-				std::cout << "waa nwaa3\n";
-				exit(0);
+				response.set_status(301, "Moved Permanently");
+                response.location = file.location.__redirect.second;
 			}
 			else
 			{
 				if (file.file_exists)
 				{
-					if (file.is_file)
+					if (file.is_writable == false)
+						response.set_status(403, "Forbidden not writable");
+					else if (file.is_file)
 					{
-						delete_file(file.file_path, response);
-						
+						if (file.file_dir_writable)
+							delete_file(file.file_path, response);
+						else
+							response.set_status(403, "Forbidden not writable");
 					}
 					else if (file.is_dir)
 						delete_dir(file, response);

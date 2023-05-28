@@ -10,14 +10,17 @@
 
 bool file_exist(string file_path)
 {
-	std::ifstream file(file_path);
-	if (file.fail())
-		return (false);
-	else
-	{
-		file.close();
+	if (access(file_path.c_str(), F_OK) == 0)
 		return (true);
-	}
+	return (false);
+	// std::ifstream file(file_path);
+	// if (file.fail())
+	// 	return (false);
+	// else
+	// {
+	// 	file.close();
+	// 	return (true);
+	// }
 }
 
 bool file_is_readable(string file_path)
@@ -97,7 +100,8 @@ void fill_query(string &full_path, HTTP_request &request)
 	if (pos == string::npos)
 		return;
 	request.query_string = full_path.substr(pos + 1);
-	full_path = full_path.substr(0, pos);
+	// full_path = full_path.substr(0, pos);
+	request.requested_file = full_path.substr(0, pos);
 	std::cout << "full path: " << full_path << std::endl;;
 }
 
@@ -752,3 +756,24 @@ void  percent_encoding(string &str)
 		}
 	}
 }
+
+bool check_transfer(HTTP_request &request_info,HTTP_response &response)
+{
+	if ((request_info.content_length == -1 && request_info.content_encoding != "chunked") || \
+		(request_info.content_length != -1 && request_info.content_encoding == "chunked"))
+	{
+		response.set_status(400, "Bad Request");
+		return false;
+	}
+	return true;
+}
+
+string get_dir(string file_path)
+{
+	size_t pos = file_path.find_last_of('/');
+	if (pos == string::npos)
+		return "";
+	return file_path.substr(0, pos + 1);
+}
+
+
