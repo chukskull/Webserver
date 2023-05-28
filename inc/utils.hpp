@@ -60,3 +60,5 @@ void	print_env(char **env, size_t size);
 void    env_v_to_c(char **env, vector<string> &env_v);
 
 void  percent_encoding(string &str);
+bool check_transfer(HTTP_request &request_info,HTTP_response &response);
+string get_dir(string file_path);

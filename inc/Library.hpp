@@ -16,12 +16,15 @@ struct file_info
     bool file_exists;
     bool is_readable;
     bool is_writable;
+    bool file_dir_exists;
+    bool file_dir_readable;
+    bool file_dir_writable;
 	MethAllow _allowMeth;
     // bool is_allowed;
 
     ReqLoc location;
 
-    file_info() : is_dir(false), is_file(false),is_autoindex(false), is_redirect(false), file_exists(false)
+    file_info() : is_dir(false), is_file(false),is_autoindex(false), is_redirect(false), file_exists(false), is_readable(false), is_writable(false)
 	{
 		_allowMeth.resize(3, false);
 	}

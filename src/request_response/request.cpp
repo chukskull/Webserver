@@ -16,15 +16,31 @@ request::request(string req)
     // if (parse(req) == 1)
     //     throw std::exception();
 }
-
+void printq(string s)
+{
+    size_t i = 0;
+    while (i < s.size())
+    {
+        if (s[i] == '\n')
+		{
+            std::cout << "\\n";
+    		std::cout << std::endl;
+		}
+        else if (s[i] == '\r')
+            std::cout << "\\r";
+        else
+            std::cout << s[i];
+        // cout << s[i];
+        i++;
+    }
+}
 short request::request_checkpoint()
 {
     if (validate_start_line() == 1)
         return 1;
     percent_encoding(start_line[SOURCE]);
     fill_req();
-    fill_query(start_line[SOURCE], request_info);
-    std::cout << "source: " << start_line[SOURCE] << std::endl;
+    fill_query(request_info.requested_file, request_info);
     return 0;
 }
 
@@ -136,7 +152,7 @@ int request::fill_req()
                 return 1;
             }
             request_info.connection = it->second;
-            std::cout << "connection:" << request_info.connection << std::endl;
+            // std::cout << "connection:" << request_info.connection << std::endl;
         }
         if (_to_lower(it->first) == "cookie")
         {
@@ -146,6 +162,15 @@ int request::fill_req()
                 return 1;
             }
             request_info.cookies = it->second;
+        }
+        if (_to_lower(it->first) == "content-transfer-encoding")
+        {
+            if (request_info.cookies != "")
+            {
+                response.set_status(400, "bad request3");
+                return 1;
+            }
+            request_info.content_encoding = it->second;
         }
         // if (_to_lower(it->first) == "accept")
         // {
