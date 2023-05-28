@@ -64,11 +64,14 @@ public:
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
+			else if (file.is_readable == false)
+			{
+				std::cout << "the file is not readable\n";
+				response.set_status(403, "Forbidden shit");
+			}
 			else if (file.file_exists)
 			{
-				if (file.is_readable == false)
-					response.set_status(403, "Forbidden shit");
-				else if (file.is_dir)
+				if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
@@ -212,32 +215,18 @@ public:
 			{
 				if (file.file_exists)
 				{
-					// if (file.is_file)
-						// update_file(file, request_info, response);
-					// else if (file.is_dir)
-					// {
-						// std::cout << request_info.content_type.first << std::endl;
-						// std::cout << "the file is writable: " << file.is_writable << std::endl;
 						if (file.location._cgi)
 						{
-							// std::cout << "loc:" << file.location.__path << std::endl;
 							_cgi_info cgi_info;
 							create_env_(request_info, _server_, file);
 							request_info.env_c = new char*[request_info.env_v.size() + 1];
 							env_v_to_c(request_info.env_c, request_info.env_v);
-							// print_env(request_info.env_c, request_info.env_v.size());
 
 							if (file_extention(file.file_path) == file.location.__cgi_ext)
 							{
-								// std::cout << "run cgi\n";
-								// cgi_info.cgi_name = file.file_path;
-								// cgi_info.cgi_name = file.file_path;
 								cgi_info.cgi_name = file.file_path;
 								cgi_info.lang_path = file.location.__cgi_path;
 								cgi_info.cgi_ext = file.location.__cgi_ext ;
-								// cgi_info.lang_path = "/usr/local/bin/python3";
-								// std::cout << "++++++++++++cgi path:" << cgi_info.cgi_path << std::endl;
-								// cgi_info.cgi_ext = ".py";
 								cgi(cgi_info , request_info, response);
 							}
 							else
@@ -247,54 +236,35 @@ public:
 							free_env(request_info.env_c, request_info.env_v.size());
 						}
 						else if (file.is_writable == false)
-						{
 							response.set_status(403, "Forbidden not writable");
-						}
+
 						else if (request_info.content_type.first == "multipart/form-data")
 						{
 							deque<form_part> parts;
-							// std::cout << "++++++>>>> " << request_info.content_type.second << "\n";
 							if (check_for_end_boundary(request_info.body, request_info.content_type.second))
 							{
 								if(get_parts(request_info.body, request_info.content_type.second, parts))
 								{
-									std::cout << "we got to handle parts\n";
-									//print parts
-
 									handle_parts(file, parts, request_info, response);
 									generat_response(parts, response);
 								}
 								else
-								{
 									response.set_status(400, "Bad Request1");
-								}
-
 							}
 							else
-							{
 								response.set_status(400, "Bad Request2");
-							}
 						}
 						else if (file.is_dir)
-						{
 							response.set_status(400, "Bad Request path");
-						}
 						else
 							update_file(file, request_info, response);
-					// }
-					// else
-						// generate_error(response, 800, "no idea on why i have this condition here");
 				}
 				else
-				{
 					creat_file(file, request_info, response);
-				}
 			}
 		}
 		else
-		{
 			response.set_status(405, "Method Not Allowed");
-		}
 	}
 };
 
@@ -307,8 +277,7 @@ public:
 
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
+
 		if (file._allowMeth[con_DELETE])
 		{
 			if (file.is_redirect)
@@ -320,11 +289,10 @@ public:
 			{
 				if (file.file_exists)
 				{
-					if (file.is_file)
-					{
+					if (file.is_writable == false)
+						response.set_status(403, "Forbidden not writable");
+					else if (file.is_file)
 						delete_file(file.file_path, response);
-						
-					}
 					else if (file.is_dir)
 						delete_dir(file, response);
 					else

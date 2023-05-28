@@ -10,14 +10,17 @@
 
 bool file_exist(string file_path)
 {
-	std::ifstream file(file_path);
-	if (file.fail())
-		return (false);
-	else
-	{
-		file.close();
+	if (access(file_path.c_str(), F_OK) == 0)
 		return (true);
-	}
+	return (false);
+	// std::ifstream file(file_path);
+	// if (file.fail())
+	// 	return (false);
+	// else
+	// {
+	// 	file.close();
+	// 	return (true);
+	// }
 }
 
 bool file_is_readable(string file_path)

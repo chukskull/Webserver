@@ -69,12 +69,15 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 			// check if the file exists
 			if (file_exist(info.file_path))
 			{
-				info.file_exists = true;
-				info._allowMeth = loc._AllowMeth;
 				if (file_is_readable(info.file_path))
+				{
+					std::cout << "the file is readable\n";
 					info.is_readable = true;
+				}
 				if (file_is_writable(info.file_path))
 					info.is_writable = true;
+				info.file_exists = true;
+				info._allowMeth = loc._AllowMeth;
 				// check if it is a directory
 				if (is_dir(info.file_path))
 				{

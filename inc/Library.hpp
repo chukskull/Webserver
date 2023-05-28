@@ -21,7 +21,7 @@ struct file_info
 
     ReqLoc location;
 
-    file_info() : is_dir(false), is_file(false),is_autoindex(false), is_redirect(false), file_exists(false)
+    file_info() : is_dir(false), is_file(false),is_autoindex(false), is_redirect(false), file_exists(false), is_readable(false), is_writable(false)
 	{
 		_allowMeth.resize(3, false);
 	}

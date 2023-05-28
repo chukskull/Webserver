@@ -152,7 +152,7 @@ int request::fill_req()
                 return 1;
             }
             request_info.connection = it->second;
-            std::cout << "connection:" << request_info.connection << std::endl;
+            // std::cout << "connection:" << request_info.connection << std::endl;
         }
         if (_to_lower(it->first) == "cookie")
         {
