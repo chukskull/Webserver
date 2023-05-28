@@ -72,7 +72,10 @@ public:
 			}
 			else if (file.file_exists)
 			{
-				if (file.is_dir)
+				if (file.file_dir_readable == false)
+					response.set_status(403, "Forbidden me");
+					
+				else if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
