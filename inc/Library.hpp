@@ -16,6 +16,9 @@ struct file_info
     bool file_exists;
     bool is_readable;
     bool is_writable;
+    bool file_dir_exists;
+    bool file_dir_readable;
+    bool file_dir_writable;
 	MethAllow _allowMeth;
     // bool is_allowed;
 

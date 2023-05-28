@@ -163,6 +163,15 @@ int request::fill_req()
             }
             request_info.cookies = it->second;
         }
+        if (_to_lower(it->first) == "content-transfer-encoding")
+        {
+            if (request_info.cookies != "")
+            {
+                response.set_status(400, "bad request3");
+                return 1;
+            }
+            request_info.content_encoding = it->second;
+        }
         // if (_to_lower(it->first) == "accept")
         // {
         //     fill_accept(*it);

@@ -12,6 +12,7 @@ void print_meth(MethAllow meth)
 	}
 	std::cout << std::endl;
 }
+
 void print_locations(ReqLoc &vec)
 {
 	// std::cout << "locs== \n";
@@ -196,6 +197,9 @@ public:
 	{
 		file_info file;
 
+		// std::cout << "shit\n";
+		if (check_transfer(request_info, response) == false)
+			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
@@ -203,7 +207,6 @@ public:
 		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
-
 			if (file.is_redirect)
 			{
                 response.set_status(301, "Moved Permanently");
@@ -215,52 +218,63 @@ public:
 			{
 				if (file.file_exists)
 				{
-						if (file.location._cgi)
-						{
-							_cgi_info cgi_info;
-							create_env_(request_info, _server_, file);
-							request_info.env_c = new char*[request_info.env_v.size() + 1];
-							env_v_to_c(request_info.env_c, request_info.env_v);
+					if (file.location._cgi)
+					{
+						_cgi_info cgi_info;
+						create_env_(request_info, _server_, file);
+						request_info.env_c = new char*[request_info.env_v.size() + 1];
+						env_v_to_c(request_info.env_c, request_info.env_v);
 
-							if (file_extention(file.file_path) == file.location.__cgi_ext)
-							{
-								cgi_info.cgi_name = file.file_path;
-								cgi_info.lang_path = file.location.__cgi_path;
-								cgi_info.cgi_ext = file.location.__cgi_ext ;
-								cgi(cgi_info , request_info, response);
-							}
-							else
-							{
-								response.set_status(403, "Forbidden extention for cgi");
-							}
-							free_env(request_info.env_c, request_info.env_v.size());
-						}
-						else if (file.is_writable == false)
-							response.set_status(403, "Forbidden not writable");
-
-						else if (request_info.content_type.first == "multipart/form-data")
+						if (file_extention(file.file_path) == file.location.__cgi_ext)
 						{
-							deque<form_part> parts;
-							if (check_for_end_boundary(request_info.body, request_info.content_type.second))
-							{
-								if(get_parts(request_info.body, request_info.content_type.second, parts))
-								{
-									handle_parts(file, parts, request_info, response);
-									generat_response(parts, response);
-								}
-								else
-									response.set_status(400, "Bad Request1");
-							}
-							else
-								response.set_status(400, "Bad Request2");
+							cgi_info.cgi_name = file.file_path;
+							cgi_info.lang_path = file.location.__cgi_path;
+							cgi_info.cgi_ext = file.location.__cgi_ext ;
+							cgi(cgi_info , request_info, response);
 						}
-						else if (file.is_dir)
-							response.set_status(400, "Bad Request path");
 						else
-							update_file(file, request_info, response);
+						{
+							response.set_status(403, "Forbidden extention for cgi");
+						}
+						free_env(request_info.env_c, request_info.env_v.size());
+					}
+					else if (file.is_writable == false || file.file_dir_writable == false)
+						response.set_status(403, "Forbidden not writable");
+
+					else if (request_info.content_type.first == "multipart/form-data")
+					{
+						deque<form_part> parts;
+						if (check_for_end_boundary(request_info.body, request_info.content_type.second))
+						{
+							if(get_parts(request_info.body, request_info.content_type.second, parts))
+							{
+								handle_parts(file, parts, request_info, response);
+								generat_response(parts, response);
+							}
+							else
+								response.set_status(400, "Bad Request1");
+						}
+						else
+							response.set_status(400, "Bad Request2");
+					}
+					else if (file.is_dir)
+						response.set_status(400, "Bad Request path");
+					else
+						update_file(file, request_info, response);
 				}
 				else
-					creat_file(file, request_info, response);
+				{
+					if (file.file_dir_exists)
+					{
+						if (file.file_dir_writable == false)
+							response.set_status(403, "Forbidden not writable");
+						else
+							creat_file(file, request_info, response);
+					}
+					else
+						response.set_status(404, "File Not Found");
+					// std::cout << "well not quite\n";
+				}
 			}
 		}
 		else
@@ -292,7 +306,12 @@ public:
 					if (file.is_writable == false)
 						response.set_status(403, "Forbidden not writable");
 					else if (file.is_file)
-						delete_file(file.file_path, response);
+					{
+						if (file.file_dir_writable)
+							delete_file(file.file_path, response);
+						else
+							response.set_status(403, "Forbidden not writable");
+					}
 					else if (file.is_dir)
 						delete_dir(file, response);
 					else

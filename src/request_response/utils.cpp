@@ -756,3 +756,24 @@ void  percent_encoding(string &str)
 		}
 	}
 }
+
+bool check_transfer(HTTP_request &request_info,HTTP_response &response)
+{
+	if ((request_info.content_length == -1 && request_info.content_encoding != "chunked") || \
+		(request_info.content_length != -1 && request_info.content_encoding == "chunked"))
+	{
+		response.set_status(400, "Bad Request");
+		return false;
+	}
+	return true;
+}
+
+string get_dir(string file_path)
+{
+	size_t pos = file_path.find_last_of('/');
+	if (pos == string::npos)
+		return "";
+	return file_path.substr(0, pos + 1);
+}
+
+

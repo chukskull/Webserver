@@ -66,6 +66,15 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 		}
 		else
 		{
+			string dir = get_dir(info.file_path);
+			if (file_exist(dir))
+			{
+				info.file_dir_exists = true;
+				if (file_is_readable(dir))
+					info.file_dir_readable = true;
+				if (file_is_writable(dir))
+					info.file_dir_writable = true;
+			}
 			// check if the file exists
 			if (file_exist(info.file_path))
 			{
