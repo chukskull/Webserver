@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <iostream>
 
-std::string set_cookies(std::string name, std::string value);
 
 
 #endif
