@@ -265,7 +265,7 @@ public:
 				if(my_client.response.size() == 0)
 				{
 					my_client.clear();
-					usleep(200);
+					usleep(1000);
 					close(fd);
 					return 2;
 				}

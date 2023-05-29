@@ -224,7 +224,7 @@ void servers_library::set_error_pages(const std::map<int, std::string>& error_pa
 		const std::string& file_name = it->second;
 
 		std::ifstream file(file_name.c_str());
-		std::cout << "file name: " << file_name << std::endl;
+		// std::cout << "file name: " << file_name << std::endl;
 		if (file.is_open()) {
 			std::stringstream buffer;
 			buffer << file.rdbuf();
@@ -232,11 +232,10 @@ void servers_library::set_error_pages(const std::map<int, std::string>& error_pa
 
 			std::cout << "status code: " << status_code << std::endl;
 			html_error_pages[status_code] = file_content;
-			std::cout << file_content << std::endl;
 
 			file.close();
 		} else {
-			std::cout << "Error: could not open file " << file_name << std::endl;
+			// std::cout << "Error: could not open file " << file_name << std::endl;
 			if (status.find(status_code) != status.end())
 				html_error_pages[status_code] = generate_error_page(status_code, status.find(status_code)->second);
 			else
