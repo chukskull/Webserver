@@ -262,10 +262,10 @@ public:
 						return -1;
 
 				}
-				if(my_client.response.size() == 0 || s == 0)
+				if(my_client.response.size() == 0)
 				{
 					my_client.clear();
-					usleep(1000);
+					usleep(200);
 					close(fd);
 					return 2;
 				}
@@ -322,7 +322,6 @@ public:
 						std::pair<int, int> server_infos;
 						int			error_header;
 						server_infos = get_server_infos(ser.server_fds, ClienTsoCKet, ser._connections);
-						string res;
 
 						int	_pars_req = receiving(ClienTsoCKet, MyClienT);
 						if(_gl_recv_return > 0)
@@ -342,7 +341,6 @@ public:
 									ser.fd_s[i].events = POLLOUT;
 								}
 							}
-							
 							else if (MyClienT._size == (MyClienT.current_size - MyClienT.header_size))
 								MyClienT._done = true;
 
@@ -359,9 +357,9 @@ public:
 								mesg.message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
 								mesg._connections = std::make_pair(ClienTsoCKet, server_infos);
+								std::cout << "got request from client " << std::endl;
 								handl_request.handle(mesg);
 								MyClienT.response.swap(mesg.response);
-								// delete mesg;
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}
@@ -372,6 +370,7 @@ public:
 							{
 								std::cerr << "this client hung up " << sender_fd<< std::endl;
 								close(ClienTsoCKet);
+								MyClienT.clear();
 								ser.fd_s[i] = ser.fd_s.back();
 								ser._connections.erase(ClienTsoCKet);
 								ser.fd_s.pop_back();

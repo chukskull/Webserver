@@ -16,7 +16,6 @@ class Client {
 			this->_done = false;
 			this->_header_done = false;
 			this->header_size = 0;
-			this->send_size = 0;
 			this->lastActiveTime = -1;
 			this->time_ = false;
 			time(&lastActiveTime);
@@ -40,7 +39,6 @@ class Client {
 			this->_done = false;
 			this->_header_done = false;
 			this->header_size = 0;
-			this->send_size = 0;
 		}
 		void AppendData(const std::string& data)
 		{
@@ -65,9 +63,7 @@ class Client {
 		size_t						_size;
 		size_t						current_size;
 		size_t						header_size;
-		size_t						send_size;
 		bool  						_done;
-		bool						send_done;
 		bool  						_header_done;
 		_string						response;
 		time_t 						lastActiveTime;

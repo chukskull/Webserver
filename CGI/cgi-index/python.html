@@ -4,11 +4,31 @@
 	<title>Username and Number Form</title>
 </head>
 <body>
-	<h1>Calculate length</h1>
-	<form action="/cgi-bin/cgi-bin.py" method="POST">
-		<label for="text">text:</label>
-		<input type="text" id="text" name="text"><br><br>
-		<input type="submit" value="Submit">
-	</form>
+    <div class="container">
+        <h1>Python GET</h1>
+        <form action="cgi-bin/cgi-bin.py" method="get">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="submit" value="Submit">
+        </form>
+        <h1>Python POST</h1>
+        <form action="cgi-bin/cgi-bin.py" method="post">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="submit" value="Submit">
+        </form>
+        <h1>PHP GET</h1>
+        <form action="cgi_bin/hello.php" method="get">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="submit" value="Submit">
+        </form>
+        <h1>PHP POST</h1>
+        <form action="cgi_bin/hello.php" method="post">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
 </body>
 </html>

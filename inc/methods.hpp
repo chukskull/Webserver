@@ -184,7 +184,7 @@ private:
 					break;
 			}
 			file.close();
-
+			delete [] buff;
 			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
 			// std::cout << "===" << response.content_length << std::endl;

@@ -36,16 +36,6 @@ bool file_is_writable(string file_path)
 		return (true);
 	return (false);
 }
-// std::string str_toupper(char *str)
-// {
-//     std::string new_str = str;
-//     int len = new_str.size();
-//     for(int j = 0; j < len; j++)
-//     {
-//         new_str[j] = std::toupper(new_str[j]);
-//     }
-//     return (new_str);
-// }
 
 string _to_lower(string str)
 {

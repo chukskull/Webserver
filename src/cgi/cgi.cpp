@@ -27,7 +27,7 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 		subtracted_body = request_info.body;
 		subtracted_body.erase(subtracted_body.size() - 1, 1);
 	}
-	subtracted_body.erase(0, 5);
+	//subtracted_body.erase(0, 5);
 	const char* body = subtracted_body.c_str();
 	char *av[] = {(char *) lang_path, (char *) cgi_name, (char *) body, nullptr};
 	FILE *fp = tmpfile();
