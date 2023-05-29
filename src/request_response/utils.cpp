@@ -36,16 +36,6 @@ bool file_is_writable(string file_path)
 		return (true);
 	return (false);
 }
-// std::string str_toupper(char *str)
-// {
-//     std::string new_str = str;
-//     int len = new_str.size();
-//     for(int j = 0; j < len; j++)
-//     {
-//         new_str[j] = std::toupper(new_str[j]);
-//     }
-//     return (new_str);
-// }
 
 string _to_lower(string str)
 {
@@ -378,6 +368,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			body_stream.seekg(current_pos);
 			// std::cout << line << std::endl;
 			part.content.swap(p);
+			delete buff;
 			return (true);
 		}
 		pos = p.find(boundary + "--" + CRLF);
@@ -399,15 +390,18 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			// body_stream.seekg(current_pos - std::__1::streampos(pos));
 			// body_stream.seekg(current_pos - pos);
 			part.content.swap(p);
+			delete buff;
 			return (false);
 		}
 		if (body_stream.eof())
 		{
 			std::cout << "function was broken here 4\n";
 			// part.content.swap(p);
+			delete buff;
 			return false;
 		}
 	}
+	delete buff;
 }
 
 bool get_parts(string &body, string &boundary, deque<form_part> &parts)
@@ -533,6 +527,13 @@ void handle_parts(file_info file , deque<form_part> &parts, HTTP_request &reques
 				if (it->content_type != "")
 					tmp_file = tmp_file + MIME.get_MIME_extention(it->content_type);
 			}
+			std::cout << "tmp_file:" << tmp_file << std::endl;
+			// if (file.is_writable == false)
+			// {
+				tmp_file = generate_other_file_name(tmp_file);
+				// it->comment = "forbidden to write to file";
+				// continue;
+			// }
 			out_file.open(tmp_file, std::ios::out | std::ios::trunc);
 			if (out_file.is_open())
 			{
@@ -776,4 +777,20 @@ string get_dir(string file_path)
 	return file_path.substr(0, pos + 1);
 }
 
+string	generate_other_file_name(string tmp_file)
+{
+	size_t pos = tmp_file.find_last_of('.');
+	string extention = tmp_file.substr(pos);
+	string file_name = tmp_file.substr(0, pos);
+	string new_file_name;
+	int i = 0;
 
+	while (1)
+	{
+		new_file_name = file_name + std::to_string(i) + extention;
+		if (access(new_file_name.c_str(), F_OK) == -1)
+			break;
+		i++;
+	}
+	return new_file_name;
+}

@@ -44,6 +44,7 @@ public:
 		file_info file;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
 
 		if (request_info.connection != "")
 		{
@@ -65,14 +66,17 @@ public:
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
-			else if (file.is_readable == false)
-			{
-				std::cout << "the file is not readable\n";
-				response.set_status(403, "Forbidden shit");
-			}
 			else if (file.file_exists)
 			{
-				if (file.is_dir)
+				if (file.is_readable == false)
+				{
+					std::cout << "the file is not readable\n";
+					response.set_status(403, "Forbidden shit");
+				}
+				else if (file.file_dir_readable == false)
+					response.set_status(403, "Forbidden me");
+					
+				else if (file.is_dir)
 				{
 					if (file.is_autoindex)
 					{
@@ -180,7 +184,7 @@ private:
 					break;
 			}
 			file.close();
-
+			delete [] buff;
 			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
 			// std::cout << "===" << response.content_length << std::endl;
@@ -202,6 +206,8 @@ public:
 			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
+
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// file = lib.get_requested_file();
@@ -291,6 +297,7 @@ public:
 
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
 
 		if (file._allowMeth[con_DELETE])
 		{
@@ -375,7 +382,6 @@ class handler
 				// req.response.set_status(400, "Bad Request it is not for this server");
 			// }
 			fill_response(req, msg.response);
-			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
 		}
 
