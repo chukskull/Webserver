@@ -678,7 +678,11 @@ void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file
 	add_to_env("SERVER_PROTOCOL", "HTTP/1.1", request_info);
 	add_to_env("REQUEST_METHOD", get_method(request_info.method), request_info);
 	add_to_env("SCRIPT_NAME", file.file_path, request_info);
-	add_to_env("QUERY_STRING", request_info.query_string, request_info);
+	if (request_info.method == GET)
+		add_to_env("QUERY_STRING", request_info.query_string, request_info);
+	else
+		add_to_env("QUERY_STRING", request_info.body, request_info);
+
 	if (request_info.content_length != -1)
 		add_to_env("CONTENT_LENGTH", std::to_string(request_info.content_length), request_info);
 	if (request_info.content_type.first != "")

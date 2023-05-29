@@ -14,10 +14,10 @@ std::string sessionID(int length)
 
 void set_cookies(HTTP_request &request_info, HTTP_response &response)
 {
-    std::time_t now = std::time(nullptr);
-    std::string set_cookies = "Set-Cookie: ";
+    std::time_t now = std::time(nullptr) + 3600;
+    std::string set_cookies = "Set-Cookie:";
     std::string sessionid = "SessionID=";
-    std::string expires = "expires: ";
+    std::string expires = "Expires=";
     char buffer[80];
     std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&now));
     std::string time(buffer);
@@ -25,9 +25,9 @@ void set_cookies(HTTP_request &request_info, HTTP_response &response)
     {
         std::srand(static_cast<unsigned>(std::time(0)));
         std::string id = sessionID(10);
-        response.cookies = set_cookies + sessionid + id + ";" + expires + time;
+        response.cookies = set_cookies + sessionid + id + "; " + expires + time;
     }
     else
-        response.cookies = set_cookies + request_info.cookies + ";" + expires + time;
+        response.cookies = set_cookies + request_info.cookies + "; " + expires + time;
 
 }
