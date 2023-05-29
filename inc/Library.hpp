@@ -68,6 +68,8 @@ public:
     string generate_error_page(int status_code, string status_message);
     void create_status_map();
     string get_status_text(short status_code);
+    std::string generate_success_page(short status_code, const std::string& status_text);
+    string get_success_page(short status_code);
 };
 
 

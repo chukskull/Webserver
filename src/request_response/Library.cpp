@@ -9,12 +9,9 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 
 	for (std::vector<ReqLoc>::iterator it = _server.__locations.begin(); it != _server.__locations.end(); it++)
 	{
-		//remove the slash from the end of the path
 		if (it->__path[it->__path.length() - 1] == '/')
 			it->__path = it->__path.substr(0, it->__path.length() - 1);
 		pos = request_info.requested_file.find(it->__path);
-		// std::cout << "file::" << it->__file << std::endl;
-		// std::cout << "! get lucky\n";
 		if (pos != request_info.requested_file.npos && pos == 0) // possibly check that the npos is zero
 		{
 			if (loc.__path.length() <= it->__path.length())
@@ -26,26 +23,18 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 	}
 	if (loc.is_set())
 	{
-		// std::cout << "=====================================> \n";
 		if (loc.__path[loc.__path.length() - 1] == '/')
 			loc.__path = loc.__path.substr(0, loc.__path.length() - 1);
 		if (request_info.requested_file[request_info.requested_file.length() - 1] == '/')
 			request_info.requested_file = request_info.requested_file.substr(0, request_info.requested_file.length() - 1);
-		// std::cout << "the requested file: " << request_info.requested_file << std::endl;
-		// std::cout << "the location: " << loc.__path << std::endl;
 		info.location = loc;
 		info._allowMeth = loc._AllowMeth;
 		info.requested_path = request_info.requested_file;
-		// std::cout << "auto:" << loc._autoindex << " method:" << request_info.method << " GET:" << GET << std::endl;
 		if (loc.__path == request_info.requested_file && loc._autoindex == false && request_info.method == GET)
 		{
-			// this will be a problem in POST requests
-
-			// loc.__file = "index2.html";
-
-			std::cout << "file-:" << loc.__file << "-" << std::endl;
-			std::cout << ":p:" << request_info.requested_file << std::endl;
-			std::cout << ":p:" << request_info.requested_file.substr(loc.__path.length()) << std::endl;
+			// std::cout << "file-:" << loc.__file << "-" << std::endl;
+			// std::cout << ":p:" << request_info.requested_file << std::endl;
+			// std::cout << ":p:" << request_info.requested_file.substr(loc.__path.length()) << std::endl;
 			info.file_path = loc.__root + request_info.requested_file.substr(loc.__path.length()) + loc.__file;
 		}
 		else
@@ -54,13 +43,9 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 		}
 
 		info.content_type = get_exten(info.file_path);
-		// std::cout << "the glory type: " << info.content_type << std::endl;
-		// info.type = path.substr(path.rfind('.') + 1);
 
 		if (loc.__redirect.first)
-		{
 			info.is_redirect = true;
-		}
 		else
 		{
 			string dir = get_dir(info.file_path);
@@ -76,10 +61,7 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 			if (file_exist(info.file_path))
 			{
 				if (file_is_readable(info.file_path))
-				{
-					std::cout << "the file is readable\n";
 					info.is_readable = true;
-				}
 				if (file_is_writable(info.file_path))
 					info.is_writable = true;
 				info.file_exists = true;
@@ -88,13 +70,8 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 				if (is_dir(info.file_path))
 				{
 					info.is_dir = true;
-					// check if autoindex is allowed
-					// std::cout << "the file is a directory\n";
-					// std::cout << "-------------------> " << loc._autoindex << std::endl;
 					if (loc._autoindex)
-					{
 						info.is_autoindex = true;
-					}
 				}
 				else if (is_file(info.file_path))
 				{
@@ -239,22 +216,27 @@ void servers_library::set_error_pages(const std::map<int, std::string>& error_pa
 	html_error_pages.clear(); // Clear existing error pages
 	
 	// Iterate over the error_pages map
-	std::cout << "Setting error pages..." << std::endl;
-	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
-		std::cout << "Setting error page for status code " << it->first << " file paht: " << it->second << "..." << std::endl;
+	// std::cout << "Setting error pages..." << std::endl;
+	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+	{
+		// std::cout << "Setting error page for status code " << it->first << " file paht: " << it->second << "..." << std::endl;
 		short status_code = it->first;
 		const std::string& file_name = it->second;
 
 		std::ifstream file(file_name.c_str());
+		std::cout << "file name: " << file_name << std::endl;
 		if (file.is_open()) {
 			std::stringstream buffer;
 			buffer << file.rdbuf();
 			std::string file_content = buffer.str();
 
+			std::cout << "status code: " << status_code << std::endl;
 			html_error_pages[status_code] = file_content;
+			std::cout << file_content << std::endl;
 
 			file.close();
 		} else {
+			std::cout << "Error: could not open file " << file_name << std::endl;
 			if (status.find(status_code) != status.end())
 				html_error_pages[status_code] = generate_error_page(status_code, status.find(status_code)->second);
 			else
@@ -269,7 +251,9 @@ string servers_library::get_error_page(short status_code, string status_text)
 
 	it = html_error_pages.find(status_code);
 	if (it != html_error_pages.end())
+	{
 		return it->second;
+	}
 	else
 	{
 		if (status_text == "")
@@ -293,12 +277,59 @@ string servers_library::get_status_text(short status_code)
 		return "not suported status";
 }
 
-
 servers_library::servers_library(vector<DataConf> servers) : _servers(servers){create_status_map();}
 
+std::string servers_library::generate_success_page(short status_code, const std::string& status_text)
+{
+    std::stringstream ss;
+    ss << "<!DOCTYPE html>\n";
+    ss << "<html>\n";
+    ss << "<head>\n";
+    ss << "    <title>Success " << status_code << "</title>\n";
+    ss << "    <style>\n";
+    ss << "        body {\n";
+    ss << "            background-color: #333333;\n";
+    ss << "            font-family: Arial, sans-serif;\n";
+    ss << "            padding: 20px;\n";
+    ss << "            text-align: center;\n";
+    ss << "        }\n";
+    ss << "        .card {\n";
+    ss << "            background-color: #222222;\n";
+    ss << "            border-radius: 8px;\n";
+    ss << "            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n";
+    ss << "            color: #ffffff;\n";
+    ss << "            margin: 0 auto;\n";
+    ss << "            max-width: 500px;\n";
+    ss << "            padding: 40px;\n";
+    ss << "        }\n";
+    ss << "        h1 {\n";
+    ss << "            color: #00a95c;\n";
+    ss << "            font-size: 24px;\n";
+    ss << "            margin-bottom: 20px;\n";
+    ss << "        }\n";
+    ss << "        p {\n";
+    ss << "            font-size: 16px;\n";
+    ss << "            line-height: 1.5;\n";
+    ss << "            margin-bottom: 20px;\n";
+    ss << "        }\n";
+    ss << "    </style>\n";
+    ss << "</head>\n";
+    ss << "<body>\n";
+    ss << "    <div class=\"card\">\n";
+    ss << "        <h1>Success " << status_code << "</h1>\n";
+    ss << "        <p>" << status_text << "</p>\n";
+    ss << "    </div>\n";
+    ss << "</body>\n";
+    ss << "</html>\n";
+
+    return ss.str();
+}
 
 
-
+string servers_library::get_success_page(short status_code)
+{
+	return generate_success_page(status_code, status.find(status_code)->second);
+}
 
 
 

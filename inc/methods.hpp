@@ -44,6 +44,7 @@ public:
 		file_info file;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
 
 		if (request_info.connection != "")
 		{
@@ -205,6 +206,8 @@ public:
 			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
+
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// file = lib.get_requested_file();
@@ -294,6 +297,7 @@ public:
 
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
 
 		if (file._allowMeth[con_DELETE])
 		{
@@ -378,7 +382,6 @@ class handler
 				// req.response.set_status(400, "Bad Request it is not for this server");
 			// }
 			fill_response(req, msg.response);
-			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
 		}
 

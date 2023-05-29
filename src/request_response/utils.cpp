@@ -378,6 +378,7 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			body_stream.seekg(current_pos);
 			// std::cout << line << std::endl;
 			part.content.swap(p);
+			delete buff;
 			return (true);
 		}
 		pos = p.find(boundary + "--" + CRLF);
@@ -399,15 +400,18 @@ bool read_part(std::stringstream &body_stream, string &b, form_part &part)
 			// body_stream.seekg(current_pos - std::__1::streampos(pos));
 			// body_stream.seekg(current_pos - pos);
 			part.content.swap(p);
+			delete buff;
 			return (false);
 		}
 		if (body_stream.eof())
 		{
 			std::cout << "function was broken here 4\n";
 			// part.content.swap(p);
+			delete buff;
 			return false;
 		}
 	}
+	delete buff;
 }
 
 bool get_parts(string &body, string &boundary, deque<form_part> &parts)
