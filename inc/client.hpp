@@ -20,6 +20,7 @@ class Client {
 			time(&lastActiveTime);
 			
 		}
+		Client(){};
 		void	clear()
 		{
 			this->is_it_chunked_ = false;

@@ -364,7 +364,6 @@ public:
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}
-						int sender_fd = ClienTsoCKet;
 
 						if (_gl_recv_return <= 0)
 						{
