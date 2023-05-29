@@ -262,7 +262,7 @@ public:
 						return -1;
 
 				}
-				if(my_client.response.size() == 0)
+				if(my_client.response.size() == 0 || s == 0)
 				{
 					my_client.clear();
 					usleep(200);

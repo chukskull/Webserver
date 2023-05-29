@@ -22,9 +22,6 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 				if ((it->__path.length() == request_info.requested_file.length()) || request_info.requested_file[it->__path.length()] == '/')
 					loc = *it;
 			}
-			// {
-			// }
-
 		}
 	}
 	if (loc.is_set())

@@ -65,14 +65,14 @@ public:
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
-			else if (file.is_readable == false)
-			{
-				std::cout << "the file is not readable\n";
-				response.set_status(403, "Forbidden shit");
-			}
 			else if (file.file_exists)
 			{
-				if (file.file_dir_readable == false)
+				if (file.is_readable == false)
+				{
+					std::cout << "the file is not readable\n";
+					response.set_status(403, "Forbidden shit");
+				}
+				else if (file.file_dir_readable == false)
 					response.set_status(403, "Forbidden me");
 					
 				else if (file.is_dir)
