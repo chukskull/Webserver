@@ -362,13 +362,6 @@ class handler
 
 			if (req.parse(msg.message) == 0)
 			{
-			// req.request_checkpoint();
-			// std::cout << "host:" << req.request_info.host << std::endl;
-			// print("host:" + req.request_info.host);
-			// std::cout << "i got to handle\n";
-			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
-			// {
-				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
@@ -376,13 +369,7 @@ class handler
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
 			}
-			// }
-			// else
-			// {
-				// req.response.set_status(400, "Bad Request it is not for this server");
-			// }
 			fill_response(req, msg.response);
-			// 	handle_delete();
 		}
 
 		void manage_server_errors(short status_code, string &response, string status_text = "")

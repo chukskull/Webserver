@@ -41,6 +41,11 @@ short request::request_checkpoint()
     percent_encoding(start_line[SOURCE]);
     fill_req();
     fill_query(request_info.requested_file, request_info);
+    if (request_info.host == "")
+    {
+        response.set_status(400, "bad request");
+        return 1;
+    }
     return 0;
 }
 
