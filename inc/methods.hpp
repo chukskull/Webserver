@@ -44,6 +44,8 @@ public:
 		file_info file;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
+
 		if (request_info.connection != "")
 		{
 			if (request_info.connection == "close")
@@ -64,7 +66,6 @@ public:
 				response.set_status(301, "Moved Permanently");
 				response.location = file.location.__redirect.second;
 			}
-
 			else if (file.file_exists)
 			{
 				if (file.is_readable == false)
@@ -72,7 +73,7 @@ public:
 					std::cout << "the file is not readable\n";
 					response.set_status(403, "Forbidden shit");
 				}
-				if (file.file_dir_readable == false)
+				else if (file.file_dir_readable == false)
 					response.set_status(403, "Forbidden me");
 					
 				else if (file.is_dir)
@@ -131,8 +132,6 @@ public:
 			response.set_status(405, "Method Not Allowed1");
 			// change the content type to maybe html
 		}
-
-		lib.set_error_pages(_server_.__error);
 	}
 private:
 	void read_file(string file_path, HTTP_response &response)
@@ -207,6 +206,8 @@ public:
 			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
+
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
 		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
 		// file = lib.get_requested_file();
@@ -284,7 +285,6 @@ public:
 		}
 		else
 			response.set_status(405, "Method Not Allowed");
-		lib.set_error_pages(_server_.__error);
 	}
 };
 
@@ -297,6 +297,7 @@ public:
 
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
+		lib.set_error_pages(_server_.__error);
 
 		if (file._allowMeth[con_DELETE])
 		{
@@ -333,8 +334,6 @@ public:
 		{
 			response.set_status(405, "Method Not Allowed");
 		}
-
-		lib.set_error_pages(_server_.__error);
 	}
 
 };
@@ -383,7 +382,6 @@ class handler
 				// req.response.set_status(400, "Bad Request it is not for this server");
 			// }
 			fill_response(req, msg.response);
-			// std::cout << "response: " << msg.response << std::endl;
 			// 	handle_delete();
 		}
 
@@ -416,10 +414,8 @@ class handler
 		res.append(CRLF);
 
 		set_cookies(req.request_info, req.response);
-		if (req.response.body.empty() && req.response.status_code >= 400)
+		if (req.response.body.empty())
 			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
-		else if (req.response.body.empty() && req.response.status_code < 400)
-			req.response.body = lib.generate_success_page(req.response.status_code, req.response.status_text);
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 

@@ -262,7 +262,7 @@ public:
 						return -1;
 
 				}
-				if(my_client.response.size() == 0)
+				if(my_client.response.size() == 0 || s == 0)
 				{
 					my_client.clear();
 					usleep(1000);
@@ -355,13 +355,13 @@ public:
 							
 							if (MyClienT._done)
 							{
-								Mesage  *mesg = new Mesage();
-								mesg->message = MyClienT.get_buffer();
+								Mesage  mesg;
+								mesg.message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
-								mesg->_connections = std::make_pair(ClienTsoCKet, server_infos);
-								std::cout << "got request from client " << std::endl;
-								handl_request.handle(*mesg);
-								MyClienT.response.swap(mesg->response);
+								mesg._connections = std::make_pair(ClienTsoCKet, server_infos);
+								handl_request.handle(mesg);
+								MyClienT.response.swap(mesg.response);
+								// delete mesg;
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}

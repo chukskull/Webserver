@@ -34,13 +34,7 @@ class Client {
 		void	clear()
 		{
 			this->is_it_chunked_ = false;
-			// if (_buffer != NULL)
-			// {
-			// 	delete _buffer;
-			// 	_buffer = new std::stringstream();
-			// }
-			// else
-			// 	_buffer = new std::stringstream();
+			delete _buffer;
 			this->_size = 0;
 			this->current_size = 0;
 			this->_done = false;
@@ -62,7 +56,6 @@ class Client {
 		}
 
 		~Client(){
-			// delete _buffer;
 		};
 		std::stringstream			*_buffer;
 		int							server_file;
