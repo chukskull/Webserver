@@ -44,7 +44,7 @@ public:
 						break ;
                     chunk_size_str.clear();
                     read_chunk_size = false;
-					i++;//skip n hh
+					i++;//skip n 
                 }
                 else
                     chunk_size_str += _body[i];
@@ -63,11 +63,11 @@ public:
 
 	static bool    handle_chunked(Client &my_client, size_t body_size)
 	{
-		bool	error;
+		bool						error;
 		handler						body;
-		_string	temp(my_client.get_buffer());
-		size_t	test_temp;
-		bool		done = false;
+		_string						temp(my_client.get_buffer());
+		size_t						test_temp;
+		bool						done = false;
 
 		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
 		{
@@ -89,40 +89,39 @@ public:
 
 	static int	receiving(int fd, Client &_my_client)
 	{
-			std::string	sure;
-			char buff[BUFFER_SIZE];
-			bzero(buff, BUFFER_SIZE);
+		char buff[BUFFER_SIZE];
+		bzero(buff, BUFFER_SIZE);
 
-			_gl_recv_return = read(fd, buff, BUFFER_SIZE);
-			if(_gl_recv_return > 0)
+		_gl_recv_return = read(fd, buff, BUFFER_SIZE);
+		if(_gl_recv_return > 0)
+		{
+			time(&_my_client.lastActiveTime);
+			(*_my_client._buffer).write(buff, _gl_recv_return);
+			_my_client.current_size += _gl_recv_return;
+			if(_my_client._header_done)
+				return 0;
+			_string				line;
+			std::istringstream	obj(buff);
+			while (getline(obj, line))
 			{
-				time(&_my_client.lastActiveTime);
-				(*_my_client._buffer).write(buff, _gl_recv_return);
-				_my_client.current_size += _gl_recv_return;
-				if(_my_client._header_done)
-					return 0;
-				_string	line;
-				std::istringstream	obj(buff);
-				while (getline(obj, line))
+				size_t j = 0;
+				line += "\n";
+				_my_client.header_size += line.size();
+				if((j = line.find("\r\n")) != _string::npos)
 				{
-					size_t j = 0;
-					line += "\n";
-					_my_client.header_size += line.size();
-					if((j = line.find("\r\n")) != _string::npos)
+					if (j == 0)
 					{
-						if (j == 0)
-						{
-							_my_client._header_done = true;
-							return 1;
-						}
+						_my_client._header_done = true;
+						return 1;
 					}
 				}
+			}
 		}
 		return 0;
 	}
 	static int pars_request(Client &_my_client)
 	{
-		size_t							index = 0;
+		size_t						index = 0;
 		std::string					header_check;
 		_string						str;
 		size_t						endindex;
@@ -187,10 +186,10 @@ public:
 				if (check_for_bind(check_bind, data[i].__host, data[i].__port[j]))
 				{
 					int server_fd;
-					print_error << data[i].__port[j].c_str() << std::endl;
-					if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0) {
+
+					// print_error << data[i].__port[j].c_str() << std::endl;
+					if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0)
 						throw std::string("error in getaddrinfo");
-					}
 					for (point = ai; point != NULL; point = point->ai_next)
 					{
 						server_fd = socket(point->ai_family, point->ai_socktype, point->ai_protocol);
@@ -215,7 +214,7 @@ public:
 					}
 					freeaddrinfo(ai);
 					if (point == NULL)
-							throw std::string("there's no ip available in this host");
+						throw std::string("there's no ip available in this host");
 					if (listen(server_fd, SOMAXCONN) == -1)
 						throw std::string("problem with listen");
 					else
@@ -239,38 +238,40 @@ public:
 		std::map<int, std::pair<int, int> >::iterator	it = servers.find(srvr);
 		return it->second;
 	}
+
 	static	int	send_response(Client &my_client, int fd)
 	{
-			ssize_t		s;
-			if (my_client.response.size())
-			{
-				if (my_client.response.size() > BUFFER_SEND)
-				{
-					s = send(fd ,my_client.response.c_str(), BUFFER_SEND, 0);
-					
-					if (s < 0)
-						return -1;
-					if (s > 0)
-						my_client.response.erase(0, BUFFER_SEND);
-				}
-				else
-				{
-					s = send(fd, my_client.response.c_str(), my_client.response.size(), 0);
-					if (s > 0)
-						my_client.response.clear();
-					else
-						return -1;
+		ssize_t		s;
 
-				}
-				if(my_client.response.size() == 0)
-				{
-					my_client.clear();
-					usleep(200);
-					close(fd);
-					return 2;
-				}
+		if (my_client.response.size())
+		{
+			if (my_client.response.size() > BUFFER_SEND)
+			{
+				s = send(fd ,my_client.response.c_str(), BUFFER_SEND, 0);
+				
+				if (s < 0)
+					return -1;
+				if (s > 0)
+					my_client.response.erase(0, BUFFER_SEND);
 			}
-			return 0;		
+			else
+			{
+				s = send(fd, my_client.response.c_str(), my_client.response.size(), 0);
+				if (s > 0)
+					my_client.response.clear();
+				else
+					return -1;
+
+			}
+			if(my_client.response.size() == 0 || s == 0)
+			{
+				my_client.clear();
+				usleep(200);
+				close(fd);
+				return 2;
+			}
+		}
+		return 0;
 	}
 
    static void run(std::vector<DataConf> &__vec_data)
@@ -283,7 +284,7 @@ public:
 		{
 			ser.initial_server(__vec_data);
 		}
-		catch(const std::string e)
+		catch(const std::string &e)
 		{
 			std::cerr << e << '\n';
 			exit(1);
@@ -296,6 +297,7 @@ public:
 				perror("poll() failed");
 				break ;
 			}
+
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
 			{
 				if (ser.fd_s[i].revents & POLLIN)
@@ -347,28 +349,27 @@ public:
 							if(static_cast<size_t>(MyClienT._size) > ser._containers[server_infos.first].__body_size)
 							{
 								handl_request.manage_server_errors(413, MyClienT.response);
-								// MyClienT.time_ = true;
 								ser.fd_s[i].events = POLLOUT;
 							}
-							
+
 							if (MyClienT._done)
 							{
-								Mesage  mesg;
+								Mesage		mesg;
+
 								mesg.message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
 								mesg._connections = std::make_pair(ClienTsoCKet, server_infos);
-								std::cout << "got request from client " << std::endl;
 								handl_request.handle(mesg);
 								MyClienT.response.swap(mesg.response);
 								ser.fd_s[i].events = POLLOUT;
 							}
 						}
 						int sender_fd = ClienTsoCKet;
+
 						if (_gl_recv_return <= 0)
 						{
 							if (_gl_recv_return == 0)
 							{
-								std::cerr << "this client hung up " << sender_fd<< std::endl;
 								close(ClienTsoCKet);
 								MyClienT.clear();
 								ser.fd_s[i] = ser.fd_s.back();
@@ -401,10 +402,10 @@ public:
 				{
 					time_t currentTime;
         			time(&currentTime);
+
         	        if (currentTime - MyClienT.lastActiveTime > 10 && ser.server_fds.find(ClienTsoCKet) == ser.server_fds.end())
         	        {
 						handl_request.manage_server_errors(408, MyClienT.response);
-						MyClienT.time_ = true;
 						ser.fd_s[i].events = POLLOUT;
         	        }
 				}
@@ -415,7 +416,6 @@ public:
 		int										rcv;
 		int										on;
 		int										rc;
-		int										nfds;
 		int										current_size;
 		struct	addrinfo						hints, *ai, *point;
 		struct	sockaddr_storage				remoteaddr;
@@ -424,6 +424,6 @@ public:
 		std::vector<DataConf>					_containers;
 		std::map<int, Client >					_connections;
 };
-							   
+
 
 #endif

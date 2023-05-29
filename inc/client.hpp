@@ -17,19 +17,9 @@ class Client {
 			this->_header_done = false;
 			this->header_size = 0;
 			this->lastActiveTime = -1;
-			this->time_ = false;
 			time(&lastActiveTime);
 			
 		}
-		Client()
-		{
-			// this->is_it_chunked_ = 0;
-			// _buffer = new std::stringstream();
-			// this->_size = 0;
-			// this->_done = false;
-			// this->_header_done = false;
-		}
-
 		void	clear()
 		{
 			this->is_it_chunked_ = false;
@@ -67,7 +57,6 @@ class Client {
 		bool  						_header_done;
 		_string						response;
 		time_t 						lastActiveTime;
-		bool						time_;
 };
 
 
