@@ -357,7 +357,7 @@ public:
 								mesg.message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
 								mesg._connections = std::make_pair(ClienTsoCKet, server_infos);
-								std::cout << "got request from client " << std::endl;
+								std::cout << "got request from client " << std::endl;z
 								handl_request.handle(mesg);
 								MyClienT.response.swap(mesg.response);
 								ser.fd_s[i].events = POLLOUT;
