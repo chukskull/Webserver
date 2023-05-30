@@ -31,16 +31,9 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 		info._allowMeth = loc._AllowMeth;
 		info.requested_path = request_info.requested_file;
 		if (loc.__path == request_info.requested_file && loc._autoindex == false && request_info.method == GET)
-		{
-			// std::cout << "file-:" << loc.__file << "-" << std::endl;
-			// std::cout << ":p:" << request_info.requested_file << std::endl;
-			// std::cout << ":p:" << request_info.requested_file.substr(loc.__path.length()) << std::endl;
 			info.file_path = loc.__root + request_info.requested_file.substr(loc.__path.length()) + loc.__file;
-		}
 		else
-		{
 			info.file_path = loc.__root + request_info.requested_file.substr(loc.__path.length());
-		}
 
 		info.content_type = get_exten(info.file_path);
 
@@ -57,7 +50,6 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 				if (file_is_writable(dir))
 					info.file_dir_writable = true;
 			}
-			// check if the file exists
 			if (file_exist(info.file_path))
 			{
 				if (file_is_readable(info.file_path))
@@ -66,7 +58,6 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 					info.is_writable = true;
 				info.file_exists = true;
 				info._allowMeth = loc._AllowMeth;
-				// check if it is a directory
 				if (is_dir(info.file_path))
 				{
 					info.is_dir = true;
@@ -79,8 +70,6 @@ file_info servers_library::get_requested_file(HTTP_request &request_info, DataCo
 				}
 			}
 		}
-		// if (loc.__path[loc.__path.length() - 1] == '/')
-			// loc.__path.push_back('/');
 	}
 	return info;
 }
@@ -213,29 +202,25 @@ void servers_library::create_status_map() {
 }
 
 void servers_library::set_error_pages(const std::map<int, std::string>& error_pages) {
-	html_error_pages.clear(); // Clear existing error pages
+	html_error_pages.clear();
 	
-	// Iterate over the error_pages map
-	// std::cout << "Setting error pages..." << std::endl;
 	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
 	{
-		// std::cout << "Setting error page for status code " << it->first << " file paht: " << it->second << "..." << std::endl;
 		short status_code = it->first;
 		const std::string& file_name = it->second;
 
 		std::ifstream file(file_name.c_str());
-		// std::cout << "file name: " << file_name << std::endl;
 		if (file.is_open()) {
 			std::stringstream buffer;
 			buffer << file.rdbuf();
 			std::string file_content = buffer.str();
 
-			std::cout << "status code: " << status_code << std::endl;
 			html_error_pages[status_code] = file_content;
 
 			file.close();
-		} else {
-			// std::cout << "Error: could not open file " << file_name << std::endl;
+		}
+		else
+		{
 			if (status.find(status_code) != status.end())
 				html_error_pages[status_code] = generate_error_page(status_code, status.find(status_code)->second);
 			else

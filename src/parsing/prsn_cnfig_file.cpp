@@ -19,7 +19,6 @@ int parsing_config_file(_string file, _server_config &servers)
 	input_file.open(file);
 	if(!input_file.is_open())
 		return -1;
-	// _server_config  servers;
 	while (std::getline(input_file, line))
 	{
 		size_t j = 0;
@@ -33,7 +32,6 @@ int parsing_config_file(_string file, _server_config &servers)
 			while(std::getline(input_file, line))
 			{
 				bool			check = false;
-				// std::cerr << line << " " << std::endl;
 				if(line.find("}") != std::string::npos)
 					break ;
 				if ((j = line.find("listen")) != _string::npos && catch_elem(line, j))
@@ -134,7 +132,6 @@ int parsing_config_file(_string file, _server_config &servers)
 						{
 							line = erase_some_charc(line);
 							// print_error << line << std::endl;
-							
 							if (line.compare("[") != 0 && line.size() != 0)
 							{
 								print_error << "error configfile" << std::endl;

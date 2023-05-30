@@ -15,15 +15,12 @@ void print_meth(MethAllow meth)
 
 void print_locations(ReqLoc &vec)
 {
-	// std::cout << "locs== \n";
-	// for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
-	// {
+
 	std::cout << "loc== ";
 	std::cout << "file: " << vec.__file;
 	std::cout << " path: " << vec.__path;
 	std::cout << " root: " << vec.__root << std::endl;
 	print_meth(vec._AllowMeth);
-	// }
 }
 
 void print_file(file_info &file)
@@ -46,19 +43,6 @@ public:
 		file = lib.get_requested_file(request_info, _server_);
 		lib.set_error_pages(_server_.__error);
 
-		if (request_info.connection != "")
-		{
-			if (request_info.connection == "close")
-			{
-				response.connection = CLOSE_CONNECTION;
-				response.connection = "close";
-			}
-			else
-			{
-				response.connection = KEEP_ALIVE;
-				response.connection = "Keep-alive";
-			}
-		}
 		if (file._allowMeth[con_GET])
 		{
 			if (file.is_redirect)
@@ -69,13 +53,9 @@ public:
 			else if (file.file_exists)
 			{
 				if (file.is_readable == false)
-				{
-					std::cout << "the file is not readable\n";
-					response.set_status(403, "Forbidden shit");
-				}
+					response.set_status(403, "Forbidden");
 				else if (file.file_dir_readable == false)
-					response.set_status(403, "Forbidden me");
-					
+					response.set_status(403, "Forbidden");
 				else if (file.is_dir)
 				{
 					if (file.is_autoindex)
@@ -83,31 +63,19 @@ public:
 						generate_autoindex(file, response);
 						response.set_status(200, "OK");
 					}
-
 					else
-					{
-						response.set_status(403, "Forbidden me");
-					}
+						response.set_status(403, "Forbidden");
 				}
 				else if (file.is_file)
 				{
 					response.set_status(200, "OK");
-					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
+						create_env_(request_info, _server_, file);
 						try
 						{
 							request_info.env_c = new char*[request_info.env_v.size() + 1];
-						}
-						catch(const std::exception& e)
-						{
-							response.set_status(500, "internal error");
-							return ;
-						}
-						request_info.env_c = new char*[request_info.env_v.size() + 1];
-						env_v_to_c(request_info.env_c, request_info.env_v);
-						// print_env(request_info.env_c, request_info.env_v.size());
-
+							env_v_to_c(request_info.env_c, request_info.env_v);
 							_cgi_info cgi_info;
 							cgi_info.cgi_name = file.file_path;
 							cgi_info.lang_path = file.location.__cgi_path;
@@ -115,11 +83,11 @@ public:
 							cgi(cgi_info , request_info, response);
 
 							free_env(request_info.env_c, request_info.env_v.size());
-						// }
-						// else
-						// {
-							// response.set_status(403, "Forbidden extention for cgi");
-						// }
+						}
+						catch(...)
+						{
+							response.set_status(500, "Internal Server Error");
+						}
 					}
 					else
 					{
@@ -130,15 +98,12 @@ public:
 			}
 			else
 			{
-				response.set_status(404, "File Not Found 444");
+				response.set_status(404, "File Not Found");
 			}
 
 		}
 		else
-		{
-			response.set_status(405, "Method Not Allowed1");
-			// change the content type to maybe html
-		}
+			response.set_status(405, "Method Not Allowed");
 	}
 private:
 	void read_file(string file_path, HTTP_response &response)
@@ -147,56 +112,34 @@ private:
 		string file_content;
 
 		if (file.fail())
-		{
-			response.set_status(500, "file couldn't be opend");
-			response.body += "The server couldn't open the file try agin later.";
-			// return ;
-		}
+			response.set_status(500, "internal server error");
 		else
 		{
 			string buffer;
 			char *buff;
 			size_t max_size = MAX_READ_SIZE;
 
-			// max_size = set_max_size(host) ;
-
 			buff = new char[max_size];
-			// file.seekg(0, std::ios::end);
-   			// size_t file_size = file.tellg();
-			// file.seekg(0, std::ios::beg);
-			// file_content.resize(file_size);
-			// file.read(&file_content[0], file_size);
-
 			buffer.resize(max_size);
 			while (1)
 			{
 				file.read(buff , max_size);
 				try
 				{
-					// std::cout << "gcount: " << file.gcount() << std::endl;
 					file_content.append(buff, file.gcount());
-					// std::cout << "------>" << file_content.length() << std::endl;
 				}
 				catch (...)
 				{
 					response.set_status(503, "Service Unavailable");
-					response.body += "We're sorry, but the server is currently unable to handle your request due to high load. Please try again later.";
+					break;
 				}
-				// if (file_content.size() > max_size)
-				// {
-				// 	response.set_status(413, "Request Entity Too Large");
-				// 	response.body += "The request entity is too large.";
-				// }
 				if (file.eof())
 					break;
 			}
 			file.close();
 			delete [] buff;
-			// response.body.swap(ostrm.str());
 			response.content_length = std::to_string(file_content.length());
-			// std::cout << "===" << response.content_length << std::endl;
 			response.body.swap(file_content);
-			// response.content_type = ;
 		}
 	}
 };
@@ -208,24 +151,18 @@ public:
 	{
 		file_info file;
 
-		// std::cout << "shit\n";
 		if (check_transfer(request_info, response) == false)
 			return ;
 		DataConf _server_ = lib.get_server_index(request_info, msg);
 		file = lib.get_requested_file(request_info, _server_);
 		lib.set_error_pages(_server_.__error);
 
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first);
-		// file = lib.get_requested_file(request_info.requested_file, msg._connections.second.first, request_info.method);
-		// file = lib.get_requested_file();
 		if (file._allowMeth[con_POST])
 		{	
 			if (file.is_redirect)
 			{
                 response.set_status(301, "Moved Permanently");
                 response.location = file.location.__redirect.second;
-				// std::cout << "waa nwaa3\n";
-				// exit(0);
 			}
 			else
 			{
@@ -233,34 +170,34 @@ public:
 				{
 					if (file.location._cgi)
 					{
-						_cgi_info cgi_info;
-						create_env_(request_info, _server_, file);
 						try
 						{
+							_cgi_info cgi_info;
+							create_env_(request_info, _server_, file);
 							request_info.env_c = new char*[request_info.env_v.size() + 1];
-						}
-						catch(const std::exception& e)
-						{
-							response.set_status(500, "internal error");
-							return ;
-						}
-						env_v_to_c(request_info.env_c, request_info.env_v);
+							env_v_to_c(request_info.env_c, request_info.env_v);
+							print_env(request_info.env_c, request_info.env_v.size());
 
-						if (file_extention(file.file_path) == file.location.__cgi_ext)
-						{
-							cgi_info.cgi_name = file.file_path;
-							cgi_info.lang_path = file.location.__cgi_path;
-							cgi_info.cgi_ext = file.location.__cgi_ext ;
-							cgi(cgi_info , request_info, response);
+							if (file_extention(file.file_path) == file.location.__cgi_ext)
+							{
+								cgi_info.cgi_name = file.file_path;
+								cgi_info.lang_path = file.location.__cgi_path;
+								cgi_info.cgi_ext = file.location.__cgi_ext ;
+								cgi(cgi_info , request_info, response);
+							}
+							else
+							{
+								response.set_status(403, "Forbidden extention for cgi");
+							}
+							free_env(request_info.env_c, request_info.env_v.size());
 						}
-						else
+						catch(...)
 						{
-							response.set_status(403, "Forbidden extention for cgi");
+							response.set_status(500, "Internal Server Error");
 						}
-						free_env(request_info.env_c, request_info.env_v.size());
 					}
 					else if (file.is_writable == false || file.file_dir_writable == false)
-						response.set_status(403, "Forbidden not writable");
+						response.set_status(403, "Forbidden");
 
 					else if (request_info.content_type.first == "multipart/form-data")
 					{
@@ -294,7 +231,6 @@ public:
 					}
 					else
 						response.set_status(404, "File Not Found");
-					// std::cout << "well not quite\n";
 				}
 			}
 		}
@@ -355,35 +291,19 @@ public:
 
 class handler
 {
-	//
-	/// if the request is not chunked and the server received -1 then error
-	//
-
 	private:
-		// string str_request;
 		__GET GET_;
 		__POST POST_;
 		__DELETE DELETE_;
 	public:
 
 		handler() {}
-		// handler(string re) : req(re){}
-		// void handle(string re, string &res)
 		void handle(Mesage &msg)
 		{
-			// request req(msg.message);
-
 			request req;
 
 			if (req.parse(msg.message) == 0)
 			{
-			// req.request_checkpoint();
-			// std::cout << "host:" << req.request_info.host << std::endl;
-			// print("host:" + req.request_info.host);
-			// std::cout << "i got to handle\n";
-			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
-			// {
-				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
@@ -391,13 +311,7 @@ class handler
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
 			}
-			// }
-			// else
-			// {
-				// req.response.set_status(400, "Bad Request it is not for this server");
-			// }
 			fill_response(req, msg.response);
-			// 	handle_delete();
 		}
 
 		void manage_server_errors(short status_code, string &response, string status_text = "")
@@ -406,7 +320,6 @@ class handler
 
 			if (status_text == "")
 				status_text = lib.get_status_text(status_code);
-
 			error_page = lib.get_error_page(status_code, status_text);
 			response.append("HTTP/1.1 ");
 			response.append(std::to_string(status_code) + " ");
@@ -430,18 +343,20 @@ class handler
 
 		set_cookies(req.request_info, req.response);
 		if (req.response.body.empty())
-			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		{
+			if (req.response.status_code < 400)
+				req.response.body = lib.generate_success_page(req.response.status_code, req.response.status_text);
+			else if (req.response.status_code >= 400)
+				req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		}
 		if (req.response.content_length != "")
-		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
+		{ res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
 		if (req.response.content_type != "")
 		{ res.append("Content-Type: "); res.append(req.response.content_type); res.append(CRLF);}
 		
 		if (req.response.location != "")
 		{ res.append("Location: "); res.append(req.response.location); res.append(CRLF);}
-		
-		if (req.response.connection == "meeeeem")
-		{ res.append("connection: "); res.append(req.response.connection); res.append(CRLF);}
 
 		if (req.response.cookies != "")
 		{ res.append(req.response.cookies); res.append(CRLF);}

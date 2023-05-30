@@ -21,8 +21,6 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 	FILE *fp = tmpfile();
 	int fd = fileno(fp);
 	pid_t pid = fork();
-	std::cout << "*****\n";
-	print_env(request_info.env_c, request_info.env_v.size());
 	if (pid == -1)
 	{
 		std::cerr << "cgi error\n";

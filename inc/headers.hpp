@@ -46,10 +46,10 @@ typedef std::vector<ServerCongif> _server_config;
 #include "ServerCongif.hpp"
 #include "client.hpp"
 
-#define	MAX_FD 200
-#define PORT 8080
+#define	MAX_FD      200
+#define PORT        8080
 #define BUFFER_SIZE 2024
-#define BUFFER_SEND 1200
+#define BUFFER_SEND 4028
 #include "mesage.hpp"
 #include "parsing.hpp"
 
