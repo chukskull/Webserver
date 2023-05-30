@@ -18,11 +18,11 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 	const char* lang_path = cgi_info.lang_path.c_str();
 	const char* cgi_name = cgi_info.cgi_name.c_str();
 	char *av[] = {(char *) lang_path, (char *) cgi_name, nullptr};
+	std::cout << "lang_paht > "<< lang_path << std::endl;
+	std::cout << "cgi name > "<< cgi_name << std::endl;
 	FILE *fp = tmpfile();
 	int fd = fileno(fp);
 	pid_t pid = fork();
-	std::cout << "*****\n";
-	print_env(request_info.env_c, request_info.env_v.size());
 	if (pid == -1)
 	{
 		std::cerr << "cgi error\n";

@@ -681,11 +681,13 @@ void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file
 	add_to_env("SCRIPT_NAME", file.file_path, request_info);
 	if (request_info.method == GET)
 		add_to_env("QUERY_STRING", request_info.query_string, request_info);
-	else
-		add_to_env("QUERY_STRING", request_info.body, request_info);
+	else if (request_info.method == POST)
+		add_to_env("QUERY_STRING", request_info.body.erase(request_info.body.size() - 1, 1), request_info);
 
 	if (request_info.content_length != -1)
 		add_to_env("CONTENT_LENGTH", std::to_string(request_info.content_length), request_info);
+	else 
+		add_to_env("CONTENT_LENGTH", std::to_string(0), request_info);
 	if (request_info.content_type.first != "")
 		add_to_env("CONTENT_TYPE", request_info.content_type.first, request_info);
 }
