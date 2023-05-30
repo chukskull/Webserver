@@ -137,44 +137,46 @@ vector<std::string> read_dir(const std::string& dir_path)
 	return filenames;
 }
 
-void generate_autoindex(file_info file, HTTP_response &response)
+void generate_autoindex(file_info file, HTTP_response& response)
 {
-	// you may file.file_path to file.requested_path
+    string html = "<html><head><title>Index of " + file.file_path + "</title>";
+    html += "<style>";
+    html += "body { font-family: Arial, sans-serif; background-color: #f1f1f1; padding: 20px; }";
+    html += ".container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }";
+    html += "h1 { color: #333; text-align: center; }";
+    html += "ul { list-style-type: none; padding: 0; margin: 0; }";
+    html += "li { margin-bottom: 10px; }";
+    html += ".button { display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px; }";
+    html += ".button:hover { background-color: #0056b3; }";
+    html += "</style>";
+    html += "</head><body>";
+    html += "<div class=\"container\">";
+    html += "<h1>Index of " + file.file_path + "</h1><hr>";
+    html += "<ul>";
 
-	string html = "<html><head><title>Index of " + file.file_path + "</title></head><body><h1>Index of " + file.file_path + "</h1><hr><pre><a href=\"../\">../</a>";
-	vector<std::string> dir_content = read_dir(file.file_path);
-	for (size_t i = 0; i < dir_content.size(); i++)
-	{
-		// std::cout << "++++++>" << file.file_path << "\n";
-		// std::cout << "------>" << dir_content[i] << "\n";
-		// std::cout << "========= " << i << '\n';
-		if (dir_content[i] == "." || dir_content[i] == "..")
-			continue;
-		// std::cout << "==================================================================\n";
-		// std::cout << "file path: " << file.file_path << std::endl;
-		// std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
-		// std::cout << "location a: " << file.location.__path.substr(0, file.location.__path.length()) << std::endl;
-		// std::cout << "location n: " << file.location.__path << std::endl;
-		// std::cout << "==================================================================\n";
-		// find a better way to do this
-		html += "<a href=\"" + file.location.__path ;
-		// std::cout << "file path: " << file.file_path << std::endl;
-		// std::cout << "file root: " << file.location.__root << std::endl;
-		// std::cout << "file loct: " << file.file_path.substr(file.location.__root.length()) << std::endl;
-		// std::cout << "dir content: " << dir_content[i] << std::endl;
-		if (file.file_path.substr(file.location.__root.length()) != "")
-			html += file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
-		else
-			html += "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
-		// html += "<a href=\"" + file.location.__path.substr(0, file.location.__path.length()) + file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a>" + "<br>";
-	}
-	html += "</pre><hr></body></html>";
-	// MIME type
-	// std::cout << "body::" << response.body << std::endl;
-	response.body += html;
-	response.content_type = "text/html";
-	response.content_length = std::to_string(html.length());
+    vector<string> dir_content = read_dir(file.file_path);
+    for (size_t i = 0; i < dir_content.size(); i++)
+    {
+        if (dir_content[i] == "." || dir_content[i] == "..")
+            continue;
+
+        html += "<li><a href=\"" + file.location.__path;
+        if (file.file_path.substr(file.location.__root.length()) != "")
+            html += file.file_path.substr(file.location.__root.length()) + "/" + dir_content[i] + "\">" + dir_content[i] + "</a></li>";
+        else
+            html += "/" + dir_content[i] + "\">" + dir_content[i] + "</a></li>";
+    }
+
+    html += "</ul><hr>";
+    html += "<a href=\"/\" class=\"button\">Go Back</a>";
+    html += "</div></body></html>";
+
+    response.body += html;
+    response.content_type = "text/html";
+    response.content_length = std::to_string(html.length());
 }
+
+
 
 void fill_content_type(HTTP_request &req, string &content_type)
 {

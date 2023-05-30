@@ -95,15 +95,8 @@ public:
 					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
-						try
-						{
-							request_info.env_c = new char*[request_info.env_v.size() + 1];
-						}
-						catch(const std::exception& e)
-						{
-							response.set_status(500, "internal error");
-							return ;
-						}
+						create_env_(request_info, _server_, file);
+
 						request_info.env_c = new char*[request_info.env_v.size() + 1];
 						env_v_to_c(request_info.env_c, request_info.env_v);
 						// print_env(request_info.env_c, request_info.env_v.size());
@@ -235,16 +228,9 @@ public:
 					{
 						_cgi_info cgi_info;
 						create_env_(request_info, _server_, file);
-						try
-						{
-							request_info.env_c = new char*[request_info.env_v.size() + 1];
-						}
-						catch(const std::exception& e)
-						{
-							response.set_status(500, "internal error");
-							return ;
-						}
+						request_info.env_c = new char*[request_info.env_v.size() + 1];
 						env_v_to_c(request_info.env_c, request_info.env_v);
+						print_env(request_info.env_c, request_info.env_v.size());
 
 						if (file_extention(file.file_path) == file.location.__cgi_ext)
 						{
@@ -377,13 +363,6 @@ class handler
 
 			if (req.parse(msg.message) == 0)
 			{
-			// req.request_checkpoint();
-			// std::cout << "host:" << req.request_info.host << std::endl;
-			// print("host:" + req.request_info.host);
-			// std::cout << "i got to handle\n";
-			// if (req.request_info.host == lib._servers[msg._connections.second.first].__name + ":" + lib._servers[msg._connections.second.first].__port[msg._connections.second.second])
-			// {
-				// std::cout << "i got to handle inside\n";
 				if (req.request_info.method == GET)
 					GET_.handle(req.request_info, req.response, msg);
 				else if (req.request_info.method == POST)
@@ -391,13 +370,7 @@ class handler
 				else if (req.request_info.method == DELETE)
 					DELETE_.handle(req.request_info, req.response, msg);
 			}
-			// }
-			// else
-			// {
-				// req.response.set_status(400, "Bad Request it is not for this server");
-			// }
 			fill_response(req, msg.response);
-			// 	handle_delete();
 		}
 
 		void manage_server_errors(short status_code, string &response, string status_text = "")
@@ -406,7 +379,6 @@ class handler
 
 			if (status_text == "")
 				status_text = lib.get_status_text(status_code);
-
 			error_page = lib.get_error_page(status_code, status_text);
 			response.append("HTTP/1.1 ");
 			response.append(std::to_string(status_code) + " ");
@@ -430,7 +402,12 @@ class handler
 
 		set_cookies(req.request_info, req.response);
 		if (req.response.body.empty())
-			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		{
+			if (req.response.status_code < 400)
+				req.response.body = lib.generate_success_page(req.response.status_code, req.response.status_text);
+			else if (req.response.status_code >= 400)
+				req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		}
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
