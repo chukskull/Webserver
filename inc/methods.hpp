@@ -378,7 +378,6 @@ class handler
 
 			if (status_text == "")
 				status_text = lib.get_status_text(status_code);
-
 			error_page = lib.get_error_page(status_code, status_text);
 			response.append("HTTP/1.1 ");
 			response.append(std::to_string(status_code) + " ");
@@ -402,7 +401,12 @@ class handler
 
 		set_cookies(req.request_info, req.response);
 		if (req.response.body.empty())
-			req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		{
+			if (req.response.status_code < 400)
+				req.response.body = lib.generate_success_page(req.response.status_code, req.response.status_text);
+			else if (req.response.status_code >= 400)
+				req.response.body = lib.get_error_page(req.response.status_code, req.response.status_text);
+		}
 		if (req.response.content_length != "")
 		{std::cout << "got to content length\n"<< std::endl; res.append("Contnet-Length: "); res.append(req.response.content_length); res.append(CRLF);}
 
