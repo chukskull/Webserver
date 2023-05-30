@@ -95,8 +95,15 @@ public:
 					std::cout << "run cgi\n";
 					if (file.location._cgi && (file_extention(file.file_path) == file.location.__cgi_ext))
 					{
-						create_env_(request_info, _server_, file);
-
+						try
+						{
+							request_info.env_c = new char*[request_info.env_v.size() + 1];
+						}
+						catch(const std::exception& e)
+						{
+							response.set_status(500, "internal error");
+							return ;
+						}
 						request_info.env_c = new char*[request_info.env_v.size() + 1];
 						env_v_to_c(request_info.env_c, request_info.env_v);
 						// print_env(request_info.env_c, request_info.env_v.size());
@@ -228,7 +235,15 @@ public:
 					{
 						_cgi_info cgi_info;
 						create_env_(request_info, _server_, file);
-						request_info.env_c = new char*[request_info.env_v.size() + 1];
+						try
+						{
+							request_info.env_c = new char*[request_info.env_v.size() + 1];
+						}
+						catch(const std::exception& e)
+						{
+							response.set_status(500, "internal error");
+							return ;
+						}
 						env_v_to_c(request_info.env_c, request_info.env_v);
 
 						if (file_extention(file.file_path) == file.location.__cgi_ext)

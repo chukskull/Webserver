@@ -15,28 +15,19 @@ void handleTimeout(int signum)
 
 int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response)
 {
-	// time out 
-	//std::cout << "'" << request_info.body << "'\n";
 	const char* lang_path = cgi_info.lang_path.c_str();
 	const char* cgi_name = cgi_info.cgi_name.c_str();
-	std::string subtracted_body;
-	if (request_info.method == GET)
-		subtracted_body = request_info.query_string;
-	else
-	{
-		subtracted_body = request_info.body;
-		subtracted_body.erase(subtracted_body.size() - 1, 1);
-	}
-	//subtracted_body.erase(0, 5);
-	const char* body = subtracted_body.c_str();
-	char *av[] = {(char *) lang_path, (char *) cgi_name, (char *) body, nullptr};
+	char *av[] = {(char *) lang_path, (char *) cgi_name, nullptr};
 	FILE *fp = tmpfile();
 	int fd = fileno(fp);
 	pid_t pid = fork();
+	std::cout << "*****\n";
+	print_env(request_info.env_c, request_info.env_v.size());
 	if (pid == -1)
 	{
 		std::cerr << "cgi error\n";
-		exit(500);
+		response.set_status(500, "internal error");
+
 	}
 	if (pid == 0)
 	{
@@ -51,7 +42,7 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 			std::cerr << "dup error\n";
 			exit(500);
 		}
-		execve(lang_path, av, NULL);
+		execve(lang_path, av, request_info.env_c);
 		perror("execve"); // Print error message
 		close(fd);
 		exit(500);
@@ -67,7 +58,7 @@ int cgi(_cgi_info cgi_info , HTTP_request &request_info, HTTP_response &response
 	{
 		response.body = "script took too long to execute.";
 		response.content_length = response.body.size();
-		response.set_status(200, "OK");
+		response.set_status(504, "Gateway Timeout");
 		response.content_type = "text/html";
 		return 1;
 	}
