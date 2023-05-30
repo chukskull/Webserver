@@ -230,6 +230,7 @@ public:
 						create_env_(request_info, _server_, file);
 						request_info.env_c = new char*[request_info.env_v.size() + 1];
 						env_v_to_c(request_info.env_c, request_info.env_v);
+						print_env(request_info.env_c, request_info.env_v.size());
 
 						if (file_extention(file.file_path) == file.location.__cgi_ext)
 						{
