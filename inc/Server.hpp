@@ -1,73 +1,75 @@
 #ifndef SERVER_HPP
-# define SERVER_HPP
+#define SERVER_HPP
 
 #include "headers.hpp"
 #include "methods.hpp"
 #include <map>
 #include <set>
 
-#define	ClienTsoCKet 	ser.fd_s[i].fd
-#define MyClienT 		ser._connections[ClienTsoCKet]
+#define ClienTsoCKet ser.fd_s[i].fd
+#define MyClienT ser._connections[ClienTsoCKet]
 
-int 	_gl_recv_return;
+int _gl_recv_return;
 
-class Server {
-	
+class Server
+{
+
 public:
-	Server(std::vector<DataConf> &data):_containers(data) {
+	Server(std::vector<DataConf> &data) : _containers(data)
+	{
 	}
 
-	static bool		decoding_chunked(Client &my_client, _string	&temp, size_t body_size)
+	static bool decoding_chunked(Client &my_client, _string &temp, size_t body_size)
 	{
-		std::string 		chunk_size_str;
-		std::stringstream 	_clean_body;
-    	int chunk_size = 0;
-    	bool read_chunk_size = true;
-		_string	_header = temp.substr(0, my_client.header_size);
+		std::string chunk_size_str;
+		std::stringstream _clean_body;
+		int chunk_size = 0;
+		bool read_chunk_size = true;
+		_string _header = temp.substr(0, my_client.header_size);
 		_string _body = temp.substr(my_client.header_size);
 		(*my_client._buffer).str("");
 		(*my_client._buffer).clear();
 
 		size_t n = _body.size();
 		for (size_t i = 0; i < n; i++)
-        {
-            if (read_chunk_size)
-            {
-                if (_body[i] == '\r' && _body[i + 1] == '\n')
-                {
+		{
+			if (read_chunk_size)
+			{
+				if (_body[i] == '\r' && _body[i + 1] == '\n')
+				{
 					if (chunk_size_str.size() == 0)
 						continue;
 					chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
 					if (chunk_size > static_cast<int>(body_size))
 						return false;
 					if (chunk_size_str == "0\r\n\r\n")
-						break ;
-                    chunk_size_str.clear();
-                    read_chunk_size = false;
-					i++;//skip n 
-                }
-                else
-                    chunk_size_str += _body[i];
-            }
-            else
-            {
-                _clean_body.write(&_body[i], chunk_size);
-                read_chunk_size = true;
-                i += chunk_size;
+						break;
+					chunk_size_str.clear();
+					read_chunk_size = false;
+					i++; // skip n
+				}
+				else
+					chunk_size_str += _body[i];
+			}
+			else
+			{
+				_clean_body.write(&_body[i], chunk_size);
+				read_chunk_size = true;
+				i += chunk_size;
 				i--;
-            }
+			}
 		}
 		(*my_client._buffer).write((_header + _clean_body.str()).c_str(), (_header + _clean_body.str()).size());
 		return 1;
 	}
 
-	static bool    handle_chunked(Client &my_client, size_t body_size)
+	static bool handle_chunked(Client &my_client, size_t body_size)
 	{
-		bool						error;
-		handler						body;
-		_string						temp(my_client.get_buffer());
-		size_t						test_temp;
-		bool						done = false;
+		bool error;
+		handler body;
+		_string temp(my_client.get_buffer());
+		size_t test_temp;
+		bool done = false;
 
 		if ((test_temp = temp.find("0\r\n\r\n")) != _string::npos)
 		{
@@ -87,27 +89,27 @@ public:
 		return true;
 	}
 
-	static int	receiving(int fd, Client &_my_client)
+	static int receiving(int fd, Client &_my_client)
 	{
 		char buff[BUFFER_SIZE];
 		bzero(buff, BUFFER_SIZE);
 
 		_gl_recv_return = read(fd, buff, BUFFER_SIZE);
-		if(_gl_recv_return > 0)
+		if (_gl_recv_return > 0)
 		{
 			time(&_my_client.lastActiveTime);
 			(*_my_client._buffer).write(buff, _gl_recv_return);
 			_my_client.current_size += _gl_recv_return;
-			if(_my_client._header_done)
+			if (_my_client._header_done)
 				return 0;
-			_string				line;
-			std::istringstream	obj(buff);
+			_string line;
+			std::istringstream obj(buff);
 			while (getline(obj, line))
 			{
 				size_t j = 0;
 				line += "\n";
 				_my_client.header_size += line.size();
-				if((j = line.find("\r\n")) != _string::npos)
+				if ((j = line.find("\r\n")) != _string::npos)
 				{
 					if (j == 0)
 					{
@@ -121,17 +123,17 @@ public:
 	}
 	static int pars_request(Client &_my_client)
 	{
-		size_t						index = 0;
-		std::string					header_check;
-		_string						str;
-		size_t						endindex;
-		handler						header;
+		size_t index = 0;
+		std::string header_check;
+		_string str;
+		size_t endindex;
+		handler header;
 
-		header_check  = _my_client._buffer->str();
+		header_check = _my_client._buffer->str();
 		if ((index = header_check.find("Content-Length: ")) != _string::npos)
 		{
 			index += 16;
-			endindex= header_check.find("\r\n", index);
+			endindex = header_check.find("\r\n", index);
 			str = header_check.substr(index, endindex - index);
 			_my_client._size = atoi(str.c_str());
 		}
@@ -140,10 +142,10 @@ public:
 			index += 19;
 			endindex = header_check.find("\r\n", index);
 			str = header_check.substr(index, endindex - index);
-			if(str == "chunked")
+			if (str == "chunked")
 			{
 				_my_client._done = false;
-				_my_client.is_it_chunked_= true;
+				_my_client.is_it_chunked_ = true;
 			}
 			else
 				_my_client._done = true;
@@ -161,9 +163,9 @@ public:
 		return 0;
 	}
 
-	bool	check_for_bind(vector<std::pair<string, string> > &check_bind, string host, string port)
+	bool check_for_bind(vector<std::pair<string, string> > &check_bind, string host, string port)
 	{
-		for(size_t i = 0; i < check_bind.size(); i++)
+		for (size_t i = 0; i < check_bind.size(); i++)
 		{
 			if (check_bind[i].first == host && check_bind[i].second == port)
 				return false;
@@ -171,24 +173,24 @@ public:
 		return true;
 	}
 
-	void	initial_server(std::vector<DataConf> &data)
+	void initial_server(std::vector<DataConf> &data)
 	{
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
 		vector<std::pair<string, string> > check_bind;
-		
-		for(size_t  i = 0; i < data.size(); i++)
+
+		for (size_t i = 0; i < data.size(); i++)
 		{
-			for(size_t j = 0; j < data[i].__port.size(); j++)
+			for (size_t j = 0; j < data[i].__port.size(); j++)
 			{
 				if (check_for_bind(check_bind, data[i].__host, data[i].__port[j]))
 				{
 					int server_fd;
 
-					// print_error << data[i].__port[j].c_str() << std::endl;
-					if ((rcv = getaddrinfo(data[i].__host.c_str() , data[i].__port[j].c_str(), &hints, &ai)) != 0)
+					print_error << "Running : " << data[i].__host.c_str() << " " << data[i].__port[j].c_str() << std::endl;
+					if ((rcv = getaddrinfo(data[i].__host.c_str(), data[i].__port[j].c_str(), &hints, &ai)) != 0)
 						throw std::string("error in getaddrinfo");
 					for (point = ai; point != NULL; point = point->ai_next)
 					{
@@ -206,20 +208,19 @@ public:
 							throw std::string("error with setsocketopt");
 						if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
 							throw std::string("error fcntl");
-						if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0) {
+						if (bind(server_fd, point->ai_addr, point->ai_addrlen) < 0)
+						{
 							close(server_fd);
 							continue;
 						}
-						break ;
+						break;
 					}
 					freeaddrinfo(ai);
 					if (point == NULL)
 						throw std::string("there's no ip available in this host");
 					if (listen(server_fd, SOMAXCONN) == -1)
 						throw std::string("problem with listen");
-					else
-						print_error << server_fd << std::endl;
-					pollfd  temp;
+					pollfd temp;
 					temp.fd = server_fd;
 					temp.events = POLLIN;
 					fd_s.push_back(temp);
@@ -228,27 +229,27 @@ public:
 		}
 	}
 
-	~Server() {
-		
+	~Server()
+	{
 	}
 
-	static	std::pair<int , int>	get_server_infos(std::map<int, std::pair<int, int> > &servers, int fd, std::map<int, Client> &concts)
+	static std::pair<int, int> get_server_infos(std::map<int, std::pair<int, int> > &servers, int fd, std::map<int, Client> &concts)
 	{
 		int srvr = concts[fd].server_file;
-		std::map<int, std::pair<int, int> >::iterator	it = servers.find(srvr);
+		std::map<int, std::pair<int, int> >::iterator it = servers.find(srvr);
 		return it->second;
 	}
 
-	static	int	send_response(Client &my_client, int fd)
+	static int send_response(Client &my_client, int fd)
 	{
-		ssize_t		s;
+		ssize_t s;
 
 		if (my_client.response.size())
 		{
 			if (my_client.response.size() > BUFFER_SEND)
 			{
-				s = send(fd ,my_client.response.c_str(), BUFFER_SEND, 0);
-				
+				s = send(fd, my_client.response.c_str(), BUFFER_SEND, 0);
+
 				if (s < 0)
 					return -1;
 				if (s > 0)
@@ -261,9 +262,8 @@ public:
 					my_client.response.clear();
 				else
 					return -1;
-
 			}
-			if(my_client.response.size() == 0 || s == 0)
+			if (my_client.response.size() == 0 || s == 0)
 			{
 				my_client.clear();
 				usleep(200);
@@ -274,17 +274,17 @@ public:
 		return 0;
 	}
 
-   static void run(std::vector<DataConf> &__vec_data)
-   {
+	static void run(std::vector<DataConf> &__vec_data)
+	{
 		handler handl_request;
 		lib.set(__vec_data);
 
-		Server  ser(__vec_data);
+		Server ser(__vec_data);
 		try
 		{
 			ser.initial_server(__vec_data);
 		}
-		catch(const std::string &e)
+		catch (const std::string &e)
 		{
 			std::cerr << e << '\n';
 			exit(1);
@@ -295,7 +295,7 @@ public:
 			if (ser.rc < 0)
 			{
 				perror("poll() failed");
-				break ;
+				break;
 			}
 
 			for (size_t i = 0; i < ser.fd_s.size(); i++)
@@ -305,7 +305,7 @@ public:
 					if (ser.server_fds.find(ClienTsoCKet) != ser.server_fds.end())
 					{
 						ser.addrlen = sizeof ser.remoteaddr;
-						int newfd = accept(ClienTsoCKet, (struct sockaddr *) &ser.remoteaddr, &ser.addrlen);
+						int newfd = accept(ClienTsoCKet, (struct sockaddr *)&ser.remoteaddr, &ser.addrlen);
 						if (newfd == -1)
 						{
 							perror("accept");
@@ -322,11 +322,11 @@ public:
 					{
 						MyClienT.time_flag = true;
 						std::pair<int, int> server_infos;
-						int			error_header;
+						int error_header;
 						server_infos = get_server_infos(ser.server_fds, ClienTsoCKet, ser._connections);
 
-						int	_pars_req = receiving(ClienTsoCKet, MyClienT);
-						if(_gl_recv_return > 0)
+						int _pars_req = receiving(ClienTsoCKet, MyClienT);
+						if (_gl_recv_return > 0)
 						{
 							if (_pars_req)
 							{
@@ -346,7 +346,7 @@ public:
 							else if (MyClienT._size == (MyClienT.current_size - MyClienT.header_size))
 								MyClienT._done = true;
 
-							if(static_cast<size_t>(MyClienT._size) > ser._containers[server_infos.first].__body_size)
+							if (static_cast<size_t>(MyClienT._size) > ser._containers[server_infos.first].__body_size)
 							{
 								handl_request.manage_server_errors(413, MyClienT.response);
 								ser.fd_s[i].events = POLLOUT;
@@ -354,7 +354,7 @@ public:
 
 							if (MyClienT._done)
 							{
-								Mesage		mesg;
+								Mesage mesg;
 
 								mesg.message = MyClienT.get_buffer();
 								MyClienT.clear_buffer();
@@ -385,7 +385,7 @@ public:
 				}
 				else if (ser.fd_s[i].revents & POLLOUT)
 				{
-					ssize_t 	s;
+					ssize_t s;
 					MyClienT.time_flag = false;
 					s = send_response(MyClienT, ClienTsoCKet);
 					if (s == 2)
@@ -393,36 +393,35 @@ public:
 					if (s < 0)
 						continue;
 				}
-			}		
+			}
 
-        	for (size_t i = 0; i < ser.fd_s.size(); ++i)
-        	{
-				if(MyClienT.time_flag)
+			for (size_t i = 0; i < ser.fd_s.size(); ++i)
+			{
+				if (MyClienT.time_flag)
 				{
 					time_t currentTime;
-        			time(&currentTime);
+					time(&currentTime);
 
-        	        if (currentTime - MyClienT.lastActiveTime > 10 && ser.server_fds.find(ClienTsoCKet) == ser.server_fds.end())
-        	        {
+					if (currentTime - MyClienT.lastActiveTime > 10 && ser.server_fds.find(ClienTsoCKet) == ser.server_fds.end())
+					{
 						handl_request.manage_server_errors(408, MyClienT.response);
 						ser.fd_s[i].events = POLLOUT;
-        	        }
+					}
 				}
-        	}
+			}
 		}
 	}
-		std::map<int, std::pair<int, int> >		server_fds;
-		int										rcv;
-		int										on;
-		int										rc;
-		int										current_size;
-		struct	addrinfo						hints, *ai, *point;
-		struct	sockaddr_storage				remoteaddr;
-		socklen_t 								addrlen;
-		_vector_fd								fd_s;
-		std::vector<DataConf>					_containers;
-		std::map<int, Client >					_connections;
+	std::map<int, std::pair<int, int> > server_fds;
+	int rcv;
+	int on;
+	int rc;
+	int current_size;
+	struct addrinfo hints, *ai, *point;
+	struct sockaddr_storage remoteaddr;
+	socklen_t addrlen;
+	_vector_fd fd_s;
+	std::vector<DataConf> _containers;
+	std::map<int, Client> _connections;
 };
-
 
 #endif

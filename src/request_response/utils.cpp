@@ -511,7 +511,6 @@ void add_to_env(string key, string val,HTTP_request &request_info)
 
 	tmp = key + "=" + val;
 	tmp.append(1, '\0');
-	std::cout << "tmp::" << tmp << std::endl;
 	request_info.env_v.push_back(tmp);
 }
 
@@ -529,7 +528,7 @@ string get_method(short method)
 void	create_env_(HTTP_request &request_info, DataConf &_server_, file_info &file)
 {
 	string tmp;
-	add_to_env("SERVER_SOFTWARE", "l3edyan- v:9.6", request_info);
+	add_to_env("SERVER_SOFTWARE", "ta7 server- v:9.6", request_info);
 	add_to_env("SERVER_NAME", _server_.__host, request_info);
 	add_to_env("GATEWAY_INTERFACE", "CGI/1.1", request_info);
 	add_to_env("SERVER_PROTOCOL", "HTTP/1.1", request_info);

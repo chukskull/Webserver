@@ -131,7 +131,6 @@ int parsing_config_file(_string file, _server_config &servers)
 						else
 						{
 							line = erase_some_charc(line);
-							// print_error << line << std::endl;
 							if (line.compare("[") != 0 && line.size() != 0)
 							{
 								print_error << "error configfile" << std::endl;

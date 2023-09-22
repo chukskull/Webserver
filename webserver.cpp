@@ -2,29 +2,6 @@
 #include "Server.hpp"
 #include <algorithm>
 
-// 	void print_meth(MethAllow meth)
-// {
-// 	for (MethAllow::iterator it = meth.begin(); it != meth.end(); it++)
-// 	{
-// 		std::cout << *it << " ";
-// 	}
-// 	std::cout << std::endl;
-// }
-
-// void print_locations(std::vector<ReqLoc> &vec)
-// 	{
-
-// 		std::cout << "locs== \n";
-// 		for (std::vector<ReqLoc>::iterator it = vec.begin(); it != vec.end(); it++)
-// 		{
-// 			std::cout << "loc== ";
-// 			std::cout << "file: " << it->__file;
-// 			std::cout << " path: " << it->__path;
-// 			std::cout << " root: " << it->__root << std::endl;
-// 			print_meth(it->_AllowMeth);
-// 		}
-// 	}
-
 void	_begin_function(char *av)
 {
 	std::string	str;
@@ -47,16 +24,6 @@ void	_begin_function(char *av)
 	if(pars < 0)
 		exit(0);
 
-		// for (std::vector<DataConf>::iterator it = _vec_data.begin(); it != _vec_data.end(); it++)
-		// {
-		// 	std::cout << it->__body_size << ", ";
-		// 	std::cout << it->__host << ", ";
-		// 	std::cout << it->__name << ", ";
-		// 	std::cout << it->__port[0] << ", ";
-		// 	print_locations(it->__locations);
-		// 	// std::cout << it->__locations[0].__path << std::endl;
-		// }
-
 	if (_vec_data.size())
 		Server::run(_vec_data);
 }
@@ -68,26 +35,3 @@ int main(int ac, char *av[])
 	_begin_function(av[1]);
 	return 0;
 }
-	// print_error << "here" << std::endl;
-	// for(_server_config::iterator it = vec.begin(); it != vec.end(); ++it)
-	// {
-	// 	print_error <<"server - port: " << std::endl;
-	// 	std::vector<_string> ports = it->get_port();
-	// 	for(size_t	i = 0; i < ports.size(); i++)
-	// 	{
-	// 		print_error << ports[i] << std::endl;
-	// 	}
-	// 	print_error << "server - host " << it->get_host() << std::endl;
-
-	// 	print_error <<"ss " <<it->get_body_size() << std::endl;
-	// 	print_error << it->get_locations().size() << std::endl;
-	// 	for(size_t i = 0; i < it->get_locations().size(); i++)
-	// 	{
-	// 		print_error << "size of methods : "<< it->get_locations()[i].get_methods().size() << std::endl;
-	// 		for(size_t j = 0; j < it->get_locations()[i].get_methods().size(); j++)
-	// 		{
-	// 			print_error << i << " " << j << std::endl;
-	// 			print_error << it->get_locations()[i].get_methods()[j] << std::endl; 
-	// 		}
-	// 	}
-	// }
